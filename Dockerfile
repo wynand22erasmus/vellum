@@ -11,13 +11,17 @@ RUN npm ci
 
 # Development: Vite + Express API (vite-plugin-node), used by docker compose.
 FROM deps AS dev
+ARG DATABASE_URL=postgresql://vellum:password@postgres:5432/vellum_db
+ENV DATABASE_URL=${DATABASE_URL}
 COPY . .
 RUN npx prisma generate
 EXPOSE 5173
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
+CMD ["npm", "run", "dev"]
 
 # Production: built static assets + Express on PORT.
 FROM deps AS build
+ARG DATABASE_URL=postgresql://vellum:password@postgres:5432/vellum_db
+ENV DATABASE_URL=${DATABASE_URL}
 COPY . .
 RUN npx prisma generate
 RUN npm run build

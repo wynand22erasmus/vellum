@@ -9,7 +9,7 @@
   },
   "packageManager": "npm@11.14.1",
   "scripts": {
-    "dev": "vite",
+    "dev": "tsx src/dev-server.ts",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",

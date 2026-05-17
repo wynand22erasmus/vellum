@@ -43,7 +43,7 @@ npm run up:logs
 
 | Service | URL |
 |---------|-----|
-| Web UI (via nginx) | http://localhost |
+| Web UI (via nginx) | http://localhost:8080 |
 | Web UI (direct) | http://localhost:5173 |
 | Mailpit | http://localhost:8025 |
 | MinIO console | http://localhost:9001 |

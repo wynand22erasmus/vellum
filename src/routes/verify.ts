@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import argon2 from 'argon2';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma.ts';
@@ -16,7 +16,8 @@ const verifyLimiter = rateLimit({
   max: 5,
   keyGenerator: (req) => {
     const body = req.body as { token?: string };
-    return body?.token ?? req.ip ?? 'unknown';
+    if (body?.token) return body.token;
+    return ipKeyGenerator(req.ip ?? '127.0.0.1');
   },
   message: { error: 'Too many attempts. Please try again later.' },
   standardHeaders: true,
