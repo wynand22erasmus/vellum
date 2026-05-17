@@ -1,5 +1,5 @@
 import { Worker } from 'bullmq';
-import type { AuditEventType, Prisma } from '@prisma/client';
+import type { AuditEventType, Prisma } from '../../generated/client.ts';
 import { addYears } from 'date-fns';
 import { prisma } from '../lib/prisma.ts';
 import { env } from '../lib/env.ts';

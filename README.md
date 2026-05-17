@@ -54,7 +54,7 @@ npm run down    # stop all services
 
 ## Local development (optional)
 
-Run backing services in containers and the app on the host (requires Node.js 22+):
+Run backing services in containers and the app on the host (requires Node.js 24 LTS+):
 
 ```bash
 cp .env.example .env

@@ -1,5 +1,5 @@
 import { Queue } from 'bullmq';
-import type { AuditEventType } from '@prisma/client';
+import type { AuditEventType } from '../../generated/client.ts';
 import { prisma } from '../lib/prisma.ts';
 import { redisConnection } from '../lib/redis.ts';
 export const auditQueue = new Queue('audit-queue', { connection: redisConnection });

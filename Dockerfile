@@ -1,4 +1,4 @@
-FROM node:22-alpine AS base
+FROM node:24-alpine AS base
 WORKDIR /app
 RUN apk add --no-cache openssl
 COPY scripts/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
@@ -27,8 +27,8 @@ ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/src ./src
+COPY --from=build /app/generated ./generated
 COPY --from=build /app/prisma ./prisma
-COPY package.json ./
-RUN npx prisma generate
+COPY package.json prisma.config.ts ./
 EXPOSE 3000
 CMD ["npx", "tsx", "src/server.ts"]

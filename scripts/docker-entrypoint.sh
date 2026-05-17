@@ -2,7 +2,7 @@
 set -e
 
 # Bind mounts hide image node_modules; populate the named volume on first run.
-if [ ! -f node_modules/.package-lock.json ] && [ ! -d node_modules/@prisma/client ]; then
+if [ ! -f node_modules/.package-lock.json ] && [ ! -d generated/client ]; then
   echo "[entrypoint] Installing dependencies..."
   npm ci
   npx prisma generate
