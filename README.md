@@ -13,47 +13,58 @@ Secure, API-first document transfer platform. Every download requires both an em
 - **Email:** Mailpit (dev) / SES (prod)
 - **Auth:** API key (upload), dev mock or WorkOS (dashboard)
 
-## Quick start
+## Quick start (containerized — recommended)
+
+The web app, API, and background worker run in containers. Compose works with **Docker** or **Podman** (see `scripts/compose.sh`).
 
 ### 1. Environment
 
 ```bash
+cp .env.docker.example .env
+```
+
+Use `.env.docker.example` so service hostnames (`postgres`, `redis`, `minio`, etc.) resolve inside the stack. For local-only development without containers, use `.env.example` instead.
+
+### 2. Start the full stack
+
+```bash
+npm run up
+```
+
+This builds and starts the app, worker, nginx, Postgres, Redis, MinIO, ClamAV, and Mailpit. Migrations run automatically on app startup.
+
+Wait for ClamAV to become healthy on first start (2–5 minutes). Follow progress:
+
+```bash
+npm run up:logs
+```
+
+### 3. Access
+
+| Service | URL |
+|---------|-----|
+| Web UI (via nginx) | http://localhost |
+| Web UI (direct) | http://localhost:5173 |
+| Mailpit | http://localhost:8025 |
+| MinIO console | http://localhost:9001 |
+
+```bash
+npm run down    # stop all services
+```
+
+## Local development (optional)
+
+Run backing services in containers and the app on the host (requires Node.js 22+):
+
+```bash
 cp .env.example .env
+npm run infra:up
+npm install && npm run db:generate && npm run db:migrate:deploy
+npm run dev          # terminal 1
+npm run worker       # terminal 2
 ```
 
-### 2. Docker services
-
-```bash
-docker compose up -d postgres redis minio clamav mailpit
-```
-
-Wait for ClamAV to become healthy (2–5 minutes on first start).
-
-### 3. Database
-
-```bash
-npm install
-npm run db:generate
-npm run db:migrate:deploy
-```
-
-### 4. Run app + workers
-
-Terminal 1:
-
-```bash
-npm run dev
-```
-
-Terminal 2:
-
-```bash
-npm run worker
-```
-
-- App: http://localhost:5173
-- Mailpit: http://localhost:8025
-- MinIO console: http://localhost:9001
+Compose helper detection order: `docker compose` → `podman compose` → `docker-compose` → `podman-compose`.
 
 ## API usage
 
@@ -106,7 +117,7 @@ Returns status for database, Redis, and ClamAV.
 
 ## Design document
 
-See [Vellum_Comprehensive_Design_Document.md](./Vellum_Comprehensive_Design_Document.md) for full architecture.
+See [Vellum_Comprehensive_Design_Document.md](./docs/Vellum_Comprehensive_Design_Document.md) for full architecture.
 
 ## AWS migration
 

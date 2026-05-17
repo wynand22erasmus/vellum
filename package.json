@@ -13,6 +13,13 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:push": "prisma db push",
     "worker": "tsx src/workers/index.ts",
+    "compose": "bash scripts/compose.sh",
+    "up": "bash scripts/compose.sh up -d --build",
+    "up:logs": "bash scripts/compose.sh logs -f app worker",
+    "down": "bash scripts/compose.sh down",
+    "infra:up": "bash scripts/compose.sh up -d postgres redis minio clamav mailpit",
+    "infra:down": "bash scripts/compose.sh down",
+    "infra:logs": "bash scripts/compose.sh logs -f",
     "test": "vitest run",
     "test:watch": "vitest"
   },
