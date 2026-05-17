@@ -80,10 +80,13 @@ export function VerifyPage() {
             </div>
 
             {error && (
-              <div className="rounded-md bg-red-50 p-3 text-sm text-red-800" role="alert">
+              <div
+                className="rounded-md bg-[var(--color-error-muted)] p-3 text-sm text-[var(--color-error)]"
+                role="alert"
+              >
                 {error}
                 {actionRequired && (
-                  <p className="mt-2 text-red-700">{actionRequired}</p>
+                  <p className="mt-2 opacity-90">{actionRequired}</p>
                 )}
               </div>
             )}

@@ -95,7 +95,7 @@ export function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[var(--color-background)]">
-      <header className="border-b border-[var(--color-border)] bg-white">
+      <header className="border-b border-[var(--color-border)] bg-[var(--color-card)]">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
           <div>
             <h1 className="text-xl font-semibold">Vellum</h1>
@@ -120,8 +120,8 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent>
             {loading && <p className="text-sm text-[var(--color-muted-foreground)]">Loading…</p>}
-            {error && <p className="text-sm text-red-600">{error}</p>}
-            {message && <p className="mb-4 text-sm text-green-700">{message}</p>}
+            {error && <p className="text-sm text-[var(--color-error)]">{error}</p>}
+            {message && <p className="mb-4 text-sm text-[var(--color-success)]">{message}</p>}
 
             {!loading && documents.length === 0 && (
               <p className="text-sm text-[var(--color-muted-foreground)]">No documents yet.</p>
@@ -181,7 +181,9 @@ function StatusBadge({ label, active }: { label: string; active: boolean }) {
   return (
     <span
       className={`rounded-full px-2 py-0.5 text-xs ${
-        active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+        active
+          ? 'bg-[var(--color-badge-active)] text-[var(--color-badge-active-foreground)]'
+          : 'bg-[var(--color-badge-inactive)] text-[var(--color-badge-inactive-foreground)]'
       }`}
     >
       {label}
