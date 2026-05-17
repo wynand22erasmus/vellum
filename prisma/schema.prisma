@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AuditEventType {
+  USER_LOGIN
+  EMAIL_INITIAL_SENT
+  EMAIL_REGENERATE_SENT
+  FILE_DOWNLOAD_SUCCESS
+  FILE_DOWNLOAD_FAILED
+  FILE_SCRUBBED
+}
+
+model Document {
+  id              String    @id @default(uuid())
+  s3Key           String?
+  fileName        String
+  recipientEmail  String
+  passwordHash    String
+  downloadToken   String    @unique
+
+  linkExpiresAt   DateTime
+  fileExpiresAt   DateTime
+  recordExpiresAt DateTime
+
+  isUsed          Boolean   @default(false)
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+
+  auditLogs       AuditLog[]
+
+  @@index([recipientEmail])
+}
+
+model AuditLog {
+  id          String         @id @default(uuid())
+  eventType   AuditEventType
+  timestamp   DateTime       @default(now())
+
+  userId      String?
+  documentId  String?
+  document    Document?      @relation(fields: [documentId], references: [id], onDelete: SetNull)
+
+  ipAddress   String?
+  userAgent   String?
+  metadata    Json?
+
+  expiresAt   DateTime
+}
+
+model FailedAuditLog {
+  id        String   @id @default(uuid())
+  payload   Json
+  error     String
+  createdAt DateTime @default(now())
+  retried   Boolean  @default(false)
+}

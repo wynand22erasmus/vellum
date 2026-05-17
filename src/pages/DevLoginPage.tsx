@@ -1,0 +1,62 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '../components/ui/button.tsx';
+import { Input } from '../components/ui/input.tsx';
+import { Label } from '../components/ui/label.tsx';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../components/ui/card.tsx';
+import { setDevEmail } from '../lib/api.ts';
+
+export function DevLoginPage() {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setDevEmail(email.trim());
+    navigate('/dashboard');
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Vellum — Dev Login</CardTitle>
+          <CardDescription>
+            Enter your recipient email to simulate dashboard access. In production, use WorkOS SSO.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email address</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="recipient@example.com"
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full">
+              Continue to dashboard
+            </Button>
+            <p className="text-center text-sm text-[var(--color-muted-foreground)]">
+              Or{' '}
+              <a href="/api/auth/login" className="underline">
+                sign in with WorkOS
+              </a>{' '}
+              when AUTH_PROVIDER=workos
+            </p>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
