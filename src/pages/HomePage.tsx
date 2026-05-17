@@ -1,20 +1,20 @@
 import { Link } from 'react-router-dom';
+import { VellumLogo } from '../components/vellum-logo.tsx';
 import { Button } from '../components/ui/button.tsx';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
 } from '../components/ui/card.tsx';
 
 export function HomePage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
       <Card className="w-full max-w-lg text-center">
-        <CardHeader>
-          <CardTitle className="text-3xl">Vellum</CardTitle>
-          <CardDescription>
+        <CardHeader className="items-center">
+          <VellumLogo variant="full" linked={false} />
+          <CardDescription className="pt-2">
             Secure document transfer for regulated industries. Two-key access: email link plus file
             password.
           </CardDescription>

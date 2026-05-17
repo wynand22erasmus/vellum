@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { VellumLogo } from '../components/vellum-logo.tsx';
 import { Button } from '../components/ui/button.tsx';
 import { Input } from '../components/ui/input.tsx';
 import { Label } from '../components/ui/label.tsx';
@@ -58,8 +59,9 @@ export function VerifyPage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Secure Document Download</CardTitle>
+        <CardHeader className="items-center">
+          <VellumLogo variant="full" linked={false} className="max-w-[220px]" />
+          <CardTitle className="pt-2">Secure Document Download</CardTitle>
           <CardDescription>
             Enter the file password you received separately. If your download does not start,
             log in to your Vellum dashboard to request a new link.

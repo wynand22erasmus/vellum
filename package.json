@@ -26,7 +26,8 @@
     "infra:down": "bash scripts/compose.sh down",
     "infra:logs": "bash scripts/compose.sh logs -f",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "brand:images": "node scripts/process-brand-images.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1048.0",
@@ -82,6 +83,7 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
     "prisma": "^7.8.0",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.3.0",
     "tsx": "^4.22.1",
     "typescript": "~6.0.3",

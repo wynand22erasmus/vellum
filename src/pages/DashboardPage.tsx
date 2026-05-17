@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { VellumLogo } from '../components/vellum-logo.tsx';
 import { Button } from '../components/ui/button.tsx';
 import {
   Card,
@@ -97,8 +98,8 @@ export function DashboardPage() {
     <div className="min-h-screen bg-[var(--color-background)]">
       <header className="border-b border-[var(--color-border)] bg-[var(--color-card)]">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <div>
-            <h1 className="text-xl font-semibold">Vellum</h1>
+          <div className="flex items-center gap-3">
+            <VellumLogo variant="mark" />
             {devEmail && (
               <p className="text-sm text-[var(--color-muted-foreground)]">{devEmail}</p>
             )}
@@ -168,7 +169,10 @@ export function DashboardPage() {
         </Card>
 
         <p className="mt-4 text-center text-sm text-[var(--color-muted-foreground)]">
-          <Link to="/" className="underline">
+          <Link
+            to="/"
+            className="text-[var(--color-secondary)] underline decoration-[var(--color-accent)] underline-offset-2 hover:text-[var(--color-primary)]"
+          >
             Home
           </Link>
         </p>
