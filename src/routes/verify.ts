@@ -1,3 +1,12 @@
+/**
+ * Recipient download verification (link token + file password).
+ *
+ * @packageDocumentation
+ * @remarks
+ * - `POST /api/verify/` — body `{ token, password }`; rate-limited per token/IP
+ * - Success: `{ downloadUrl, fileName }` with 30s presigned URL
+ */
+
 import { Router } from 'express';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import argon2 from 'argon2';
@@ -6,11 +15,13 @@ import { prisma } from '../lib/prisma.ts';
 import { generatePresignedUrl } from '../lib/storage/s3Client.ts';
 import { logEvent } from '../queues/auditQueue.ts';
 
+/** @internal */
 const verifySchema = z.object({
   token: z.string().min(1),
   password: z.string().min(1),
 });
 
+/** @internal */
 const verifyLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
@@ -24,6 +35,7 @@ const verifyLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+/** Express router mounted at `/api/verify` (public, no session). */
 export const verifyRouter = Router();
 
 verifyRouter.post('/', verifyLimiter, async (req, res) => {

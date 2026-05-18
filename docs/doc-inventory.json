@@ -1,0 +1,720 @@
+{
+  "generatedAt": "2026-05-17T21:46:22.040Z",
+  "minCoveragePercent": 95,
+  "files": [
+    {
+      "path": "src/app.ts",
+      "exports": [
+        {
+          "name": "createApp",
+          "kind": "function",
+          "line": 29,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/App.tsx",
+      "exports": [
+        {
+          "name": "default",
+          "kind": "function",
+          "line": 15,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "e2e/helpers.ts",
+      "exports": [
+        {
+          "name": "loadState",
+          "kind": "function",
+          "line": 39,
+          "status": "complete"
+        },
+        {
+          "name": "launchBrowser",
+          "kind": "function",
+          "line": 52,
+          "status": "complete"
+        },
+        {
+          "name": "newPage",
+          "kind": "function",
+          "line": 64,
+          "status": "complete"
+        },
+        {
+          "name": "devLogin",
+          "kind": "function",
+          "line": 76,
+          "status": "complete"
+        },
+        {
+          "name": "clearDevSession",
+          "kind": "function",
+          "line": 91,
+          "status": "complete"
+        },
+        {
+          "name": "BASE_URL",
+          "kind": "variable",
+          "line": 15,
+          "status": "complete"
+        },
+        {
+          "name": "DEFAULT_TIMEOUT_MS",
+          "kind": "variable",
+          "line": 18,
+          "status": "complete"
+        },
+        {
+          "name": "E2EState",
+          "kind": "interface",
+          "line": 23,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/app-shell.tsx",
+      "exports": [
+        {
+          "name": "AppShell",
+          "kind": "function",
+          "line": 15,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/theme-provider.tsx",
+      "exports": [
+        {
+          "name": "ThemeProvider",
+          "kind": "function",
+          "line": 27,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/theme-toggle.tsx",
+      "exports": [
+        {
+          "name": "ThemeToggle",
+          "kind": "function",
+          "line": 21,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/vellum-logo.tsx",
+      "exports": [
+        {
+          "name": "VellumLogo",
+          "kind": "function",
+          "line": 41,
+          "status": "complete"
+        },
+        {
+          "name": "VellumLogoProps",
+          "kind": "type",
+          "line": 12,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/use-theme.ts",
+      "exports": [
+        {
+          "name": "useTheme",
+          "kind": "function",
+          "line": 15,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/api.ts",
+      "exports": [
+        {
+          "name": "getDevEmail",
+          "kind": "function",
+          "line": 12,
+          "status": "complete"
+        },
+        {
+          "name": "setDevEmail",
+          "kind": "function",
+          "line": 21,
+          "status": "complete"
+        },
+        {
+          "name": "clearDevEmail",
+          "kind": "function",
+          "line": 26,
+          "status": "complete"
+        },
+        {
+          "name": "apiFetch",
+          "kind": "function",
+          "line": 48,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/clamav.ts",
+      "exports": [
+        {
+          "name": "scanBuffer",
+          "kind": "function",
+          "line": 40,
+          "status": "complete"
+        },
+        {
+          "name": "checkClamAV",
+          "kind": "function",
+          "line": 94,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/env.ts",
+      "exports": [
+        {
+          "name": "env",
+          "kind": "variable",
+          "line": 32,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/prisma.ts",
+      "exports": [
+        {
+          "name": "prisma",
+          "kind": "variable",
+          "line": 28,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/redis.ts",
+      "exports": [
+        {
+          "name": "checkRedis",
+          "kind": "function",
+          "line": 18,
+          "status": "complete"
+        },
+        {
+          "name": "redisConnection",
+          "kind": "variable",
+          "line": 11,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/theme-context.ts",
+      "exports": [
+        {
+          "name": "ThemeContextValue",
+          "kind": "interface",
+          "line": 13,
+          "status": "complete"
+        },
+        {
+          "name": "ThemeContext",
+          "kind": "variable",
+          "line": 23,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/theme.ts",
+      "exports": [
+        {
+          "name": "getStoredTheme",
+          "kind": "function",
+          "line": 18,
+          "status": "complete"
+        },
+        {
+          "name": "resolveTheme",
+          "kind": "function",
+          "line": 30,
+          "status": "complete"
+        },
+        {
+          "name": "applyTheme",
+          "kind": "function",
+          "line": 41,
+          "status": "complete"
+        },
+        {
+          "name": "Theme",
+          "kind": "type",
+          "line": 8,
+          "status": "complete"
+        },
+        {
+          "name": "THEME_STORAGE_KEY",
+          "kind": "variable",
+          "line": 11,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "exports": [
+        {
+          "name": "cn",
+          "kind": "function",
+          "line": 16,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/middleware/apiKeyAuth.ts",
+      "exports": [
+        {
+          "name": "apiKeyAuth",
+          "kind": "function",
+          "line": 15,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/middleware/devAuth.ts",
+      "exports": [
+        {
+          "name": "dashboardAuth",
+          "kind": "function",
+          "line": 19,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/middleware/requestId.ts",
+      "exports": [
+        {
+          "name": "requestId",
+          "kind": "function",
+          "line": 13,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/DashboardPage.tsx",
+      "exports": [
+        {
+          "name": "DashboardPage",
+          "kind": "function",
+          "line": 32,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/DevLoginPage.tsx",
+      "exports": [
+        {
+          "name": "DevLoginPage",
+          "kind": "function",
+          "line": 23,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/HomePage.tsx",
+      "exports": [
+        {
+          "name": "HomePage",
+          "kind": "function",
+          "line": 18,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/VerifyPage.tsx",
+      "exports": [
+        {
+          "name": "VerifyPage",
+          "kind": "function",
+          "line": 22,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/queues/auditQueue.ts",
+      "exports": [
+        {
+          "name": "logEvent",
+          "kind": "function",
+          "line": 37,
+          "status": "complete"
+        },
+        {
+          "name": "auditQueue",
+          "kind": "variable",
+          "line": 13,
+          "status": "complete"
+        },
+        {
+          "name": "LogEventData",
+          "kind": "interface",
+          "line": 16,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/queues/cleanupQueue.ts",
+      "exports": [
+        {
+          "name": "cleanupQueue",
+          "kind": "variable",
+          "line": 14,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/queues/emailQueue.ts",
+      "exports": [
+        {
+          "name": "emailQueue",
+          "kind": "variable",
+          "line": 14,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/routes/auth.ts",
+      "exports": [
+        {
+          "name": "authRouter",
+          "kind": "variable",
+          "line": 19,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/routes/documents.ts",
+      "exports": [
+        {
+          "name": "documentsRouter",
+          "kind": "variable",
+          "line": 17,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/routes/health.ts",
+      "exports": [
+        {
+          "name": "healthRouter",
+          "kind": "variable",
+          "line": 15,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/routes/upload.ts",
+      "exports": [
+        {
+          "name": "uploadRouter",
+          "kind": "variable",
+          "line": 41,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/routes/verify.ts",
+      "exports": [
+        {
+          "name": "verifyRouter",
+          "kind": "variable",
+          "line": 39,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/workers/auditWorker.ts",
+      "exports": [
+        {
+          "name": "auditWorker",
+          "kind": "variable",
+          "line": 18,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/workers/emailWorker.ts",
+      "exports": [
+        {
+          "name": "emailWorker",
+          "kind": "variable",
+          "line": 21,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/workers/fileScrubWorker.ts",
+      "exports": [
+        {
+          "name": "fileScrubWorker",
+          "kind": "variable",
+          "line": 19,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/workers/recordScrubWorker.ts",
+      "exports": [
+        {
+          "name": "recordScrubWorker",
+          "kind": "variable",
+          "line": 16,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/ui/button.tsx",
+      "exports": [
+        {
+          "name": "Button",
+          "kind": "function",
+          "line": 47,
+          "status": "complete"
+        },
+        {
+          "name": "ButtonProps",
+          "kind": "interface",
+          "line": 39,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/ui/card.tsx",
+      "exports": [
+        {
+          "name": "Card",
+          "kind": "function",
+          "line": 11,
+          "status": "complete"
+        },
+        {
+          "name": "CardHeader",
+          "kind": "function",
+          "line": 24,
+          "status": "complete"
+        },
+        {
+          "name": "CardTitle",
+          "kind": "function",
+          "line": 29,
+          "status": "complete"
+        },
+        {
+          "name": "CardDescription",
+          "kind": "function",
+          "line": 34,
+          "status": "complete"
+        },
+        {
+          "name": "CardContent",
+          "kind": "function",
+          "line": 41,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/ui/input.tsx",
+      "exports": [
+        {
+          "name": "Input",
+          "kind": "function",
+          "line": 11,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/ui/label.tsx",
+      "exports": [
+        {
+          "name": "Label",
+          "kind": "function",
+          "line": 12,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/auth/session.ts",
+      "exports": [
+        {
+          "name": "createSessionToken",
+          "kind": "function",
+          "line": 19,
+          "status": "complete"
+        },
+        {
+          "name": "verifySessionToken",
+          "kind": "function",
+          "line": 34,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/auth/types.ts",
+      "exports": [
+        {
+          "name": "AuthUser",
+          "kind": "interface",
+          "line": 10,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/auth/workos.ts",
+      "exports": [
+        {
+          "name": "getWorkOS",
+          "kind": "function",
+          "line": 18,
+          "status": "complete"
+        },
+        {
+          "name": "getAuthorizationUrl",
+          "kind": "function",
+          "line": 35,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/email/EmailService.ts",
+      "exports": [
+        {
+          "name": "EmailService",
+          "kind": "class",
+          "line": 15,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/email/IEmailProvider.ts",
+      "exports": [
+        {
+          "name": "EmailPayload",
+          "kind": "interface",
+          "line": 8,
+          "status": "complete"
+        },
+        {
+          "name": "IEmailProvider",
+          "kind": "interface",
+          "line": 20,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/storage/s3Client.ts",
+      "exports": [
+        {
+          "name": "ensureBucket",
+          "kind": "function",
+          "line": 34,
+          "status": "complete"
+        },
+        {
+          "name": "uploadObject",
+          "kind": "function",
+          "line": 49,
+          "status": "complete"
+        },
+        {
+          "name": "deleteObject",
+          "kind": "function",
+          "line": 69,
+          "status": "complete"
+        },
+        {
+          "name": "generatePresignedUrl",
+          "kind": "function",
+          "line": 85,
+          "status": "complete"
+        },
+        {
+          "name": "s3Client",
+          "kind": "variable",
+          "line": 19,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/email/providers/LocalEmailProvider.ts",
+      "exports": [
+        {
+          "name": "LocalEmailProvider",
+          "kind": "class",
+          "line": 14,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/email/providers/SesEmailProvider.ts",
+      "exports": [
+        {
+          "name": "SesEmailProvider",
+          "kind": "class",
+          "line": 13,
+          "status": "complete"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total": 79,
+    "documented": 79,
+    "coveragePercent": 100
+  }
+}

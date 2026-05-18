@@ -1,0 +1,22 @@
+meta {
+  name: Request Link
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/documents/{{documentId}}/request-link
+  body: none
+  auth: none
+}
+
+headers {
+  X-Dev-User-Email: {{devEmail}}
+}
+
+tests {
+  test("sends fresh access link", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().message).to.contain("link");
+  });
+}

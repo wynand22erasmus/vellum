@@ -1,0 +1,18 @@
+meta {
+  name: List Unauthorized
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/documents
+  body: none
+  auth: none
+}
+
+tests {
+  test("requires dev auth header", function () {
+    expect(res.getStatus()).to.equal(401);
+    expect(res.getBody().error).to.contain("Not authenticated");
+  });
+}

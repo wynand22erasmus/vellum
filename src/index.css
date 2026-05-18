@@ -1,18 +1,57 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: oklch(0.985 0.002 247);
-  --color-foreground: oklch(0.2 0.02 260);
-  --color-card: oklch(1 0 0);
-  --color-card-foreground: oklch(0.2 0.02 260);
-  --color-primary: oklch(0.35 0.06 260);
-  --color-primary-foreground: oklch(0.98 0 0);
-  --color-muted: oklch(0.94 0.01 260);
-  --color-muted-foreground: oklch(0.45 0.02 260);
-  --color-border: oklch(0.88 0.01 260);
+  /* Brand: royal blue → teal (logo gradient) */
+  --color-background: oklch(0.98 0.012 250);
+  --color-foreground: oklch(0.28 0.05 265);
+  --color-card: oklch(0.995 0.008 250);
+  --color-card-foreground: oklch(0.28 0.05 265);
+  --color-primary: oklch(0.42 0.14 265);
+  --color-primary-foreground: oklch(0.99 0.005 250);
+  --color-secondary: oklch(0.58 0.12 200);
+  --color-secondary-foreground: oklch(0.99 0.005 250);
+  --color-accent: oklch(0.88 0.09 88);
+  --color-accent-foreground: oklch(0.28 0.06 265);
+  --color-muted: oklch(0.94 0.02 250);
+  --color-muted-foreground: oklch(0.48 0.04 265);
+  --color-border: oklch(0.88 0.03 250);
   --color-destructive: oklch(0.55 0.2 25);
   --color-destructive-foreground: oklch(0.98 0 0);
+  --color-success: oklch(0.52 0.14 165);
+  --color-success-muted: oklch(0.94 0.04 165);
+  --color-error: oklch(0.5 0.18 25);
+  --color-error-muted: oklch(0.95 0.03 25);
+  --color-badge-active: oklch(0.92 0.05 165);
+  --color-badge-active-foreground: oklch(0.35 0.1 165);
+  --color-badge-inactive: oklch(0.93 0.02 250);
+  --color-badge-inactive-foreground: oklch(0.48 0.04 265);
   --radius: 0.5rem;
+}
+
+.dark {
+  --color-background: oklch(0.17 0.04 265);
+  --color-foreground: oklch(0.95 0.015 250);
+  --color-card: oklch(0.21 0.045 265);
+  --color-card-foreground: oklch(0.95 0.015 250);
+  --color-primary: oklch(0.68 0.12 200);
+  --color-primary-foreground: oklch(0.15 0.04 265);
+  --color-secondary: oklch(0.55 0.1 200);
+  --color-secondary-foreground: oklch(0.95 0.015 250);
+  --color-accent: oklch(0.86 0.1 88);
+  --color-accent-foreground: oklch(0.2 0.05 265);
+  --color-muted: oklch(0.26 0.04 265);
+  --color-muted-foreground: oklch(0.68 0.03 250);
+  --color-border: oklch(0.32 0.04 265);
+  --color-destructive: oklch(0.6 0.18 25);
+  --color-destructive-foreground: oklch(0.98 0 0);
+  --color-success: oklch(0.72 0.12 165);
+  --color-success-muted: oklch(0.28 0.05 165);
+  --color-error: oklch(0.75 0.12 25);
+  --color-error-muted: oklch(0.28 0.06 25);
+  --color-badge-active: oklch(0.32 0.06 165);
+  --color-badge-active-foreground: oklch(0.82 0.1 165);
+  --color-badge-inactive: oklch(0.26 0.04 265);
+  --color-badge-inactive-foreground: oklch(0.68 0.03 250);
 }
 
 * {
@@ -27,6 +66,25 @@ body {
     system-ui,
     -apple-system,
     sans-serif;
-  background: var(--color-background);
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -15%, oklch(0.88 0.06 200 / 0.22), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, oklch(0.9 0.05 88 / 0.12), transparent 50%),
+    var(--color-background);
   color: var(--color-foreground);
+}
+
+.dark body {
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -15%, oklch(0.35 0.08 265 / 0.45), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, oklch(0.75 0.08 88 / 0.1), transparent 50%),
+    var(--color-background);
+}
+
+a:not([class]) {
+  color: var(--color-secondary);
+  text-decoration-color: var(--color-accent);
+}
+
+a:not([class]):hover {
+  color: var(--color-primary);
 }

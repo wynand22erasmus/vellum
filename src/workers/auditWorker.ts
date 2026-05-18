@@ -1,3 +1,9 @@
+/**
+ * Persists audit events from the `audit-queue` to PostgreSQL.
+ *
+ * @packageDocumentation
+ */
+
 import { Worker } from 'bullmq';
 import type { AuditEventType, Prisma } from '../../generated/client.ts';
 import { addYears } from 'date-fns';
@@ -6,6 +12,9 @@ import { env } from '../lib/env.ts';
 import { redisConnection } from '../lib/redis.ts';
 import type { LogEventData } from '../queues/auditQueue.ts';
 
+/**
+ * Consumes `log-event` jobs and inserts {@link !AuditLog} rows with compliance TTL.
+ */
 export const auditWorker = new Worker(
   'audit-queue',
   async (job) => {

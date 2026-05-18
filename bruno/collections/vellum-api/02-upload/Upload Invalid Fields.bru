@@ -1,0 +1,29 @@
+meta {
+  name: Upload Invalid Fields
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/upload
+  body: multipartForm
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{apiKey}}
+}
+
+body:multipart-form {
+  file: @file(./fixtures/e2e-sample.txt)
+  recipientEmail: not-an-email
+  password: short
+  linkTtl: 999999
+  fileTtl: 1
+}
+
+tests {
+  test("rejects invalid metadata", function () {
+    expect(res.getStatus()).to.equal(400);
+  });
+}

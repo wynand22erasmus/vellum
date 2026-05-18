@@ -1,3 +1,16 @@
+/**
+ * Typed environment configuration loaded from `process.env`.
+ *
+ * @packageDocumentation
+ * @see docs/CONFIG.md for the full variable reference
+ */
+
+/**
+ * @internal
+ * @param key - Environment variable name
+ * @returns Raw string value
+ * @throws {Error} When the variable is unset or empty
+ */
 function requireEnv(key: string): string {
   const value = process.env[key];
   if (!value) {
@@ -6,10 +19,16 @@ function requireEnv(key: string): string {
   return value;
 }
 
+/**
+ * @internal
+ * @param key - Environment variable name
+ * @param fallback - Value used when unset
+ */
 function optionalEnv(key: string, fallback: string): string {
   return process.env[key] ?? fallback;
 }
 
+/** Application configuration derived from environment variables. @see docs/CONFIG.md */
 export const env = {
   nodeEnv: optionalEnv('NODE_ENV', 'development'),
   appUrl: optionalEnv('APP_URL', 'http://localhost:5173'),
@@ -38,4 +57,8 @@ export const env = {
   reportingLifetimeYears: Number(optionalEnv('REPORTING_LIFETIME_YEARS', '5')),
   maxUploadBytes: Number(optionalEnv('MAX_UPLOAD_BYTES', '52428800')),
   isProduction: optionalEnv('NODE_ENV', 'development') === 'production',
+  /** Dev/test only — skips ClamAV INSTREAM scans when `SKIP_VIRUS_SCAN=true`. Ignored in production. */
+  skipVirusScan:
+    optionalEnv('NODE_ENV', 'development') !== 'production' &&
+    optionalEnv('SKIP_VIRUS_SCAN', 'false') === 'true',
 };

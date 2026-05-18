@@ -1,5 +1,12 @@
+/**
+ * Recipient dashboard: list documents and request new download links.
+ *
+ * @packageDocumentation
+ */
+
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { VellumLogo } from '../components/vellum-logo.tsx';
 import { Button } from '../components/ui/button.tsx';
 import {
   Card,
@@ -21,6 +28,7 @@ interface DocumentRow {
   createdAt: string;
 }
 
+/** Authenticated dashboard route (`/dashboard`). */
 export function DashboardPage() {
   const [documents, setDocuments] = useState<DocumentRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,10 +103,10 @@ export function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[var(--color-background)]">
-      <header className="border-b border-[var(--color-border)] bg-white">
+      <header className="border-b border-[var(--color-border)] bg-[var(--color-card)]">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <div>
-            <h1 className="text-xl font-semibold">Vellum</h1>
+          <div className="flex items-center gap-3">
+            <VellumLogo variant="mark" />
             {devEmail && (
               <p className="text-sm text-[var(--color-muted-foreground)]">{devEmail}</p>
             )}
@@ -120,8 +128,8 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent>
             {loading && <p className="text-sm text-[var(--color-muted-foreground)]">Loading…</p>}
-            {error && <p className="text-sm text-red-600">{error}</p>}
-            {message && <p className="mb-4 text-sm text-green-700">{message}</p>}
+            {error && <p className="text-sm text-[var(--color-error)]">{error}</p>}
+            {message && <p className="mb-4 text-sm text-[var(--color-success)]">{message}</p>}
 
             {!loading && documents.length === 0 && (
               <p className="text-sm text-[var(--color-muted-foreground)]">No documents yet.</p>
@@ -168,7 +176,10 @@ export function DashboardPage() {
         </Card>
 
         <p className="mt-4 text-center text-sm text-[var(--color-muted-foreground)]">
-          <Link to="/" className="underline">
+          <Link
+            to="/"
+            className="text-[var(--color-secondary)] underline decoration-[var(--color-accent)] underline-offset-2 hover:text-[var(--color-primary)]"
+          >
             Home
           </Link>
         </p>
@@ -181,7 +192,9 @@ function StatusBadge({ label, active }: { label: string; active: boolean }) {
   return (
     <span
       className={`rounded-full px-2 py-0.5 text-xs ${
-        active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+        active
+          ? 'bg-[var(--color-badge-active)] text-[var(--color-badge-active-foreground)]'
+          : 'bg-[var(--color-badge-inactive)] text-[var(--color-badge-inactive-foreground)]'
       }`}
     >
       {label}

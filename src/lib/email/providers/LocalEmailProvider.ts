@@ -1,7 +1,16 @@
+/**
+ * Development email provider that delivers to Mailpit via SMTP.
+ *
+ * @packageDocumentation
+ */
+
 import nodemailer from 'nodemailer';
 import type { EmailPayload, IEmailProvider } from '../IEmailProvider.ts';
 import { env } from '../../env.ts';
 
+/**
+ * Sends mail through Mailpit (`MAILPIT_HOST` / `MAILPIT_PORT`).
+ */
 export class LocalEmailProvider implements IEmailProvider {
   private transporter = nodemailer.createTransport({
     host: env.mailpitHost,
@@ -9,6 +18,7 @@ export class LocalEmailProvider implements IEmailProvider {
     secure: false,
   });
 
+  /** @inheritdoc */
   async send(payload: EmailPayload): Promise<void> {
     await this.transporter.sendMail({
       from: 'noreply@vellum.local',

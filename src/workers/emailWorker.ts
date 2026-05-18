@@ -1,11 +1,23 @@
+/**
+ * Sends download-link emails and records related audit events.
+ *
+ * @packageDocumentation
+ */
+
 import { Worker } from 'bullmq';
 import { prisma } from '../lib/prisma.ts';
 import { EmailService } from '../lib/email/EmailService.ts';
 import { auditQueue } from '../queues/auditQueue.ts';
 import { redisConnection } from '../lib/redis.ts';
 
+/** @internal */
 const emailService = new EmailService();
 
+/**
+ * Processes `email-queue` jobs: loads the document, sends mail, enqueues audit trail.
+ *
+ * @remarks Job data shape: `{ docId, type: 'INITIAL' | 'REGENERATE', requestedBy? }`
+ */
 export const emailWorker = new Worker(
   'email-queue',
   async (job) => {

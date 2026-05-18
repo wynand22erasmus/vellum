@@ -1,5 +1,12 @@
+/**
+ * Recipient password gate for email download links (`/verify/:token`).
+ *
+ * @packageDocumentation
+ */
+
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { VellumLogo } from '../components/vellum-logo.tsx';
 import { Button } from '../components/ui/button.tsx';
 import { Input } from '../components/ui/input.tsx';
 import { Label } from '../components/ui/label.tsx';
@@ -11,6 +18,7 @@ import {
   CardTitle,
 } from '../components/ui/card.tsx';
 
+/** Public verify route; posts to `POST /api/verify`. */
 export function VerifyPage() {
   const { token } = useParams<{ token: string }>();
   const [password, setPassword] = useState('');
@@ -58,8 +66,9 @@ export function VerifyPage() {
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Secure Document Download</CardTitle>
+        <CardHeader className="items-center">
+          <VellumLogo variant="full" linked={false} className="max-w-[220px]" />
+          <CardTitle className="pt-2">Secure Document Download</CardTitle>
           <CardDescription>
             Enter the file password you received separately. If your download does not start,
             log in to your Vellum dashboard to request a new link.
@@ -80,10 +89,13 @@ export function VerifyPage() {
             </div>
 
             {error && (
-              <div className="rounded-md bg-red-50 p-3 text-sm text-red-800" role="alert">
+              <div
+                className="rounded-md bg-[var(--color-error-muted)] p-3 text-sm text-[var(--color-error)]"
+                role="alert"
+              >
                 {error}
                 {actionRequired && (
-                  <p className="mt-2 text-red-700">{actionRequired}</p>
+                  <p className="mt-2 opacity-90">{actionRequired}</p>
                 )}
               </div>
             )}

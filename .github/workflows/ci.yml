@@ -55,3 +55,18 @@ jobs:
       - run: npm run build
 
       - run: npm test
+
+      - run: npm run docs:api
+
+      - run: npm run docs:coverage
+        env:
+          DOCS_COVERAGE_MIN: '95'
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: api-docs
+          path: |
+            docs/api/html
+            docs/api/markdown
+            docs/doc-inventory.json

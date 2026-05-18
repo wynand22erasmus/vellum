@@ -1,0 +1,22 @@
+meta {
+  name: Health Check
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/health
+  body: none
+  auth: none
+}
+
+tests {
+  test("returns 200 when dependencies are healthy", function () {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(body.status).to.equal("ok");
+    expect(body.checks.database).to.equal(true);
+    expect(body.checks.redis).to.equal(true);
+    expect(body.checks.clamav).to.equal(true);
+  });
+}

@@ -1,8 +1,17 @@
+/**
+ * Health check routes for load balancers and monitoring.
+ *
+ * @packageDocumentation
+ * @remarks
+ * - `GET /api/health` — database, Redis, and ClamAV readiness (200 ok / 503 degraded)
+ */
+
 import { Router } from 'express';
 import { checkClamAV } from '../lib/clamav.ts';
 import { prisma } from '../lib/prisma.ts';
 import { checkRedis } from '../lib/redis.ts';
 
+/** Express router mounted at `/api`. */
 export const healthRouter = Router();
 
 healthRouter.get('/health', async (_req, res) => {

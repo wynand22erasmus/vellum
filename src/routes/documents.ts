@@ -1,9 +1,19 @@
+/**
+ * Dashboard document list and link regeneration for authenticated recipients.
+ *
+ * @packageDocumentation
+ * @remarks
+ * - `GET /api/documents/` — list documents for `req.user.email`
+ * - `POST /api/documents/:id/request-link` — new download token + email (requires {@link ../middleware/devAuth.ts})
+ */
+
 import { randomBytes } from 'node:crypto';
 import { Router } from 'express';
 import { addHours } from 'date-fns';
 import { prisma } from '../lib/prisma.ts';
 import { emailQueue } from '../queues/emailQueue.ts';
 
+/** Express router mounted at `/api/documents`. */
 export const documentsRouter = Router();
 
 documentsRouter.get('/', async (req, res) => {

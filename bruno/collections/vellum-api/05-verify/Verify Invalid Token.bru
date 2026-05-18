@@ -1,0 +1,29 @@
+meta {
+  name: Verify Invalid Token
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/verify
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "token": "invalid-token-not-in-database",
+    "password": "{{filePassword}}"
+  }
+}
+
+tests {
+  test("rejects unknown token", function () {
+    expect(res.getStatus()).to.equal(404);
+    expect(res.getBody().error).to.contain("Invalid link");
+  });
+}

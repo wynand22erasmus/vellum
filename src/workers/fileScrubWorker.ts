@@ -1,9 +1,21 @@
+/**
+ * Deletes expired document objects from S3/MinIO on an hourly schedule.
+ *
+ * @packageDocumentation
+ */
+
 import { Worker } from 'bullmq';
 import { prisma } from '../lib/prisma.ts';
 import { deleteObject } from '../lib/storage/s3Client.ts';
 import { auditQueue } from '../queues/auditQueue.ts';
 import { redisConnection } from '../lib/redis.ts';
 
+/**
+ * Handles `cleanup-queue` jobs named `scrub-files`.
+ *
+ * @remarks Selects documents past `fileExpiresAt` with a non-null `s3Key`, deletes storage,
+ * nulls `s3Key`, sets `deletedAt`, and emits `FILE_SCRUBBED` audit events.
+ */
 export const fileScrubWorker = new Worker(
   'cleanup-queue',
   async (job) => {

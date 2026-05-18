@@ -1,0 +1,26 @@
+meta {
+  name: Upload No API Key
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/upload
+  body: multipartForm
+  auth: none
+}
+
+body:multipart-form {
+  file: @file(./fixtures/e2e-sample.txt)
+  recipientEmail: {{devEmail}}
+  password: {{filePassword}}
+  linkTtl: 86400
+  fileTtl: 604800
+}
+
+tests {
+  test("rejects missing authorization", function () {
+    expect(res.getStatus()).to.equal(401);
+    expect(res.getBody().error).to.contain("Authorization");
+  });
+}

@@ -1,3 +1,9 @@
+/**
+ * Express application factory: API routes, middleware, and production SPA fallback.
+ *
+ * @packageDocumentation
+ */
+
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
@@ -15,6 +21,11 @@ import { verifyRouter } from './routes/verify.ts';
 import { documentsRouter } from './routes/documents.ts';
 import { authRouter } from './routes/auth.ts';
 
+/**
+ * Builds the Express app with security middleware and mounted API routers.
+ *
+ * @returns Configured Express application (static `dist/` in production only)
+ */
 export async function createApp(): Promise<express.Application> {
   const app = express();
 

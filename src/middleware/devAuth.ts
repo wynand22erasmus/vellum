@@ -1,7 +1,21 @@
+/**
+ * Dashboard authentication: WorkOS session cookie or dev email header.
+ *
+ * @packageDocumentation
+ */
+
 import type { Request, Response, NextFunction } from 'express';
 import { env } from '../lib/env.ts';
 import { verifySessionToken } from '../lib/auth/session.ts';
 
+/**
+ * Populates `req.user` for protected dashboard routes.
+ *
+ * @remarks
+ * - **WorkOS:** requires `vellum_session` cookie (see `/api/auth/callback`).
+ * - **Dev:** requires `X-Dev-User-Email` header (see `src/lib/api.ts`).
+ * Mounted on `/api/documents`.
+ */
 export async function dashboardAuth(
   req: Request,
   res: Response,
