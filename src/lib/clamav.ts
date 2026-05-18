@@ -1,24 +1,41 @@
+/**
+ * ClamAV INSTREAM virus scanning for uploaded file buffers.
+ *
+ * @packageDocumentation
+ */
+
 import net from 'node:net';
 import { env } from './env.ts';
 
+/** @internal */
 const CHUNK_SIZE = 64 * 1024;
 
-function sendInstCommand(socket: net.Socket, command: string): Promise<string> {
+/**
+ * @internal
+ * Reads one clamd response (null- or newline-terminated).
+ */
+function readClamdResponse(socket: net.Socket): Promise<string> {
   return new Promise((resolve, reject) => {
     let data = '';
     const onData = (chunk: Buffer) => {
-      data += chunk.toString();
-      if (data.includes('\n')) {
+      data += chunk.toString('utf8');
+      if (data.includes('\0') || data.includes('\n')) {
         socket.removeListener('data', onData);
-        resolve(data.trim());
+        resolve(data.replace(/\0/g, '').trim());
       }
     };
     socket.on('data', onData);
-    socket.write(command);
     socket.once('error', reject);
   });
 }
 
+/**
+ * Scans a file buffer via ClamAV `zINSTREAM`.
+ *
+ * @param buffer - Raw upload bytes
+ * @returns `clean: true` or `clean: false` with a signature name in `reason`
+ * @throws {Error} When ClamAV is unreachable or returns an unexpected response
+ */
 export async function scanBuffer(buffer: Buffer): Promise<{ clean: boolean; reason?: string }> {
   return new Promise((resolve, reject) => {
     const socket = net.createConnection(env.clamavPort, env.clamavHost);
@@ -35,7 +52,7 @@ export async function scanBuffer(buffer: Buffer): Promise<{ clean: boolean; reas
 
     socket.on('connect', async () => {
       try {
-        await sendInstCommand(socket, 'zINSTREAM\0');
+        socket.write('zINSTREAM\0');
 
         let offset = 0;
         while (offset < buffer.length) {
@@ -51,12 +68,12 @@ export async function scanBuffer(buffer: Buffer): Promise<{ clean: boolean; reas
         endBuf.writeUInt32BE(0, 0);
         socket.write(endBuf);
 
-        const response = await sendInstCommand(socket, '');
+        const response = await readClamdResponse(socket);
         socket.end();
 
         if (response.includes('FOUND')) {
-          const match = response.match(/FOUND: (.+)$/);
-          resolve({ clean: false, reason: match?.[1] ?? 'Malware detected' });
+          const match = response.match(/FOUND:?\s*(.+)$/i);
+          resolve({ clean: false, reason: match?.[1]?.trim() ?? 'Malware detected' });
         } else if (response.includes('OK')) {
           resolve({ clean: true });
         } else {
@@ -70,15 +87,25 @@ export async function scanBuffer(buffer: Buffer): Promise<{ clean: boolean; reas
   });
 }
 
+/**
+ * Returns whether clamd responds to `zPING` (health check).
+ */
 export async function checkClamAV(): Promise<boolean> {
   try {
     return await new Promise((resolve) => {
       const socket = net.createConnection(env.clamavPort, env.clamavHost);
       socket.setTimeout(3000);
+
       socket.on('connect', () => {
-        socket.end();
-        resolve(true);
+        socket.write('zPING\0');
       });
+
+      socket.on('data', (chunk) => {
+        const text = chunk.toString('utf8').replace(/\0/g, '').trim();
+        socket.destroy();
+        resolve(text.toUpperCase().includes('PONG'));
+      });
+
       socket.on('error', () => resolve(false));
       socket.on('timeout', () => {
         socket.destroy();
