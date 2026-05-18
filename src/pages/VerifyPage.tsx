@@ -1,3 +1,9 @@
+/**
+ * Recipient password gate for email download links (`/verify/:token`).
+ *
+ * @packageDocumentation
+ */
+
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { VellumLogo } from '../components/vellum-logo.tsx';
@@ -12,6 +18,7 @@ import {
   CardTitle,
 } from '../components/ui/card.tsx';
 
+/** Public verify route; posts to `POST /api/verify`. */
 export function VerifyPage() {
   const { token } = useParams<{ token: string }>();
   const [password, setPassword] = useState('');

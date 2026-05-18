@@ -1,6 +1,13 @@
+/**
+ * Text input primitive matching Vellum form styles.
+ *
+ * @packageDocumentation
+ */
+
 import type { InputHTMLAttributes } from 'react';
 import { cn } from '../../lib/utils.ts';
 
+/** Native text input with theme-aware border and focus ring. */
 export function Input({ className, type, ...props }: InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input

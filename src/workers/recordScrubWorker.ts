@@ -1,7 +1,18 @@
+/**
+ * Purges expired audit logs and document rows on a monthly schedule.
+ *
+ * @packageDocumentation
+ */
+
 import { Worker } from 'bullmq';
 import { prisma } from '../lib/prisma.ts';
 import { redisConnection } from '../lib/redis.ts';
 
+/**
+ * Handles `cleanup-queue` jobs named `scrub-records`.
+ *
+ * @remarks Deletes `AuditLog` rows past `expiresAt` and `Document` rows past `recordExpiresAt`.
+ */
 export const recordScrubWorker = new Worker(
   'cleanup-queue',
   async (job) => {

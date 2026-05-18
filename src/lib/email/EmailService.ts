@@ -1,16 +1,33 @@
+/**
+ * High-level email API for document download links.
+ *
+ * @packageDocumentation
+ */
+
 import { env } from '../env.ts';
 import type { IEmailProvider } from './IEmailProvider.ts';
 import { LocalEmailProvider } from './providers/LocalEmailProvider.ts';
 import { SesEmailProvider } from './providers/SesEmailProvider.ts';
 
+/**
+ * Sends recipient emails using the configured provider (`local` or `ses`).
+ */
 export class EmailService {
   private provider: IEmailProvider;
 
+  /** Selects {@link LocalEmailProvider} or {@link SesEmailProvider} from `EMAIL_PROVIDER`. */
   constructor() {
     this.provider =
       env.emailProvider === 'ses' ? new SesEmailProvider() : new LocalEmailProvider();
   }
 
+  /**
+   * Emails the verify URL for a newly uploaded or regenerated document link.
+   *
+   * @param to - Recipient email
+   * @param token - `downloadToken` for `/verify/{token}`
+   * @param fileName - Display name included in the subject line
+   */
   async sendDownloadLink(to: string, token: string, fileName: string): Promise<void> {
     const url = `${env.appUrl}/verify/${token}`;
     await this.provider.send({

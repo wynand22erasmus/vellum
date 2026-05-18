@@ -7,25 +7,39 @@ datasource db {
   provider = "postgresql"
 }
 
+/// Audit trail event types for compliance and security monitoring.
 enum AuditEventType {
+  /// Dashboard user signed in (dev mock or WorkOS).
   USER_LOGIN
+  /// First download link email sent after upload.
   EMAIL_INITIAL_SENT
+  /// Recipient requested a new access link from the dashboard.
   EMAIL_REGENERATE_SENT
+  /// Successful file download after password verification.
   FILE_DOWNLOAD_SUCCESS
+  /// Failed download attempt (wrong password or expired link).
   FILE_DOWNLOAD_FAILED
+  /// File removed from object storage by the scrub worker.
   FILE_SCRUBBED
 }
 
+/// Uploaded file metadata, credentials, and lifecycle timestamps.
 model Document {
   id              String    @id @default(uuid())
+  /// S3/MinIO object key; null until upload completes and scan passes.
   s3Key           String?
   fileName        String
   recipientEmail  String
+  /// Argon2 hash of the per-file download password (knowledge factor).
   passwordHash    String
+  /// Opaque token embedded in the verify URL (possession factor).
   downloadToken   String    @unique
 
+  /// When the email verify link stops working.
   linkExpiresAt   DateTime
+  /// When the object may be deleted from storage.
   fileExpiresAt   DateTime
+  /// When the database row may be purged.
   recordExpiresAt DateTime
 
   isUsed          Boolean   @default(false)
@@ -37,6 +51,7 @@ model Document {
   @@index([recipientEmail])
 }
 
+/// Immutable audit events tied to documents and users.
 model AuditLog {
   id          String         @id @default(uuid())
   eventType   AuditEventType
@@ -50,9 +65,11 @@ model AuditLog {
   userAgent   String?
   metadata    Json?
 
+  /// Retention horizon for compliance (see `REPORTING_LIFETIME_YEARS`).
   expiresAt   DateTime
 }
 
+/// Dead-letter store when audit queue processing fails.
 model FailedAuditLog {
   id        String   @id @default(uuid())
   payload   Json

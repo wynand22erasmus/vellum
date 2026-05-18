@@ -6,4 +6,8 @@ describe('env', () => {
     expect(env.appUrl).toBeTruthy();
     expect(env.reportingLifetimeYears).toBeGreaterThan(0);
   });
+
+  it('does not skip virus scan by default', () => {
+    expect(env.skipVirusScan).toBe(false);
+  });
 });

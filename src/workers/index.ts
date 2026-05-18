@@ -1,9 +1,17 @@
+/**
+ * Worker process entrypoint: registers BullMQ schedulers and loads all workers.
+ *
+ * @packageDocumentation
+ * @remarks Run via `npm run worker`. Registers hourly file scrub and monthly record scrub cron jobs.
+ */
+
 import { cleanupQueue } from '../queues/cleanupQueue.ts';
 import './emailWorker.ts';
 import './auditWorker.ts';
 import './fileScrubWorker.ts';
 import './recordScrubWorker.ts';
 
+/** @internal */
 async function registerSchedulers(): Promise<void> {
   await cleanupQueue.upsertJobScheduler(
     'scrub-files-hourly',

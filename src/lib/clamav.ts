@@ -1,8 +1,19 @@
+/**
+ * ClamAV INSTREAM virus scanning for uploaded file buffers.
+ *
+ * @packageDocumentation
+ */
+
 import net from 'node:net';
 import { env } from './env.ts';
 
+/** @internal */
 const CHUNK_SIZE = 64 * 1024;
 
+/**
+ * @internal
+ * Reads a line-terminated response from the ClamAV daemon socket.
+ */
 function sendInstCommand(socket: net.Socket, command: string): Promise<string> {
   return new Promise((resolve, reject) => {
     let data = '';
@@ -19,6 +30,13 @@ function sendInstCommand(socket: net.Socket, command: string): Promise<string> {
   });
 }
 
+/**
+ * Scans a file buffer via ClamAV `zINSTREAM`.
+ *
+ * @param buffer - Raw upload bytes
+ * @returns `clean: true` or `clean: false` with a signature name in `reason`
+ * @throws {Error} When ClamAV is unreachable or returns an unexpected response
+ */
 export async function scanBuffer(buffer: Buffer): Promise<{ clean: boolean; reason?: string }> {
   return new Promise((resolve, reject) => {
     const socket = net.createConnection(env.clamavPort, env.clamavHost);
@@ -70,6 +88,9 @@ export async function scanBuffer(buffer: Buffer): Promise<{ clean: boolean; reas
   });
 }
 
+/**
+ * Returns whether a TCP connection to the ClamAV daemon succeeds (health check).
+ */
 export async function checkClamAV(): Promise<boolean> {
   try {
     return await new Promise((resolve) => {

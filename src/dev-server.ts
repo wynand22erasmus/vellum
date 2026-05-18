@@ -1,3 +1,10 @@
+/**
+ * Development server: Express API + Vite middleware on a single port.
+ *
+ * @packageDocumentation
+ * @remarks Run via `npm run dev`. Default port 5173 (`PORT` env).
+ */
+
 import { createServer as createViteServer } from 'vite';
 import { createApp } from './app.ts';
 

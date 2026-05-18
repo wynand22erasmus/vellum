@@ -1,3 +1,9 @@
+/**
+ * Development login form (stores recipient email for `X-Dev-User-Email`).
+ *
+ * @packageDocumentation
+ */
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { VellumLogo } from '../components/vellum-logo.tsx';
@@ -13,6 +19,7 @@ import {
 } from '../components/ui/card.tsx';
 import { setDevEmail } from '../lib/api.ts';
 
+/** Dev auth route (`/login`); not used when `AUTH_PROVIDER=workos`. */
 export function DevLoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');

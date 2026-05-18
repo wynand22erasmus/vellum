@@ -1,14 +1,25 @@
+/**
+ * Vellum brand logo (full wordmark or favicon mark).
+ *
+ * @packageDocumentation
+ */
+
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils.ts';
 
-type VellumLogoProps = {
+/** Props for {@link VellumLogo}. */
+export type VellumLogoProps = {
+  /** `full` shows wordmark image; `mark` shows favicon only. */
   variant?: 'full' | 'mark';
   className?: string;
+  /** When false, renders image only without a home link. */
   linked?: boolean;
+  /** Router target when `linked` is true. */
   href?: string;
 };
 
+/** @internal */
 function LogoWordmark({ className }: { className?: string }) {
   return (
     <div className={cn('hidden flex-col items-center text-center dark:flex', className)}>
@@ -22,6 +33,11 @@ function LogoWordmark({ className }: { className?: string }) {
   );
 }
 
+/**
+ * Brand logo with optional link to home.
+ *
+ * @param props - {@link VellumLogoProps}
+ */
 export function VellumLogo({
   variant = 'full',
   className,

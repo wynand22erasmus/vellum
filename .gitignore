@@ -32,8 +32,13 @@ prisma/*.db-journal
 *.log
 npm-debug.log*
 
+# Generated API reference (built via npm run docs:api)
+docs/api/
+
 # Test
 coverage/
+e2e/.state.json
+bruno/environments/Seeded.bru
 
 # Docker
 .docker/

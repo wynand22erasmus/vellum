@@ -1,0 +1,14 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "Vellum API",
+  "entryPoints": ["src", "e2e/helpers.ts"],
+  "entryPointStrategy": "expand",
+  "out": "docs/api/html",
+  "tsconfig": "tsconfig.typedoc.json",
+  "exclude": ["**/*.test.ts"],
+  "excludeInternal": true,
+  "readme": "README.md",
+  "navigation": {
+    "includeFolders": true
+  }
+}

@@ -1,8 +1,15 @@
+/**
+ * Primary button primitive with variant and size styles (shadcn-style).
+ *
+ * @packageDocumentation
+ */
+
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import type { ButtonHTMLAttributes } from 'react';
 import { cn } from '../../lib/utils.ts';
 
+/** @internal */
 const buttonVariants = cva(
   'inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
   {
@@ -28,12 +35,15 @@ const buttonVariants = cva(
   },
 );
 
+/** Button props including CVA variants and optional Radix `asChild`. */
 export interface ButtonProps
   extends ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
+  /** Render as child element (e.g. `Link`) via Radix Slot. */
   asChild?: boolean;
 }
 
+/** Styled button; use `variant` and `size` for appearance. */
 export function Button({
   className,
   variant,

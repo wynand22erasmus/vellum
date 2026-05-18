@@ -1,3 +1,9 @@
+/**
+ * Marketing landing page with links to login and product overview.
+ *
+ * @packageDocumentation
+ */
+
 import { Link } from 'react-router-dom';
 import { VellumLogo } from '../components/vellum-logo.tsx';
 import { Button } from '../components/ui/button.tsx';
@@ -8,6 +14,7 @@ import {
   CardHeader,
 } from '../components/ui/card.tsx';
 
+/** Public home route (`/`). */
 export function HomePage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">

@@ -115,6 +115,32 @@ curl http://localhost:5173/api/health
 
 Returns status for database, Redis, and ClamAV.
 
+## E2E tests (Bruno + Puppeteer)
+
+Requires the stack to be up and ClamAV healthy. See [docs/e2e-test-plan.md](./docs/e2e-test-plan.md) for coverage matrix.
+
+```bash
+npm run test:e2e:seed    # seed document (upload or DB fallback)
+npm run test:api         # Bruno API collection (needs seed)
+npm run test:api:smoke   # Bruno smoke tests (no seed)
+npm run test:e2e         # Puppeteer browser tests (needs seed)
+npm run test:e2e:smoke   # Puppeteer smoke (no seed)
+npm run test:e2e:all     # seed + API + UI
+```
+
+Set `SKIP_VIRUS_SCAN=true` in `.env` for reliable uploads during E2E (see `.env.docker.example`). Optional: `E2E_BASE_URL`, `E2E_HEADLESS=false`.
+
+## API reference (TypeDoc)
+
+Generate HTML and Markdown API docs from TSDoc comments:
+
+```bash
+npm run docs:api          # docs/api/html + docs/api/markdown
+npm run docs:coverage     # coverage gate + docs/doc-inventory.json
+```
+
+Standards and env reference: [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md), [docs/CONFIG.md](./docs/CONFIG.md).
+
 ## Design document
 
 See [Vellum_Comprehensive_Design_Document.md](./docs/Vellum_Comprehensive_Design_Document.md) for full architecture.

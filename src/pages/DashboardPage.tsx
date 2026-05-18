@@ -1,3 +1,9 @@
+/**
+ * Recipient dashboard: list documents and request new download links.
+ *
+ * @packageDocumentation
+ */
+
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { VellumLogo } from '../components/vellum-logo.tsx';
@@ -22,6 +28,7 @@ interface DocumentRow {
   createdAt: string;
 }
 
+/** Authenticated dashboard route (`/dashboard`). */
 export function DashboardPage() {
   const [documents, setDocuments] = useState<DocumentRow[]>([]);
   const [loading, setLoading] = useState(true);

@@ -1,9 +1,21 @@
+/**
+ * Dashboard authentication routes (WorkOS OAuth and dev session probe).
+ *
+ * @packageDocumentation
+ * @remarks
+ * - `GET /api/auth/login` — redirect to WorkOS AuthKit
+ * - `GET /api/auth/callback` — OAuth callback, sets `vellum_session` cookie
+ * - `POST /api/auth/logout` — clears session cookie
+ * - `GET /api/auth/me` — current user (cookie or `X-Dev-User-Email`)
+ */
+
 import { Router } from 'express';
 import { logEvent } from '../queues/auditQueue.ts';
 import { getAuthorizationUrl, getWorkOS } from '../lib/auth/workos.ts';
 import { createSessionToken, verifySessionToken } from '../lib/auth/session.ts';
 import { env } from '../lib/env.ts';
 
+/** Express router mounted at `/api/auth`. */
 export const authRouter = Router();
 
 authRouter.get('/login', (_req, res) => {

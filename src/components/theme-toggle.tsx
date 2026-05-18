@@ -1,3 +1,9 @@
+/**
+ * Cycles light → dark → system theme via a toolbar button.
+ *
+ * @packageDocumentation
+ */
+
 import { Monitor, Moon, Sun } from 'lucide-react';
 import { Button } from './ui/button.tsx';
 import { useTheme } from '../hooks/use-theme.ts';
@@ -11,6 +17,7 @@ const labels: Record<Theme, string> = {
   system: 'System theme',
 };
 
+/** Icon button that rotates through theme modes. */
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 

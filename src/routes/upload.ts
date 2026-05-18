@@ -1,3 +1,12 @@
+/**
+ * Authenticated document upload API (virus scan, storage, email enqueue).
+ *
+ * @packageDocumentation
+ * @remarks
+ * - `POST /api/upload/` — multipart upload; requires {@link ../middleware/apiKeyAuth.ts}
+ * - Fields: `file`, `recipientEmail`, `password`, `linkTtl`, `fileTtl` (seconds)
+ */
+
 import { randomBytes } from 'node:crypto';
 import { Router } from 'express';
 import multer from 'multer';
@@ -10,11 +19,13 @@ import { prisma } from '../lib/prisma.ts';
 import { uploadObject } from '../lib/storage/s3Client.ts';
 import { emailQueue } from '../queues/emailQueue.ts';
 
+/** @internal */
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: env.maxUploadBytes },
 });
 
+/** @internal */
 const uploadFieldsSchema = z
   .object({
     recipientEmail: z.string().email(),
@@ -26,6 +37,7 @@ const uploadFieldsSchema = z
     message: 'linkTtl cannot exceed fileTtl',
   });
 
+/** Express router mounted at `/api/upload`. */
 export const uploadRouter = Router();
 
 uploadRouter.post('/', upload.single('file'), async (req, res) => {
@@ -43,15 +55,19 @@ uploadRouter.post('/', upload.single('file'), async (req, res) => {
 
     const { recipientEmail, password, linkTtl, fileTtl } = parsed.data;
 
-    let scanResult;
-    try {
-      scanResult = await scanBuffer(req.file.buffer);
-    } catch (err) {
-      res.status(503).json({
-        error: 'Virus scanner unavailable. Upload rejected.',
-        detail: err instanceof Error ? err.message : 'Unknown error',
-      });
-      return;
+    let scanResult: { clean: boolean; reason?: string };
+    if (env.skipVirusScan) {
+      scanResult = { clean: true };
+    } else {
+      try {
+        scanResult = await scanBuffer(req.file.buffer);
+      } catch (err) {
+        res.status(503).json({
+          error: 'Virus scanner unavailable. Upload rejected.',
+          detail: err instanceof Error ? err.message : 'Unknown error',
+        });
+        return;
+      }
     }
 
     if (!scanResult.clean) {
