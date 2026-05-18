@@ -75,9 +75,10 @@
 Prerequisites: stack running (`npm run up`), migrations applied.
 
 ```bash
-npm run test:e2e:seed    # upload or DB fallback → e2e/.state.json + bruno Seeded env
+npm run test:e2e:seed    # upload or DB fallback → e2e/.state.json + bruno/collections/vellum-api Seeded env
 npm run test:api         # full Bruno collection (Seeded env)
 npm run test:api:smoke   # Bruno without seed (health, upload negatives, auth, verify negatives)
+npm run test:api:remote  # full suite against Remote env (other hosts; see bruno/README.md)
 npm run test:e2e         # full Puppeteer suite (requires seed)
 npm run test:e2e:smoke   # Puppeteer smoke (no seed)
 npm run test:e2e:all     # seed + API + UI

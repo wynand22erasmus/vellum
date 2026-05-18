@@ -1,7 +1,7 @@
 /**
  * Seeds a document for E2E/API tests via upload + DB token lookup.
  * Falls back to direct MinIO + Postgres insert when upload fails (e.g. ClamAV timeout).
- * Writes e2e/.state.json and bruno/environments/Seeded.bru
+ * Writes e2e/.state.json and bruno/collections/vellum-api/environments/Seeded.bru
  */
 import { randomBytes, randomUUID } from 'node:crypto';
 import fs from 'node:fs';
@@ -52,7 +52,14 @@ function writeArtifacts(documentId, downloadToken) {
   fs.mkdirSync(path.dirname(statePath), { recursive: true });
   fs.writeFileSync(statePath, JSON.stringify(state, null, 2));
 
-  const seededEnvPath = path.join(root, 'bruno', 'environments', 'Seeded.bru');
+  const seededEnvPath = path.join(
+    root,
+    'bruno',
+    'collections',
+    'vellum-api',
+    'environments',
+    'Seeded.bru',
+  );
   fs.mkdirSync(path.dirname(seededEnvPath), { recursive: true });
   fs.writeFileSync(
     seededEnvPath,

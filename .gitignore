@@ -38,7 +38,7 @@ docs/api/
 # Test
 coverage/
 e2e/.state.json
-bruno/environments/Seeded.bru
+bruno/collections/vellum-api/environments/Seeded.bru
 
 # Docker
 .docker/
