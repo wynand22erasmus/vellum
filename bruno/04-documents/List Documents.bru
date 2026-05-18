@@ -1,0 +1,27 @@
+meta {
+  name: List Documents
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/documents
+  body: none
+  auth: none
+}
+
+headers {
+  X-Dev-User-Email: {{devEmail}}
+}
+
+tests {
+  test("lists documents for recipient", function () {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(body.documents).to.be.an("array");
+    const match = body.documents.find((d) => d.fileName === "e2e-sample.txt");
+    expect(match, "seeded document should appear in list").to.exist;
+    expect(match.linkActive).to.equal(true);
+    expect(match.fileAvailable).to.equal(true);
+  });
+}

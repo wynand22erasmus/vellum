@@ -1,0 +1,22 @@
+meta {
+  name: Request Link Not Found
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/documents/00000000-0000-0000-0000-000000000099/request-link
+  body: none
+  auth: none
+}
+
+headers {
+  X-Dev-User-Email: {{devEmail}}
+}
+
+tests {
+  test("returns 404 for unknown document", function () {
+    expect(res.getStatus()).to.equal(404);
+    expect(res.getBody().error).to.contain("not found");
+  });
+}

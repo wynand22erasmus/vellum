@@ -1,0 +1,30 @@
+meta {
+  name: Upload Invalid API Key
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/upload
+  body: multipartForm
+  auth: none
+}
+
+headers {
+  Authorization: Bearer invalid-api-key-for-e2e
+}
+
+body:multipart-form {
+  file: @file(./fixtures/e2e-sample.txt)
+  recipientEmail: {{devEmail}}
+  password: {{filePassword}}
+  linkTtl: 86400
+  fileTtl: 604800
+}
+
+tests {
+  test("rejects invalid API key", function () {
+    expect(res.getStatus()).to.equal(401);
+    expect(res.getBody().error).to.contain("Invalid API key");
+  });
+}

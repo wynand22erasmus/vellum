@@ -1,0 +1,37 @@
+meta {
+  name: Upload Success
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/upload
+  body: multipartForm
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{apiKey}}
+}
+
+body:multipart-form {
+  file: @file(./fixtures/e2e-sample.txt)
+  recipientEmail: {{devEmail}}
+  password: {{filePassword}}
+  linkTtl: 86400
+  fileTtl: 604800
+}
+
+tests {
+  test("creates document with warning when scanner available", function () {
+    if (res.getStatus() === 503) {
+      expect(res.getBody().error).to.match(/scanner|Virus/i);
+      return;
+    }
+    expect(res.getStatus()).to.equal(201);
+    const body = res.getBody();
+    expect(body.id).to.be.a("string").and.not.empty;
+    expect(body.warning).to.contain("separate channel");
+    bru.setVar("documentId", body.id);
+  });
+}

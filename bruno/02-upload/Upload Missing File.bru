@@ -1,0 +1,29 @@
+meta {
+  name: Upload Missing File
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/upload
+  body: multipartForm
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{apiKey}}
+}
+
+body:multipart-form {
+  recipientEmail: {{devEmail}}
+  password: {{filePassword}}
+  linkTtl: 86400
+  fileTtl: 604800
+}
+
+tests {
+  test("requires file field", function () {
+    expect(res.getStatus()).to.equal(400);
+    expect(res.getBody().error).to.contain("File");
+  });
+}

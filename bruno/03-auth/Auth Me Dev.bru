@@ -1,0 +1,24 @@
+meta {
+  name: Auth Me Dev
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/auth/me
+  body: none
+  auth: none
+}
+
+headers {
+  X-Dev-User-Email: {{devEmail}}
+}
+
+tests {
+  test("returns dev user profile", function () {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(body.provider).to.equal("dev");
+    expect(body.user.email).to.match(/@example\.com$/);
+  });
+}
