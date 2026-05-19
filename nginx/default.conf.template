@@ -2,10 +2,14 @@ server {
   listen 8080;
   server_name ${VELLUM_HOST};
 
+  # Re-resolve `app` on each request so nginx survives container IP changes (Podman/Docker).
+  resolver ${NGINX_LOCAL_RESOLVERS} valid=10s ipv6=off;
+  set $upstream_app app:5173;
+
   client_max_body_size 55m;
 
   location /api/ {
-    proxy_pass http://app;
+    proxy_pass http://$upstream_app;
     proxy_http_version 1.1;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
@@ -14,7 +18,7 @@ server {
   }
 
   location /docs/ {
-    proxy_pass http://app;
+    proxy_pass http://$upstream_app;
     proxy_http_version 1.1;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
@@ -23,7 +27,7 @@ server {
   }
 
   location / {
-    proxy_pass http://app;
+    proxy_pass http://$upstream_app;
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection "upgrade";

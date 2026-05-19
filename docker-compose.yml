@@ -123,6 +123,7 @@ services:
       - "8080:8080"
     environment:
       VELLUM_HOST: ${VELLUM_HOST:-localhost}
+      NGINX_ENTRYPOINT_LOCAL_RESOLVERS: "1"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/default.conf.template:/etc/nginx/templates/default.conf.template:ro
