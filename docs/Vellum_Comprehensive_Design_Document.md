@@ -402,11 +402,14 @@ export const generatePresignedUrl = async (
 
 | Method | Path | Auth | Description |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/upload` | API Key / WorkOS JWT | Upload a document |
+| `POST` | `/api/upload` | API Key (`Authorization: Bearer`) | Upload a document |
 | `POST` | `/api/verify` | None | Validate token + password, receive presigned URL |
-| `GET` | `/api/documents` | WorkOS JWT | List documents for authenticated user |
-| `POST` | `/api/documents/:id/request-link` | WorkOS JWT | Request a new download link |
-| `GET` | `/api/auth/callback` | WorkOS | WorkOS OAuth2 callback handler |
+| `GET` | `/api/documents` | Session cookie (`vellum_session`) | List documents for authenticated user |
+| `POST` | `/api/documents/:id/request-link` | Session cookie | Request a new download link |
+| `GET` | `/api/auth/login` | None | Redirect to WorkOS AuthKit (production) |
+| `GET` | `/api/auth/callback` | WorkOS | OAuth callback; sets session cookie |
+| `POST` | `/api/auth/dev/request-login` | None | Dev sign-in; sets session cookie when verified |
+| `GET` | `/docs/` | Session cookie + `ADMIN` | Generated TypeDoc HTML (admin only) |
 
 ### 7.2 Upload Endpoint
 
@@ -555,43 +558,53 @@ router.post("/:id/request-link", async (req, res) => {
 
 ## 8. Authentication & Authorization
 
-### 8.1 WorkOS Integration
+### 8.1 Identity providers
 
-WorkOS is the sole SSO and identity provider for authenticated dashboard access.
+| Mode | `AUTH_PROVIDER` | Dashboard sign-in |
+| :--- | :--- | :--- |
+| **Production** | `workos` | WorkOS AuthKit (`GET /api/auth/login`) |
+| **Local / dev** | `dev` | Email + Mailpit verification (`POST /api/auth/dev/request-login`) |
+
+Both modes issue the same **`vellum_session`** HTTP-only cookie (HS256 JWT, 7-day TTL). Dev mode also supports `X-Dev-User-Email` on API `fetch` calls from the SPA.
 
 | User Type | Auth Method | Can Download Directly? |
 | :--- | :--- | :--- |
-| **Uploader** | API Key or WorkOS JWT | N/A (uploads only) |
+| **Uploader** | API Key | N/A (uploads only) |
 | **Guest Recipient** | Email Link + File Password | Yes (via Path A) |
-| **Dashboard User** | WorkOS SSO | No (triggers Path A via email) |
+| **Dashboard User** | Session cookie (WorkOS or dev) | No (triggers Path A via email) |
+| **Admin** | Session cookie + `UserKind.ADMIN` | No for files; yes for `/docs/` |
 
 ### 8.2 WorkOS Callback Handler
 
 ```typescript
 // GET /api/auth/callback
 router.get("/callback", async (req, res) => {
-  const { code } = req.query;
+  const { code, state } = req.query;
 
   const { user } = await workos.userManagement.authenticateWithCode({
     code: code as string,
     clientId: process.env.WORKOS_CLIENT_ID,
   });
 
-  logEvent({
-    eventType: "USER_LOGIN",
-    userId: user.id,
-    ip: req.ip,
-    metadata: { email: user.email, provider: "WorkOS" },
-  });
+  // upsert user, enforce email verification for consumers, ...
 
-  // Set JWT or session cookie here
-  res.redirect("/dashboard");
+  const token = await createSessionToken({ id: user.id, email: user.email });
+  setSessionCookie(res, token);
+
+  const returnTo = safeReturnTo(state); // e.g. /docs/ when opened from API docs
+  res.redirect(returnTo);
 });
 ```
 
-### 8.3 Dashboard Security Model
+### 8.3 Dev sign-in
 
-1. User authenticates via WorkOS.
+1. User submits email at `/login` → `POST /api/auth/dev/request-login`.
+2. If unverified, Mailpit delivers `GET /api/auth/verify-email?token=…`.
+3. When verified, the API sets `vellum_session` and the browser redirects to `/dashboard` or `returnTo` (e.g. `/docs/`).
+
+### 8.4 Dashboard Security Model
+
+1. User authenticates (WorkOS or dev) and receives `vellum_session`.
 2. Dashboard calls `GET /api/documents`. Backend queries Prisma `WHERE recipientEmail = user.email`.
 3. User sees a list of documents addressed to them.
 4. Clicking "Get Access Link" calls `POST /api/documents/:id/request-link`.

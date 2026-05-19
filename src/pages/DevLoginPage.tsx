@@ -8,7 +8,7 @@
  */
 
 import { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { VellumLogo } from '../components/vellum-logo.tsx';
 import { Button } from '../components/ui/button.tsx';
 import { Input } from '../components/ui/input.tsx';
@@ -20,6 +20,7 @@ import {
   CardHeader,
   CardTitle,
 } from '../components/ui/card.tsx';
+import { safeReturnTo } from '../lib/auth/returnTo.ts';
 import { setDevEmail } from '../lib/api.ts';
 
 type RequestLoginResponse = {
@@ -31,9 +32,9 @@ type RequestLoginResponse = {
 
 /** Dev auth route (`/login`); not used when `AUTH_PROVIDER=workos`. */
 export function DevLoginPage() {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const verifiedBanner = searchParams.get('verified') === '1';
+  const returnTo = safeReturnTo(searchParams.get('returnTo') ?? undefined);
   const [email, setEmail] = useState('');
   const [awaitingVerification, setAwaitingVerification] = useState(false);
   const [pendingToken, setPendingToken] = useState<string | null>(null);
@@ -48,6 +49,7 @@ export function DevLoginPage() {
     try {
       const res = await fetch('/api/auth/dev/request-login', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim() }),
       });
@@ -58,7 +60,7 @@ export function DevLoginPage() {
 
       if (data.verified) {
         setDevEmail(data.email);
-        navigate('/dashboard');
+        window.location.assign(returnTo);
         return;
       }
 

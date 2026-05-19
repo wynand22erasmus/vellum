@@ -24,7 +24,7 @@ Runtime configuration is read in `src/lib/env.ts`. Copy `.env.example` (host) or
 | `AUTH_PROVIDER` | No | `dev` | `dev` (mock dashboard) or `workos` |
 | `DEFAULT_ADMIN_EMAILS` | No | `["wynand22erasmus@gmail.com"]` | JSON array of emails assigned {@link UserKind} `ADMIN` on sign-in |
 | `SKIP_EMAIL_VERIFICATION` | No | `false` | Dev/E2E only: allow dashboard access without verified email (ignored in production) |
-| `SESSION_SECRET` | No | dev placeholder | Signs dashboard session JWT (32+ chars in prod) |
+| `SESSION_SECRET` | No | dev placeholder | Signs dashboard session JWT (`vellum_session` cookie; 32+ chars in prod) |
 | `WORKOS_API_KEY` | If WorkOS | — | WorkOS API key |
 | `WORKOS_CLIENT_ID` | If WorkOS | — | WorkOS client ID |
 | `WORKOS_REDIRECT_URI` | No | `{APP_URL}/api/auth/callback` | OAuth redirect URL |
@@ -57,13 +57,33 @@ WorkOS and dev sign-in upsert rows into the Postgres `users` table:
 | `kind` | `ADMIN` or `CONSUMER` — admins are listed in `DEFAULT_ADMIN_EMAILS` |
 | `firstName`, `lastName`, `profilePictureUrl` | From WorkOS profile |
 
-Admins can open generated API docs at **`/docs/`** (run `npm run docs:api` first). The home page shows an **API documentation** link when signed in as an admin.
+### Dashboard session
+
+After successful sign-in (WorkOS callback or dev `POST /api/auth/dev/request-login` when verified), the API sets an HTTP-only cookie:
+
+| Cookie | Purpose |
+|--------|---------|
+| `vellum_session` | HS256 JWT (7 days); required for `/docs/`, `/api/documents`, and WorkOS mode |
+
+`GET /api/auth/me` and dashboard API calls accept the cookie. In **dev** mode, `X-Dev-User-Email` (set by the SPA after login) is also accepted for API requests, but **not** for full-page routes such as `/docs/` — use the session cookie there.
+
+`POST /api/auth/logout` clears the cookie.
+
+### API documentation (`/docs/`)
+
+| Step | Action |
+|------|--------|
+| 1 | `npm run docs:api` (output under `docs/api/html/`) |
+| 2 | Sign in as a user with `kind: ADMIN` |
+| 3 | Open **`/docs/`** (or use the home page / **Dev services** link) |
+
+Unauthenticated browser requests to `/docs/` redirect to sign-in with `returnTo=/docs/` and return after login. Non-admins receive `403`.
 
 ### Email verification before login
 
 - **WorkOS:** After OAuth, users with `emailVerified: false` are redirected to `/login/email-verification` and receive a WorkOS verification email. They must verify, then sign in again.
 - **Admins:** Users with `kind: ADMIN` (including emails in `DEFAULT_ADMIN_EMAILS`) may sign in without verifying email.
-- **Dev:** `POST /api/auth/dev/request-login` sends a Mailpit link to `GET /api/auth/verify-email`. After verifying, return to `/login` and continue.
+- **Dev:** `POST /api/auth/dev/request-login` sends a Mailpit link to `GET /api/auth/verify-email`. After verifying, return to `/login` and continue. A verified sign-in sets `vellum_session` and optional `returnTo` redirect (e.g. back to `/docs/`).
 - **E2E:** Set `SKIP_EMAIL_VERIFICATION=true` in non-production only (same intent as `SKIP_VIRUS_SCAN`).
 
 See [README.md](../README.md) for WorkOS and Docker-specific setup.

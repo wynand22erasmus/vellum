@@ -9,7 +9,8 @@
 | 3 | Verify / download | `POST /api/verify` | Bruno + Puppeteer |
 | 4 | Dashboard documents | `GET /api/documents` | Bruno + Puppeteer |
 | 5 | Request new link | `POST /api/documents/:id/request-link` | Bruno + Puppeteer |
-| 6 | Dev auth | `X-Dev-User-Email`, `/api/auth/me`, logout | Bruno + Puppeteer |
+| 6 | Dev auth | `vellum_session` cookie, `X-Dev-User-Email`, `/api/auth/me`, logout | Bruno + Puppeteer |
+| 6b | API docs (admin) | `GET /docs/` (session cookie) | Manual / future |
 | 7 | WorkOS auth (disabled in dev) | `GET /api/auth/login` | Bruno |
 | 8 | Home page | `/` | Puppeteer |
 | 9 | Dev login page | `/login` | Puppeteer |
@@ -61,8 +62,12 @@
 - **Negative:** Unknown id, no auth — Bruno.
 
 ### 6. Dev auth
-- **Positive:** `/api/auth/me` with header — Bruno.
-- **Negative:** No header — Bruno.
+- **Positive:** `/api/auth/me` with `X-Dev-User-Email` or session cookie after dev login — Bruno.
+- **Negative:** No header and no cookie — Bruno.
+
+### 6b. API docs (admin)
+- **Positive:** Admin user with `vellum_session` opens `/docs/` after `npm run docs:api`.
+- **Negative:** Unauthenticated → redirect to `/login?returnTo=…`; non-admin → `403`.
 
 ### 7. WorkOS login (dev mode)
 - **Negative:** `GET /api/auth/login` → `400` — Bruno.

@@ -6,9 +6,11 @@
 
 import type { Request, Response, NextFunction } from 'express';
 import { resolveRequestUser } from '../lib/auth/resolveUser.ts';
+import { env } from '../lib/env.ts';
 
 /**
  * Populates `req.user` and rejects non-admin callers. Used for `/docs/`.
+ * Unauthenticated HTML requests redirect to sign-in with `returnTo` preserved.
  */
 export async function adminAuth(
   req: Request,
@@ -20,7 +22,12 @@ export async function adminAuth(
 
   if (!user) {
     if (acceptsHtml) {
-      res.redirect('/login');
+      const returnTo = encodeURIComponent(req.originalUrl);
+      if (env.authProvider === 'workos') {
+        res.redirect(`/api/auth/login?returnTo=${returnTo}`);
+      } else {
+        res.redirect(`/login?returnTo=${returnTo}`);
+      }
       return;
     }
     res.status(401).json({ error: 'Not authenticated.' });

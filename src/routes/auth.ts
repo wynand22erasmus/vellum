@@ -9,13 +9,14 @@
  * - `POST /api/auth/dev/request-login` — dev: email verification or immediate access if verified
  * - `POST /api/auth/resend-verification` — resend WorkOS or dev verification email
  * - `POST /api/auth/logout` — clears session cookie
- * - `GET /api/auth/me` — current user (cookie or `X-Dev-User-Email`)
+ * - `GET /api/auth/me` — current user (`vellum_session` cookie; dev also accepts `X-Dev-User-Email`)
  */
 
 import { Router } from 'express';
 import { logEvent } from '../queues/auditQueue.ts';
 import { getAuthorizationUrl, getWorkOS } from '../lib/auth/workos.ts';
-import { createSessionToken } from '../lib/auth/session.ts';
+import { safeReturnTo } from '../lib/auth/returnTo.ts';
+import { createSessionToken, setSessionCookie } from '../lib/auth/session.ts';
 import { resolveRequestUser } from '../lib/auth/resolveUser.ts';
 import {
   assertEmailVerified,
@@ -31,14 +32,16 @@ import { env } from '../lib/env.ts';
 /** Express router mounted at `/api/auth`. */
 export const authRouter = Router();
 
-authRouter.get('/login', (_req, res) => {
+authRouter.get('/login', (req, res) => {
   if (env.authProvider !== 'workos') {
     res.status(400).json({
       error: 'WorkOS is not enabled. Use X-Dev-User-Email header for local development.',
     });
     return;
   }
-  res.redirect(getAuthorizationUrl());
+  const returnTo =
+    typeof req.query.returnTo === 'string' ? safeReturnTo(req.query.returnTo) : undefined;
+  res.redirect(getAuthorizationUrl(returnTo));
 });
 
 authRouter.get('/callback', async (req, res) => {
@@ -79,15 +82,11 @@ authRouter.get('/callback', async (req, res) => {
     });
 
     const token = await createSessionToken({ id: user.id, email: user.email });
-    res.cookie('vellum_session', token, {
-      httpOnly: true,
-      secure: env.isProduction,
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: '/',
-    });
+    setSessionCookie(res, token);
 
-    res.redirect('/dashboard');
+    const returnTo =
+      typeof req.query.state === 'string' ? safeReturnTo(req.query.state) : '/dashboard';
+    res.redirect(returnTo);
   } catch (err) {
     console.error('[Auth callback]', err);
     res.status(500).json({ error: 'Authentication failed.' });
@@ -134,6 +133,14 @@ authRouter.post('/dev/request-login', async (req, res) => {
     const user = await upsertDevUser(email);
 
     if (isEmailVerificationSatisfied(user)) {
+      const token = await createSessionToken({ id: user.id, email: user.email });
+      setSessionCookie(res, token);
+      logEvent({
+        eventType: 'USER_LOGIN',
+        userId: user.id,
+        ip: req.ip,
+        metadata: { email: user.email, provider: 'dev', kind: user.kind },
+      });
       res.json({ verified: true, email: user.email });
       return;
     }

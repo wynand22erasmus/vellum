@@ -11,8 +11,8 @@ import { resolveRequestUser } from '../lib/auth/resolveUser.ts';
  * Populates `req.user` for protected dashboard routes.
  *
  * @remarks
- * - **WorkOS:** requires `vellum_session` cookie (see `/api/auth/callback`).
- * - **Dev:** requires `X-Dev-User-Email` header (see `src/lib/api.ts`).
+ * - **All providers:** `vellum_session` cookie (see `/api/auth/callback` and dev `request-login`).
+ * - **Dev only:** `X-Dev-User-Email` header from the SPA (see `src/lib/api.ts`) as a fallback for API calls.
  * Mounted on `/api/documents`.
  */
 export async function dashboardAuth(

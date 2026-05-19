@@ -1,5 +1,5 @@
 /**
- * Marketing landing page with links to login and product overview.
+ * Marketing landing page with login and admin API documentation link.
  *
  * @packageDocumentation
  */

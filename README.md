@@ -11,7 +11,7 @@ Secure, API-first document transfer platform. Every download requires both an em
 - **Jobs:** BullMQ + Redis
 - **Virus scan:** ClamAV
 - **Email:** Mailpit (dev) / SES (prod)
-- **Auth:** API key (upload), dev mock or WorkOS (dashboard)
+- **Auth:** API key (upload); session cookie + dev mock or WorkOS (dashboard); admin-only TypeDoc at `/docs/`
 
 ## Quick start (containerized — recommended)
 
@@ -47,8 +47,11 @@ npm run up:logs
 |---------|-----|
 | Web UI (via nginx) | `http://$VELLUM_HOST:8080` (default host: `localhost`) |
 | Web UI (direct) | `http://$VELLUM_HOST:5173` when using the app container port |
+| API docs (admin) | `/docs/` after `npm run docs:api` — sign in as an admin first |
 | Mailpit | http://localhost:8025 |
 | MinIO console | http://localhost:9001 |
+
+In non-production, use the **Dev services** menu (top-left of the app) for quick links to Mailpit, MinIO, and API docs.
 
 ```bash
 npm run down    # stop all services
@@ -90,13 +93,20 @@ The response includes a warning: communicate the file password via a **separate 
 2. Enter the file password
 3. Browser redirects to a 30-second presigned MinIO URL
 
-### Dashboard (dev auth)
+### Dashboard sign-in
 
-1. Visit `/login` and enter your recipient email
-2. View documents at `/dashboard`
-3. Use **Send access link** to regenerate (still requires Path A to download)
+Dashboard routes use a **`vellum_session` HTTP-only cookie** (7-day JWT). In dev mode, the SPA also stores your email in `localStorage` and sends `X-Dev-User-Email` on `fetch` calls for backward compatibility.
 
-### WorkOS (production)
+#### Dev auth (`AUTH_PROVIDER=dev`, default)
+
+1. Visit `/login` and enter your email.
+2. If the address is not verified, open the link in **Mailpit** (`GET /api/auth/verify-email`), then sign in again.
+3. On success you receive a session cookie and land on `/dashboard` (or the page you were trying to open).
+4. Use **Send access link** to regenerate a download email (download still requires the email link + file password).
+
+**Admins** (emails in `DEFAULT_ADMIN_EMAILS`) may sign in without email verification. For automated E2E only, set `SKIP_EMAIL_VERIFICATION=true` in non-production (see `.env.docker.example`).
+
+#### WorkOS (`AUTH_PROVIDER=workos`)
 
 Set in `.env`:
 
@@ -105,9 +115,12 @@ AUTH_PROVIDER=workos
 WORKOS_API_KEY=sk_...
 WORKOS_CLIENT_ID=client_...
 WORKOS_REDIRECT_URI=https://your-domain/api/auth/callback
+SESSION_SECRET=...   # 32+ random characters
 ```
 
-Sign in via `/api/auth/login`.
+- Sign in: `GET /api/auth/login` (or follow the redirect when opening a protected page such as `/docs/`).
+- Callback: `GET /api/auth/callback` sets `vellum_session` and redirects to `/dashboard`, or to a same-origin `returnTo` path passed through OAuth `state`.
+- Unverified consumers are sent to `/login/email-verification` until they confirm email (admins may sign in without verification).
 
 ## Health check
 
@@ -142,17 +155,28 @@ npm run docs:api          # docs/api/html + docs/api/markdown
 npm run docs:coverage     # coverage gate + docs/doc-inventory.json
 ```
 
-**Viewing docs:** Admins (emails in `DEFAULT_ADMIN_EMAILS`) can browse HTML docs at **`/docs/`** after running `docs:api`. Sign in first; the home page shows a link when you are an admin.
+**Viewing HTML docs**
+
+| Requirement | Detail |
+|---------------|--------|
+| Generate | Run `npm run docs:api` once (creates `docs/api/html/`) |
+| Role | `ADMIN` only (`DEFAULT_ADMIN_EMAILS` on first sign-in) |
+| URL | **`/docs/`** (admin-only; uses the same `vellum_session` cookie as the dashboard) |
+| Discover | Home page link when signed in as admin; **Dev services** menu in non-production |
+
+If you open `/docs/` without a session, you are redirected to sign in and then returned to `/docs/`. If HTML has not been generated, the server responds with `503` and instructions to run `docs:api`.
+
+Standards: [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md). Environment reference: [docs/CONFIG.md](./docs/CONFIG.md).
 
 ## Dashboard users
 
-Sign-in (WorkOS or dev) stores users in Postgres (`users` table) with `emailVerified` and `kind` (`ADMIN` or `CONSUMER`). **Consumers must verify email before the dashboard loads** (WorkOS or Mailpit). **Admins** (see `DEFAULT_ADMIN_EMAILS`) may sign in without verification. Set default admins via JSON in `.env`:
+Sign-in (WorkOS or dev) upserts rows in Postgres (`users` table) with `emailVerified` and `kind` (`ADMIN` or `CONSUMER`). Set default admins via JSON in `.env`:
 
 ```bash
-DEFAULT_ADMIN_EMAILS=["wynand22erasmus@gmail.com"]
+DEFAULT_ADMIN_EMAILS=["admin@example.com"]
 ```
 
-Standards and env reference: [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md), [docs/CONFIG.md](./docs/CONFIG.md).
+See [docs/CONFIG.md](./docs/CONFIG.md) for verification rules and session settings.
 
 ## Design document
 

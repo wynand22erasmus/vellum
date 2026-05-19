@@ -4,6 +4,7 @@
  * @packageDocumentation
  */
 
+import type { Response } from 'express';
 import { SignJWT, jwtVerify } from 'jose';
 import type { AuthUser } from './types.ts';
 import { env } from '../env.ts';
@@ -41,4 +42,20 @@ export async function verifySessionToken(token: string): Promise<SessionUser> {
     throw new Error('Invalid session payload');
   }
   return { id: payload.sub, email };
+}
+
+/**
+ * Sets the HTTP-only dashboard session cookie on the response.
+ *
+ * @param res - Express response
+ * @param token - JWT from {@link createSessionToken}
+ */
+export function setSessionCookie(res: Response, token: string): void {
+  res.cookie('vellum_session', token, {
+    httpOnly: true,
+    secure: env.isProduction,
+    sameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    path: '/',
+  });
 }
