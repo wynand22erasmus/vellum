@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-17T21:46:22.040Z",
+  "generatedAt": "2026-05-19T07:29:05.647Z",
   "minCoveragePercent": 95,
   "files": [
     {
@@ -173,13 +173,13 @@
         {
           "name": "scanBuffer",
           "kind": "function",
-          "line": 40,
+          "line": 39,
           "status": "complete"
         },
         {
           "name": "checkClamAV",
           "kind": "function",
-          "line": 94,
+          "line": 93,
           "status": "complete"
         }
       ]
