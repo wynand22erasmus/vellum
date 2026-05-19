@@ -12,7 +12,10 @@ import puppeteer, { type Browser, type Page } from 'puppeteer';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /** Base URL for UI tests (override with `E2E_BASE_URL`). */
-export const BASE_URL = process.env.E2E_BASE_URL ?? 'http://localhost:5173';
+import 'dotenv/config';
+import { buildPublicUrl } from '../src/lib/public-url.ts';
+
+export const BASE_URL = process.env.E2E_BASE_URL ?? buildPublicUrl();
 
 /** Default Puppeteer timeout in milliseconds (`E2E_TIMEOUT_MS`). */
 export const DEFAULT_TIMEOUT_MS = Number(process.env.E2E_TIMEOUT_MS ?? 30_000);

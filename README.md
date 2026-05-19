@@ -25,6 +25,8 @@ cp .env.docker.example .env
 
 Use `.env.docker.example` so service hostnames (`postgres`, `redis`, `minio`, etc.) resolve inside the stack. For local-only development without containers, use `.env.example` instead.
 
+Set **`VELLUM_HOST`** to your public domain (for example `devman.wtfgang.win`). The app derives email links and OAuth callbacks from `VELLUM_HOST`, `VELLUM_PUBLIC_SCHEME`, and `VELLUM_PUBLIC_PORT`, or you can set **`APP_URL`** explicitly to override. Nginx uses the same hostname for `server_name`.
+
 ### 2. Start the full stack
 
 ```bash
@@ -43,8 +45,8 @@ npm run up:logs
 
 | Service | URL |
 |---------|-----|
-| Web UI (via nginx) | http://localhost:8080 |
-| Web UI (direct) | http://localhost:5173 |
+| Web UI (via nginx) | `http://$VELLUM_HOST:8080` (default host: `localhost`) |
+| Web UI (direct) | `http://$VELLUM_HOST:5173` when using the app container port |
 | Mailpit | http://localhost:8025 |
 | MinIO console | http://localhost:9001 |
 
@@ -138,6 +140,16 @@ Generate HTML and Markdown API docs from TSDoc comments:
 ```bash
 npm run docs:api          # docs/api/html + docs/api/markdown
 npm run docs:coverage     # coverage gate + docs/doc-inventory.json
+```
+
+**Viewing docs:** Admins (emails in `DEFAULT_ADMIN_EMAILS`) can browse HTML docs at **`/docs/`** after running `docs:api`. Sign in first; the home page shows a link when you are an admin.
+
+## Dashboard users
+
+Sign-in (WorkOS or dev) stores users in Postgres (`users` table) with `emailVerified` and `kind` (`ADMIN` or `CONSUMER`). **Consumers must verify email before the dashboard loads** (WorkOS or Mailpit). **Admins** (see `DEFAULT_ADMIN_EMAILS`) may sign in without verification. Set default admins via JSON in `.env`:
+
+```bash
+DEFAULT_ADMIN_EMAILS=["wynand22erasmus@gmail.com"]
 ```
 
 Standards and env reference: [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md), [docs/CONFIG.md](./docs/CONFIG.md).

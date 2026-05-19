@@ -8,6 +8,9 @@ import { SignJWT, jwtVerify } from 'jose';
 import type { AuthUser } from './types.ts';
 import { env } from '../env.ts';
 
+/** Claims stored in the dashboard session JWT. */
+export type SessionUser = Pick<AuthUser, 'id' | 'email'>;
+
 /** @internal */
 const secret = new TextEncoder().encode(env.sessionSecret);
 
@@ -16,7 +19,7 @@ const secret = new TextEncoder().encode(env.sessionSecret);
  *
  * @param user - User id and email from WorkOS or dev login
  */
-export async function createSessionToken(user: AuthUser): Promise<string> {
+export async function createSessionToken(user: SessionUser): Promise<string> {
   return new SignJWT({ email: user.email })
     .setProtectedHeader({ alg: 'HS256' })
     .setSubject(user.id)
@@ -31,7 +34,7 @@ export async function createSessionToken(user: AuthUser): Promise<string> {
  * @param token - Raw cookie value
  * @throws {Error} When the token is invalid or missing required claims
  */
-export async function verifySessionToken(token: string): Promise<AuthUser> {
+export async function verifySessionToken(token: string): Promise<SessionUser> {
   const { payload } = await jwtVerify(token, secret);
   const email = payload.email;
   if (typeof email !== 'string' || typeof payload.sub !== 'string') {
