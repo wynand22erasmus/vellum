@@ -25,6 +25,7 @@
   --color-badge-active-foreground: oklch(0.35 0.1 165);
   --color-badge-inactive: oklch(0.93 0.02 250);
   --color-badge-inactive-foreground: oklch(0.48 0.04 265);
+  --color-logo-surface: oklch(0.96 0.025 250);
   --radius: 0.5rem;
 }
 
@@ -52,6 +53,7 @@
   --color-badge-active-foreground: oklch(0.82 0.1 165);
   --color-badge-inactive: oklch(0.26 0.04 265);
   --color-badge-inactive-foreground: oklch(0.68 0.03 250);
+  --color-logo-surface: oklch(0.25 0.05 265);
 }
 
 * {

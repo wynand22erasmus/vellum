@@ -98,7 +98,7 @@ export function DevLoginPage() {
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="items-center">
-          <VellumLogo variant="full" linked={false} className="max-w-[220px]" />
+          <VellumLogo variant="full" linked={false} />
           <CardTitle className="pt-2">Dev Login</CardTitle>
           <CardDescription>
             Enter your email to access the dashboard. You must verify your address before signing in.
