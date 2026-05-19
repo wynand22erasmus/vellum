@@ -15,16 +15,23 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { env } from '../env.ts';
 
-/** Shared S3 client (path-style, configured for MinIO or AWS). */
-export const s3Client = new S3Client({
-  endpoint: env.minioEndpoint,
-  region: env.awsRegion,
-  credentials: {
-    accessKeyId: env.minioRootUser,
-    secretAccessKey: env.minioRootPassword,
-  },
-  forcePathStyle: true,
-});
+function createS3Client(endpoint: string): S3Client {
+  return new S3Client({
+    endpoint,
+    region: env.awsRegion,
+    credentials: {
+      accessKeyId: env.minioRootUser,
+      secretAccessKey: env.minioRootPassword,
+    },
+    forcePathStyle: true,
+  });
+}
+
+/** S3 client for server-side I/O (internal Compose hostname in containers). */
+export const s3Client = createS3Client(env.minioEndpoint);
+
+/** S3 client for presigned GET URLs returned to browsers. */
+const presignS3Client = createS3Client(env.minioPublicEndpoint);
 
 /**
  * Ensures the configured bucket exists, creating it when missing.
@@ -91,5 +98,5 @@ export async function generatePresignedUrl(
     Key: s3Key,
     ResponseContentDisposition: `attachment; filename="${fileName.replace(/"/g, '')}"`,
   });
-  return getSignedUrl(s3Client, command, { expiresIn: 30 });
+  return getSignedUrl(presignS3Client, command, { expiresIn: 30 });
 }

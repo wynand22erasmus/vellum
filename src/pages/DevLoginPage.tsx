@@ -121,7 +121,7 @@ export function DevLoginPage() {
               </Button>
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 className="w-full"
                 onClick={() => {
                   setAwaitingVerification(false);

@@ -6,7 +6,11 @@
  */
 
 import { parseJsonStringArray } from './env-json.ts';
-import { buildPublicUrl, buildWorkosRedirectUri } from './public-url.ts';
+import {
+  buildMinioPublicEndpoint,
+  buildPublicUrl,
+  buildWorkosRedirectUri,
+} from './public-url.ts';
 
 const DEFAULT_ADMIN_EMAILS_FALLBACK = ['wynand22erasmus@gmail.com'];
 
@@ -42,6 +46,8 @@ export const env = {
   databaseUrl: () => requireEnv('DATABASE_URL'),
   redisUrl: optionalEnv('REDIS_URL', 'redis://localhost:6379'),
   minioEndpoint: optionalEnv('MINIO_ENDPOINT', 'http://localhost:9000'),
+  /** Browser-reachable S3 endpoint for presigned download URLs. */
+  minioPublicEndpoint: buildMinioPublicEndpoint(),
   minioRootUser: optionalEnv('MINIO_ROOT_USER', 'minioadmin'),
   minioRootPassword: optionalEnv('MINIO_ROOT_PASSWORD', 'minioadmin'),
   minioBucket: optionalEnv('MINIO_BUCKET_NAME', 'vellum-documents'),
