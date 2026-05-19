@@ -15,11 +15,13 @@ import {
 } from '@aws-sdk/client-s3';
 import argon2 from 'argon2';
 import pg from 'pg';
+import 'dotenv/config';
+import { buildPublicUrl } from '../src/lib/public-url.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
 
-const baseUrl = process.env.E2E_BASE_URL ?? 'http://localhost:5173';
+const baseUrl = process.env.E2E_BASE_URL ?? buildPublicUrl();
 const apiKey = process.env.API_KEY ?? 'dev-api-key-change-in-production';
 const databaseUrl =
   process.env.DATABASE_URL ?? 'postgresql://vellum:password@localhost:5432/vellum_db';

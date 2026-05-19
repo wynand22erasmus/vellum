@@ -27,7 +27,7 @@
     "infra:logs": "bash scripts/compose.sh logs -f",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e:seed": "node scripts/e2e-seed.mjs",
+    "test:e2e:seed": "node --import tsx scripts/e2e-seed.mjs",
     "test:api": "node scripts/e2e-seed.mjs && cd bruno/collections/vellum-api && bru run 01-health 02-upload 03-auth 04-documents 05-verify 06-request-link --env Seeded",
     "test:api:smoke": "cd bruno/collections/vellum-api && bru run 01-health 02-upload 03-auth 05-verify --env Local",
     "test:api:remote": "cd bruno/collections/vellum-api && bru run 01-health 02-upload 03-auth 04-documents 05-verify 06-request-link --env Remote",

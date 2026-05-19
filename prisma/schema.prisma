@@ -7,6 +7,14 @@ datasource db {
   provider = "postgresql"
 }
 
+/// Dashboard user role for access control.
+enum UserKind {
+  /// Full access including API documentation at `/docs/`.
+  ADMIN
+  /// Standard recipient dashboard access.
+  CONSUMER
+}
+
 /// Audit trail event types for compliance and security monitoring.
 enum AuditEventType {
   /// Dashboard user signed in (dev mock or WorkOS).
@@ -21,6 +29,24 @@ enum AuditEventType {
   FILE_DOWNLOAD_FAILED
   /// File removed from object storage by the scrub worker.
   FILE_SCRUBBED
+}
+
+/// Local copy of dashboard users (WorkOS or dev login).
+model User {
+  /// WorkOS user id, or `dev:{email}` for development auth.
+  id                String   @id
+  email             String   @unique
+  /// Must be `true` before dashboard sign-in (WorkOS or dev verification link).
+  emailVerified     Boolean  @default(false)
+  kind              UserKind @default(CONSUMER)
+  firstName         String?
+  lastName          String?
+  profilePictureUrl String?
+  lastSignInAt      DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@map("users")
 }
 
 /// Uploaded file metadata, credentials, and lifecycle timestamps.

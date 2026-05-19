@@ -5,6 +5,11 @@
  * @see docs/CONFIG.md for the full variable reference
  */
 
+import { parseJsonStringArray } from './env-json.ts';
+import { buildPublicUrl, buildWorkosRedirectUri } from './public-url.ts';
+
+const DEFAULT_ADMIN_EMAILS_FALLBACK = ['wynand22erasmus@gmail.com'];
+
 /**
  * @internal
  * @param key - Environment variable name
@@ -31,7 +36,7 @@ function optionalEnv(key: string, fallback: string): string {
 /** Application configuration derived from environment variables. @see docs/CONFIG.md */
 export const env = {
   nodeEnv: optionalEnv('NODE_ENV', 'development'),
-  appUrl: optionalEnv('APP_URL', 'http://localhost:5173'),
+  appUrl: buildPublicUrl(),
   port: Number(optionalEnv('PORT', '3000')),
   apiKey: optionalEnv('API_KEY', 'dev-api-key-change-in-production'),
   databaseUrl: () => requireEnv('DATABASE_URL'),
@@ -47,10 +52,7 @@ export const env = {
   sessionSecret: optionalEnv('SESSION_SECRET', 'dev-session-secret-change-in-production'),
   workosApiKey: () => process.env.WORKOS_API_KEY,
   workosClientId: () => process.env.WORKOS_CLIENT_ID,
-  workosRedirectUri: optionalEnv(
-    'WORKOS_REDIRECT_URI',
-    'http://localhost:5173/api/auth/callback',
-  ),
+  workosRedirectUri: buildWorkosRedirectUri(),
   emailProvider: optionalEnv('EMAIL_PROVIDER', 'local'),
   mailpitHost: optionalEnv('MAILPIT_HOST', 'localhost'),
   mailpitPort: Number(optionalEnv('MAILPIT_PORT', '1025')),
@@ -61,4 +63,16 @@ export const env = {
   skipVirusScan:
     optionalEnv('NODE_ENV', 'development') !== 'production' &&
     optionalEnv('SKIP_VIRUS_SCAN', 'false') === 'true',
+  /**
+   * Dev/E2E only — allows dashboard access without `emailVerified` when `true`.
+   * Ignored in production. Never enable in deployed environments.
+   */
+  skipEmailVerification:
+    optionalEnv('NODE_ENV', 'development') !== 'production' &&
+    optionalEnv('SKIP_EMAIL_VERIFICATION', 'false') === 'true',
+  /** Lowercase emails promoted to {@link UserKind.ADMIN} on sign-in. */
+  defaultAdminEmails: parseJsonStringArray(
+    process.env.DEFAULT_ADMIN_EMAILS,
+    DEFAULT_ADMIN_EMAILS_FALLBACK,
+  ),
 };

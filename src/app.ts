@@ -20,6 +20,7 @@ import { uploadRouter } from './routes/upload.ts';
 import { verifyRouter } from './routes/verify.ts';
 import { documentsRouter } from './routes/documents.ts';
 import { authRouter } from './routes/auth.ts';
+import { mountApiDocs } from './routes/docs.ts';
 
 /**
  * Builds the Express app with security middleware and mounted API routers.
@@ -41,6 +42,7 @@ export async function createApp(): Promise<express.Application> {
   app.use('/api/verify', verifyRouter);
   app.use('/api/documents', dashboardAuth, documentsRouter);
   app.use('/api/auth', authRouter);
+  mountApiDocs(app);
 
   if (env.isProduction) {
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
