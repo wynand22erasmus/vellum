@@ -16,6 +16,7 @@ import { dashboardAuth } from './middleware/devAuth.ts';
 import { requestId } from './middleware/requestId.ts';
 import { ensureBucket } from './lib/storage/s3Client.ts';
 import { healthRouter } from './routes/health.ts';
+import { metaRouter } from './routes/meta.ts';
 import { uploadRouter } from './routes/upload.ts';
 import { verifyRouter } from './routes/verify.ts';
 import { documentsRouter } from './routes/documents.ts';
@@ -38,6 +39,7 @@ export async function createApp(): Promise<express.Application> {
   app.use(requestId);
 
   app.use('/api', healthRouter);
+  app.use('/api', metaRouter);
   app.use('/api/upload', apiKeyAuth, uploadRouter);
   app.use('/api/verify', verifyRouter);
   app.use('/api/documents', dashboardAuth, documentsRouter);
