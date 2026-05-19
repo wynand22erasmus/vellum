@@ -33,6 +33,33 @@ export function buildPublicUrl(): string {
 }
 
 /**
+ * Browser-reachable MinIO/S3 base URL for presigned downloads.
+ *
+ * Uses `MINIO_PUBLIC_ENDPOINT` when set. When `MINIO_ENDPOINT` uses the internal
+ * Compose hostname `minio`, derives `http://{VELLUM_HOST}:9000` so signatures match
+ * what the user's browser can resolve.
+ */
+export function buildMinioPublicEndpoint(): string {
+  const explicit = process.env.MINIO_PUBLIC_ENDPOINT?.trim();
+  if (explicit) {
+    return explicit.replace(/\/$/, '');
+  }
+
+  const internal = (process.env.MINIO_ENDPOINT ?? 'http://localhost:9000').trim();
+  try {
+    const url = new URL(internal);
+    if (url.hostname === 'minio') {
+      const host = process.env.VELLUM_HOST?.trim() || 'localhost';
+      url.hostname = host;
+      return url.toString().replace(/\/$/, '');
+    }
+  } catch {
+    // fall through to internal endpoint
+  }
+  return internal.replace(/\/$/, '');
+}
+
+/**
  * WorkOS OAuth callback URL.
  *
  * Uses `WORKOS_REDIRECT_URI` when set; otherwise `{@link buildPublicUrl}/api/auth/callback`.

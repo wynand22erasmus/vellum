@@ -13,7 +13,8 @@ Runtime configuration is read in `src/lib/env.ts`. Copy `.env.example` (host) or
 | `API_KEY` | No | `dev-api-key-change-in-production` | Bearer token for `POST /api/upload` |
 | `DATABASE_URL` | **Yes** | — | PostgreSQL connection string |
 | `REDIS_URL` | No | `redis://localhost:6379` | BullMQ and health checks |
-| `MINIO_ENDPOINT` | No | `http://localhost:9000` | S3-compatible endpoint (MinIO in dev) |
+| `MINIO_ENDPOINT` | No | `http://localhost:9000` | S3 endpoint for server-side I/O (upload, delete) |
+| `MINIO_PUBLIC_ENDPOINT` | No | derived | Browser-reachable URL for presigned downloads. When `MINIO_ENDPOINT` uses hostname `minio` (Compose), defaults to `http://{VELLUM_HOST}:9000` |
 | `MINIO_ROOT_USER` | No | `minioadmin` | S3 access key |
 | `MINIO_ROOT_PASSWORD` | No | `minioadmin` | S3 secret key |
 | `MINIO_BUCKET_NAME` | No | `vellum-documents` | Object storage bucket |
