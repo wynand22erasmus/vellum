@@ -56,7 +56,7 @@ export function EmailVerificationPage() {
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="items-center">
-          <VellumLogo variant="full" linked={false} className="max-w-[220px]" />
+          <VellumLogo variant="full" linked={false} />
           <CardTitle className="pt-2">Verify your email</CardTitle>
           <CardDescription>
             We sent a verification message to your inbox. Confirm your email address, then return

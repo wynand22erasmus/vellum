@@ -67,7 +67,7 @@ export function VerifyPage() {
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="items-center">
-          <VellumLogo variant="full" linked={false} className="max-w-[220px]" />
+          <VellumLogo variant="full" linked={false} />
           <CardTitle className="pt-2">Secure Document Download</CardTitle>
           <CardDescription>
             Enter the file password you received separately. If your download does not start,
