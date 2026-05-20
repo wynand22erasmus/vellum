@@ -9,7 +9,7 @@ import { resolveRequestUser } from '../lib/auth/resolveUser.ts';
 import { env } from '../lib/env.ts';
 
 /**
- * Populates `req.user` and rejects non-admin callers. Used for `/docs/`.
+ * Populates `req.user` and rejects non-admin callers. Used for `/docs/` and `/api/admin/*`.
  * Unauthenticated HTML requests redirect to sign-in with `returnTo` preserved.
  */
 export async function adminAuth(

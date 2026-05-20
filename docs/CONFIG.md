@@ -2,6 +2,20 @@
 
 Runtime configuration is read in `src/lib/env.ts`. Copy `.env.example` (host) or `.env.docker.example` (Compose) and adjust values.
 
+## Container images (Compose / Podman / Docker)
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `VELLUM_PROJECT` | No | `vellum` | Project prefix for built image names and OCI labels (`com.vellum.project`) |
+| `VELLUM_ENV` | No | `development` | Environment tag: **`development`** or **`production`** only. Sets image tags (`vellum-app:development`, etc.) and label `com.vellum.environment` |
+| `VELLUM_BUILD_TARGET` | No | derived | Dockerfile stage: `dev` when `VELLUM_ENV=development`, `production` when `VELLUM_ENV=production`. Override only if needed |
+
+Built services (`app`, `worker`) publish images named `{VELLUM_PROJECT}-{service}:{VELLUM_ENV}` (for example `vellum-app:development`, `vellum-worker:production`). Third-party images (Postgres, Redis, etc.) keep upstream tags; Compose adds the same `com.vellum.*` labels on those containers for stack identification.
+
+`scripts/compose.sh` validates `VELLUM_ENV` and exports `VELLUM_BUILD_TARGET` before invoking Compose.
+
+## Application runtime
+
 | Variable | Required | Default (dev) | Description |
 |----------|----------|---------------|-------------|
 | `NODE_ENV` | No | `development` | `production` enables static SPA serving and stricter logging |
@@ -33,6 +47,7 @@ Runtime configuration is read in `src/lib/env.ts`. Copy `.env.example` (host) or
 | `MAILPIT_PORT` | No | `1025` | SMTP port for local provider |
 | `REPORTING_LIFETIME_YEARS` | No | `5` | Audit log retention horizon |
 | `MAX_UPLOAD_BYTES` | No | `52428800` (50 MiB) | Upload size limit |
+| `ALLOWED_UPLOAD_EXTENSIONS` | No | built-in list (pdf, txt, docx, …) | JSON array of allowed extensions without dots (e.g. `["pdf","txt"]`). Use `["*"]` to allow any extension; misleading trailing types (e.g. `.pdf.exe`) are still stripped from stored filenames |
 | `SKIP_VIRUS_SCAN` | No | `false` | Skip ClamAV on upload in non-production (for E2E when scanner is slow) |
 
 ## E2E-only variables
@@ -63,11 +78,15 @@ After successful sign-in (WorkOS callback or dev `POST /api/auth/dev/request-log
 
 | Cookie | Purpose |
 |--------|---------|
-| `vellum_session` | HS256 JWT (7 days); required for `/docs/`, `/api/documents`, and WorkOS mode |
+| `vellum_session` | HS256 JWT (7 days); required for `/docs/`, `/admin`, `/api/documents`, `/api/admin`, and WorkOS mode |
 
-`GET /api/auth/me` and dashboard API calls accept the cookie. In **dev** mode, `X-Dev-User-Email` (set by the SPA after login) is also accepted for API requests, but **not** for full-page routes such as `/docs/` — use the session cookie there.
+`GET /api/auth/me` and dashboard API calls accept the cookie. In **dev** mode, `X-Dev-User-Email` (set by the SPA after login) is also accepted for API requests, but **not** for full-page routes such as `/docs/` — use the session cookie there. The **Data browser** at `/admin` uses the same session (and dev header for `/api/admin/*` in dev).
 
 `POST /api/auth/logout` clears the cookie.
+
+### Data browser (`/admin`)
+
+Read-only UI for operators with `kind: ADMIN`: documents, users, audit logs, and failed audit rows. Requires the same session as `/docs/`. API: `GET /api/admin/*` (see server `src/routes/admin.ts`).
 
 ### API documentation (`/docs/`)
 

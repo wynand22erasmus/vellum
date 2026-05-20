@@ -6,6 +6,13 @@
 
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppShell } from './components/app-shell.tsx';
+import { AdminAuditLogsPage } from './pages/admin/AdminAuditLogsPage.tsx';
+import { AdminDocumentDetailPage } from './pages/admin/AdminDocumentDetailPage.tsx';
+import { AdminDocumentsPage } from './pages/admin/AdminDocumentsPage.tsx';
+import { AdminFailedAuditLogsPage } from './pages/admin/AdminFailedAuditLogsPage.tsx';
+import { AdminIndexPage } from './pages/admin/AdminIndexPage.tsx';
+import { AdminLayout } from './pages/admin/AdminLayout.tsx';
+import { AdminUsersPage } from './pages/admin/AdminUsersPage.tsx';
 import { DashboardPage } from './pages/DashboardPage.tsx';
 import { DevLoginPage } from './pages/DevLoginPage.tsx';
 import { EmailVerificationPage } from './pages/EmailVerificationPage.tsx';
@@ -23,6 +30,14 @@ export default function App() {
           <Route path="/login" element={<DevLoginPage />} />
           <Route path="/login/email-verification" element={<EmailVerificationPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminIndexPage />} />
+            <Route path="documents" element={<AdminDocumentsPage />} />
+            <Route path="documents/:id" element={<AdminDocumentDetailPage />} />
+            <Route path="users" element={<AdminUsersPage />} />
+            <Route path="audit-logs" element={<AdminAuditLogsPage />} />
+            <Route path="failed-audit-logs" element={<AdminFailedAuditLogsPage />} />
+          </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AppShell>

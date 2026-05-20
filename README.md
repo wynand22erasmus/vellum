@@ -11,7 +11,7 @@ Secure, API-first document transfer platform. Every download requires both an em
 - **Jobs:** BullMQ + Redis
 - **Virus scan:** ClamAV
 - **Email:** Mailpit (dev) / SES (prod)
-- **Auth:** API key (upload); session cookie + dev mock or WorkOS (dashboard); admin-only TypeDoc at `/docs/`
+- **Auth:** API key (upload); session cookie + dev mock or WorkOS (dashboard); admin-only TypeDoc at `/docs/` and read-only **Data browser** at `/admin`
 
 ## Quick start (containerized — recommended)
 
@@ -26,6 +26,8 @@ cp .env.docker.example .env
 Use `.env.docker.example` so service hostnames (`postgres`, `redis`, `minio`, etc.) resolve inside the stack. For local-only development without containers, use `.env.example` instead.
 
 Set **`VELLUM_HOST`** to your public domain (for example `devman.wtfgang.win`). The app derives email links and OAuth callbacks from `VELLUM_HOST`, `VELLUM_PUBLIC_SCHEME`, and `VELLUM_PUBLIC_PORT`, or you can set **`APP_URL`** explicitly to override. Nginx uses the same hostname for `server_name`.
+
+**Container images** are tagged from `.env` using **`VELLUM_PROJECT`** (default `vellum`) and **`VELLUM_ENV`** (`development` or `production`). Examples: `vellum-app:development`, `vellum-worker:development`. For a production stack, set `VELLUM_ENV=production` and `NODE_ENV=production` before `npm run up` (build target `production` is selected automatically). See [docs/CONFIG.md](./docs/CONFIG.md).
 
 ### 2. Start the full stack
 
@@ -48,10 +50,12 @@ npm run up:logs
 | Web UI (via nginx) | `http://$VELLUM_HOST:8080` (default host: `localhost`) |
 | Web UI (direct) | `http://$VELLUM_HOST:5173` when using the app container port |
 | API docs (admin) | `/docs/` after `npm run docs:api` — sign in as an admin first |
+| Data browser (admin) | `/admin` — read-only lists for documents, users, audit logs (session + `ADMIN` role) |
+| Prisma Studio (local) | Run `npm run db:studio` (default http://localhost:5555) — full DB UI; also linked from **Dev services** when Studio is running |
 | Mailpit | http://localhost:8025 |
 | MinIO console | http://localhost:9001 |
 
-In non-production, use the **Dev services** menu (top-left of the app) for quick links to Mailpit, MinIO, and API docs.
+In non-production, use the **Dev services** menu (top-left of the app) for quick links to Mailpit, MinIO, API docs, and Prisma Studio (open the link after starting `npm run db:studio` in another terminal).
 
 ```bash
 npm run down    # stop all services
@@ -67,6 +71,7 @@ npm run infra:up
 npm install && npm run db:generate && npm run db:migrate:deploy
 npm run dev          # terminal 1
 npm run worker       # terminal 2
+# optional: npm run db:studio   # terminal 3 — browse/edit Postgres in Prisma Studio
 ```
 
 Compose helper detection order: `docker compose` → `podman compose` → `docker-compose` → `podman-compose`.
@@ -86,6 +91,8 @@ curl -X POST http://localhost:5173/api/upload \
 ```
 
 The response includes a warning: communicate the file password via a **separate channel** (not the same email as the download link).
+
+Allowed file types come from `ALLOWED_UPLOAD_EXTENSIONS` (JSON array of extensions without dots; see [docs/CONFIG.md](./docs/CONFIG.md)). The server strips misleading trailing extensions such as `.pdf.exe` from the stored filename, then checks the remaining extension.
 
 ### Download (recipient)
 

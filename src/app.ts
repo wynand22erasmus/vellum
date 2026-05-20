@@ -12,6 +12,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { env } from './lib/env.ts';
 import { apiKeyAuth } from './middleware/apiKeyAuth.ts';
+import { adminAuth } from './middleware/adminAuth.ts';
 import { dashboardAuth } from './middleware/devAuth.ts';
 import { requestId } from './middleware/requestId.ts';
 import { ensureBucket } from './lib/storage/s3Client.ts';
@@ -21,6 +22,7 @@ import { uploadRouter } from './routes/upload.ts';
 import { verifyRouter } from './routes/verify.ts';
 import { documentsRouter } from './routes/documents.ts';
 import { authRouter } from './routes/auth.ts';
+import { adminRouter } from './routes/admin.ts';
 import { mountApiDocs } from './routes/docs.ts';
 
 /**
@@ -43,6 +45,7 @@ export async function createApp(): Promise<express.Application> {
   app.use('/api/upload', apiKeyAuth, uploadRouter);
   app.use('/api/verify', verifyRouter);
   app.use('/api/documents', dashboardAuth, documentsRouter);
+  app.use('/api/admin', adminAuth, adminRouter);
   app.use('/api/auth', authRouter);
   mountApiDocs(app);
 

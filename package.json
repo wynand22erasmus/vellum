@@ -17,6 +17,7 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:push": "prisma db push",
+    "db:studio": "prisma studio",
     "worker": "tsx src/workers/index.ts",
     "compose": "bash scripts/compose.sh",
     "up": "bash scripts/compose.sh up -d --build",
