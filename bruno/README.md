@@ -2,6 +2,11 @@
 
 API tests live in a [Bruno 3 workspace](https://docs.usebruno.com/get-started/bruno-basics/create-a-workspace) so the collection can be opened or run from any machine that can reach the API.
 
+## Authentication in tests
+
+- **Upload:** `Authorization: Bearer {{apiKey}}` (see `02-upload`).
+- **Dashboard:** In dev, Bruno sets `X-Dev-User-Email` (see `03-auth/Auth Me Dev`). The browser UI also sets a `vellum_session` cookie on sign-in; full-page routes such as `/docs/` require that cookie.
+
 ## Layout
 
 ```

@@ -1,5 +1,19 @@
 # Compatible with Docker Compose and Podman Compose (see scripts/compose.sh).
+# Image names and OCI labels use VELLUM_PROJECT + VELLUM_ENV from .env (see README.md).
 version: "3.8"
+
+x-vellum-project: &vellum-project ${VELLUM_PROJECT:-vellum}
+x-vellum-env: &vellum-env ${VELLUM_ENV:-development}
+
+x-vellum-labels: &vellum-labels
+  com.vellum.project: *vellum-project
+  com.vellum.environment: *vellum-env
+  org.opencontainers.image.title: *vellum-project
+
+x-vellum-build-args: &vellum-build-args
+  VELLUM_PROJECT: *vellum-project
+  VELLUM_ENV: *vellum-env
+  VELLUM_SERVICE: app
 
 x-app-env: &app-env
   DATABASE_URL: postgresql://vellum:password@postgres:5432/vellum_db
@@ -14,9 +28,15 @@ x-app-env: &app-env
 
 services:
   app:
+    image: ${VELLUM_PROJECT:-vellum}-app:${VELLUM_ENV:-development}
     build:
       context: .
-      target: dev
+      target: ${VELLUM_BUILD_TARGET:-dev}
+      args:
+        <<: *vellum-build-args
+    labels:
+      <<: *vellum-labels
+      com.vellum.service: app
     env_file: .env
     environment:
       <<: *app-env
@@ -47,9 +67,16 @@ services:
       start_period: 60s
 
   worker:
+    image: ${VELLUM_PROJECT:-vellum}-worker:${VELLUM_ENV:-development}
     build:
       context: .
-      target: dev
+      target: ${VELLUM_BUILD_TARGET:-dev}
+      args:
+        <<: *vellum-build-args
+        VELLUM_SERVICE: worker
+    labels:
+      <<: *vellum-labels
+      com.vellum.service: worker
     env_file: .env
     environment:
       <<: *app-env
@@ -67,6 +94,9 @@ services:
 
   postgres:
     image: postgres:15-alpine
+    labels:
+      <<: *vellum-labels
+      com.vellum.service: postgres
     environment:
       POSTGRES_DB: vellum_db
       POSTGRES_USER: vellum
@@ -83,6 +113,9 @@ services:
 
   redis:
     image: redis:alpine
+    labels:
+      <<: *vellum-labels
+      com.vellum.service: redis
     ports:
       - "6379:6379"
     volumes:
@@ -91,6 +124,9 @@ services:
 
   minio:
     image: minio/minio
+    labels:
+      <<: *vellum-labels
+      com.vellum.service: minio
     command: server /data --console-address ":9001"
     ports:
       - "9000:9000"
@@ -103,6 +139,9 @@ services:
 
   clamav:
     image: clamav/clamav:latest
+    labels:
+      <<: *vellum-labels
+      com.vellum.service: clamav
     volumes:
       - clamav_data:/var/lib/clamav
     healthcheck:
@@ -113,12 +152,18 @@ services:
 
   mailpit:
     image: axllent/mailpit
+    labels:
+      <<: *vellum-labels
+      com.vellum.service: mailpit
     ports:
       - "8025:8025"
       - "1025:1025"
 
   nginx:
     image: nginx:alpine
+    labels:
+      <<: *vellum-labels
+      com.vellum.service: nginx
     ports:
       - "8080:8080"
     environment:

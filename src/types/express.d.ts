@@ -9,7 +9,7 @@ import type { AuthUser } from '../lib/auth/types.ts';
 declare global {
   namespace Express {
     interface Request {
-      /** Set by {@link ../middleware/devAuth.ts} on dashboard routes. */
+      /** Set by {@link ../middleware/devAuth.ts} or {@link ../middleware/adminAuth.ts}. */
       user?: AuthUser;
     }
   }

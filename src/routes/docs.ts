@@ -1,5 +1,5 @@
 /**
- * Serves generated TypeDoc HTML at `/docs/` (admin only).
+ * Serves generated TypeDoc HTML at `/docs/` (admin only, `vellum_session` cookie).
  *
  * @packageDocumentation
  */

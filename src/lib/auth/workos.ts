@@ -30,14 +30,16 @@ export function getWorkOS(): WorkOS {
 /**
  * Builds the AuthKit authorization URL for the OAuth redirect flow.
  *
- * @returns URL to redirect the browser to `/api/auth/login`
+ * @param returnTo - Same-origin path to open after sign-in (passed through OAuth `state`)
+ * @returns URL to redirect the browser to WorkOS AuthKit
  */
-export function getAuthorizationUrl(): string {
+export function getAuthorizationUrl(returnTo?: string): string {
   const workos = getWorkOS();
   const clientId = env.workosClientId()!;
   return workos.userManagement.getAuthorizationUrl({
     clientId,
     redirectUri: env.workosRedirectUri,
     provider: 'authkit',
+    ...(returnTo ? { state: returnTo } : {}),
   });
 }

@@ -38,7 +38,7 @@ Do not restate types that are already clear from TypeScript unless behavior matt
 |----------|----------|
 | `prisma/schema.prisma` | `///` on models, fields, enums |
 | `bruno/**` | Bruno `docs { }` blocks (added in a later pass) |
-| Docker / shell / CI YAML | File header comments + `docs/INFRASTRUCTURE.md` when needed |
+| Docker / shell / CI YAML | File header comments; stack overview in [README.md](../README.md) |
 | `.env.example` | Inline `#` comments mirrored in `docs/CONFIG.md` |
 
 ## Coverage gate

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-19T07:29:05.647Z",
+  "generatedAt": "2026-05-20T12:05:26.783Z",
   "minCoveragePercent": 95,
   "files": [
     {
@@ -8,7 +8,7 @@
         {
           "name": "createApp",
           "kind": "function",
-          "line": 29,
+          "line": 33,
           "status": "complete"
         }
       ]
@@ -19,7 +19,7 @@
         {
           "name": "default",
           "kind": "function",
-          "line": 15,
+          "line": 23,
           "status": "complete"
         }
       ]
@@ -30,49 +30,49 @@
         {
           "name": "loadState",
           "kind": "function",
-          "line": 39,
+          "line": 42,
           "status": "complete"
         },
         {
           "name": "launchBrowser",
           "kind": "function",
-          "line": 52,
+          "line": 55,
           "status": "complete"
         },
         {
           "name": "newPage",
           "kind": "function",
-          "line": 64,
+          "line": 67,
           "status": "complete"
         },
         {
           "name": "devLogin",
           "kind": "function",
-          "line": 76,
+          "line": 79,
           "status": "complete"
         },
         {
           "name": "clearDevSession",
           "kind": "function",
-          "line": 91,
+          "line": 94,
           "status": "complete"
         },
         {
           "name": "BASE_URL",
           "kind": "variable",
-          "line": 15,
-          "status": "complete"
+          "line": 18,
+          "status": "missing"
         },
         {
           "name": "DEFAULT_TIMEOUT_MS",
           "kind": "variable",
-          "line": 18,
+          "line": 21,
           "status": "complete"
         },
         {
           "name": "E2EState",
           "kind": "interface",
-          "line": 23,
+          "line": 26,
           "status": "complete"
         }
       ]
@@ -83,7 +83,18 @@
         {
           "name": "AppShell",
           "kind": "function",
-          "line": 15,
+          "line": 16,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/dev-services-menu.tsx",
+      "exports": [
+        {
+          "name": "DevServicesMenu",
+          "kind": "function",
+          "line": 28,
           "status": "complete"
         }
       ]
@@ -116,7 +127,7 @@
         {
           "name": "VellumLogo",
           "kind": "function",
-          "line": 41,
+          "line": 49,
           "status": "complete"
         },
         {
@@ -185,12 +196,40 @@
       ]
     },
     {
+      "path": "src/lib/dev-services.ts",
+      "exports": [
+        {
+          "name": "getDevServices",
+          "kind": "function",
+          "line": 38,
+          "status": "complete"
+        },
+        {
+          "name": "DevServiceLink",
+          "kind": "type",
+          "line": 10,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/env-json.ts",
+      "exports": [
+        {
+          "name": "parseJsonStringArray",
+          "kind": "function",
+          "line": 11,
+          "status": "complete"
+        }
+      ]
+    },
+    {
       "path": "src/lib/env.ts",
       "exports": [
         {
           "name": "env",
           "kind": "variable",
-          "line": 32,
+          "line": 42,
           "status": "complete"
         }
       ]
@@ -202,6 +241,29 @@
           "name": "prisma",
           "kind": "variable",
           "line": 28,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/public-url.ts",
+      "exports": [
+        {
+          "name": "buildPublicUrl",
+          "kind": "function",
+          "line": 14,
+          "status": "complete"
+        },
+        {
+          "name": "buildMinioPublicEndpoint",
+          "kind": "function",
+          "line": 42,
+          "status": "complete"
+        },
+        {
+          "name": "buildWorkosRedirectUri",
+          "kind": "function",
+          "line": 67,
           "status": "complete"
         }
       ]
@@ -276,12 +338,70 @@
       ]
     },
     {
+      "path": "src/lib/uploadFilename.ts",
+      "exports": [
+        {
+          "name": "parseAllowedUploadExtensionsFromEnv",
+          "kind": "function",
+          "line": 95,
+          "status": "complete"
+        },
+        {
+          "name": "basenameSafe",
+          "kind": "function",
+          "line": 118,
+          "status": "complete"
+        },
+        {
+          "name": "stripDangerousTrailingExtensions",
+          "kind": "function",
+          "line": 140,
+          "status": "complete"
+        },
+        {
+          "name": "effectiveExtensionFromBasename",
+          "kind": "function",
+          "line": 157,
+          "status": "complete"
+        },
+        {
+          "name": "resolveUploadFileName",
+          "kind": "function",
+          "line": 176,
+          "status": "complete"
+        },
+        {
+          "name": "DEFAULT_ALLOWED_UPLOAD_EXTENSIONS",
+          "kind": "variable",
+          "line": 17,
+          "status": "complete"
+        },
+        {
+          "name": "ResolveUploadFileNameResult",
+          "kind": "type",
+          "line": 166,
+          "status": "missing"
+        }
+      ]
+    },
+    {
       "path": "src/lib/utils.ts",
       "exports": [
         {
           "name": "cn",
           "kind": "function",
           "line": 16,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/middleware/adminAuth.ts",
+      "exports": [
+        {
+          "name": "adminAuth",
+          "kind": "function",
+          "line": 15,
           "status": "complete"
         }
       ]
@@ -303,7 +423,7 @@
         {
           "name": "dashboardAuth",
           "kind": "function",
-          "line": 19,
+          "line": 18,
           "status": "complete"
         }
       ]
@@ -336,7 +456,18 @@
         {
           "name": "DevLoginPage",
           "kind": "function",
-          "line": 23,
+          "line": 34,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/EmailVerificationPage.tsx",
+      "exports": [
+        {
+          "name": "EmailVerificationPage",
+          "kind": "function",
+          "line": 24,
           "status": "complete"
         }
       ]
@@ -347,7 +478,7 @@
         {
           "name": "HomePage",
           "kind": "function",
-          "line": 18,
+          "line": 24,
           "status": "complete"
         }
       ]
@@ -409,12 +540,34 @@
       ]
     },
     {
+      "path": "src/routes/admin.ts",
+      "exports": [
+        {
+          "name": "adminRouter",
+          "kind": "variable",
+          "line": 16,
+          "status": "complete"
+        }
+      ]
+    },
+    {
       "path": "src/routes/auth.ts",
       "exports": [
         {
           "name": "authRouter",
           "kind": "variable",
-          "line": 19,
+          "line": 33,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/routes/docs.ts",
+      "exports": [
+        {
+          "name": "mountApiDocs",
+          "kind": "function",
+          "line": 20,
           "status": "complete"
         }
       ]
@@ -442,12 +595,23 @@
       ]
     },
     {
+      "path": "src/routes/meta.ts",
+      "exports": [
+        {
+          "name": "metaRouter",
+          "kind": "variable",
+          "line": 12,
+          "status": "complete"
+        }
+      ]
+    },
+    {
       "path": "src/routes/upload.ts",
       "exports": [
         {
           "name": "uploadRouter",
           "kind": "variable",
-          "line": 41,
+          "line": 44,
           "status": "complete"
         }
       ]
@@ -582,18 +746,122 @@
       ]
     },
     {
+      "path": "src/lib/auth/emailVerification.ts",
+      "exports": [
+        {
+          "name": "isEmailVerificationSatisfied",
+          "kind": "function",
+          "line": 47,
+          "status": "complete"
+        },
+        {
+          "name": "assertEmailVerified",
+          "kind": "function",
+          "line": 62,
+          "status": "complete"
+        },
+        {
+          "name": "createEmailVerificationToken",
+          "kind": "function",
+          "line": 74,
+          "status": "complete"
+        },
+        {
+          "name": "verifyEmailVerificationToken",
+          "kind": "function",
+          "line": 91,
+          "status": "complete"
+        },
+        {
+          "name": "createPendingVerificationToken",
+          "kind": "function",
+          "line": 111,
+          "status": "complete"
+        },
+        {
+          "name": "verifyPendingVerificationToken",
+          "kind": "function",
+          "line": 128,
+          "status": "complete"
+        },
+        {
+          "name": "EMAIL_NOT_VERIFIED_CODE",
+          "kind": "variable",
+          "line": 17,
+          "status": "complete"
+        },
+        {
+          "name": "EmailNotVerifiedError",
+          "kind": "class",
+          "line": 31,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/auth/resolveUser.ts",
+      "exports": [
+        {
+          "name": "resolveRequestUser",
+          "kind": "function",
+          "line": 35,
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/auth/returnTo.ts",
+      "exports": [
+        {
+          "name": "safeReturnTo",
+          "kind": "function",
+          "line": 14,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/auth/sendVerificationEmail.ts",
+      "exports": [
+        {
+          "name": "sendWorkOSVerificationEmail",
+          "kind": "function",
+          "line": 17,
+          "status": "complete"
+        },
+        {
+          "name": "sendDevVerificationEmail",
+          "kind": "function",
+          "line": 28,
+          "status": "complete"
+        }
+      ]
+    },
+    {
       "path": "src/lib/auth/session.ts",
       "exports": [
         {
           "name": "createSessionToken",
           "kind": "function",
-          "line": 19,
+          "line": 23,
           "status": "complete"
         },
         {
           "name": "verifySessionToken",
           "kind": "function",
-          "line": 34,
+          "line": 38,
+          "status": "complete"
+        },
+        {
+          "name": "setSessionCookie",
+          "kind": "function",
+          "line": 53,
+          "status": "complete"
+        },
+        {
+          "name": "SessionUser",
+          "kind": "type",
+          "line": 13,
           "status": "complete"
         }
       ]
@@ -602,9 +870,15 @@
       "path": "src/lib/auth/types.ts",
       "exports": [
         {
+          "name": "UserKind",
+          "kind": "type",
+          "line": 8,
+          "status": "complete"
+        },
+        {
           "name": "AuthUser",
           "kind": "interface",
-          "line": 10,
+          "line": 13,
           "status": "complete"
         }
       ]
@@ -621,7 +895,7 @@
         {
           "name": "getAuthorizationUrl",
           "kind": "function",
-          "line": 35,
+          "line": 36,
           "status": "complete"
         }
       ]
@@ -660,31 +934,137 @@
         {
           "name": "ensureBucket",
           "kind": "function",
-          "line": 34,
+          "line": 41,
           "status": "complete"
         },
         {
           "name": "uploadObject",
           "kind": "function",
-          "line": 49,
+          "line": 56,
           "status": "complete"
         },
         {
           "name": "deleteObject",
           "kind": "function",
-          "line": 69,
+          "line": 76,
           "status": "complete"
         },
         {
           "name": "generatePresignedUrl",
           "kind": "function",
-          "line": 85,
+          "line": 92,
           "status": "complete"
         },
         {
           "name": "s3Client",
           "kind": "variable",
-          "line": 19,
+          "line": 31,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/users/userService.ts",
+      "exports": [
+        {
+          "name": "upsertWorkOSUser",
+          "kind": "function",
+          "line": 45,
+          "status": "complete"
+        },
+        {
+          "name": "upsertDevUser",
+          "kind": "function",
+          "line": 85,
+          "status": "complete"
+        },
+        {
+          "name": "markEmailVerified",
+          "kind": "function",
+          "line": 116,
+          "status": "complete"
+        },
+        {
+          "name": "findUserById",
+          "kind": "function",
+          "line": 129,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/admin/AdminAuditLogsPage.tsx",
+      "exports": [
+        {
+          "name": "AdminAuditLogsPage",
+          "kind": "function",
+          "line": 57,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/admin/AdminDocumentDetailPage.tsx",
+      "exports": [
+        {
+          "name": "AdminDocumentDetailPage",
+          "kind": "function",
+          "line": 52,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/admin/AdminDocumentsPage.tsx",
+      "exports": [
+        {
+          "name": "AdminDocumentsPage",
+          "kind": "function",
+          "line": 50,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/admin/AdminFailedAuditLogsPage.tsx",
+      "exports": [
+        {
+          "name": "AdminFailedAuditLogsPage",
+          "kind": "function",
+          "line": 40,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/admin/AdminIndexPage.tsx",
+      "exports": [
+        {
+          "name": "AdminIndexPage",
+          "kind": "function",
+          "line": 16,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/admin/AdminLayout.tsx",
+      "exports": [
+        {
+          "name": "AdminLayout",
+          "kind": "function",
+          "line": 23,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/admin/AdminUsersPage.tsx",
+      "exports": [
+        {
+          "name": "AdminUsersPage",
+          "kind": "function",
+          "line": 44,
           "status": "complete"
         }
       ]
@@ -713,8 +1093,8 @@
     }
   ],
   "summary": {
-    "total": 79,
-    "documented": 79,
-    "coveragePercent": 100
+    "total": 124,
+    "documented": 121,
+    "coveragePercent": 97.6
   }
 }

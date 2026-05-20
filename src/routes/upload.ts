@@ -5,6 +5,8 @@
  * @remarks
  * - `POST /api/upload/` — multipart upload; requires {@link ../middleware/apiKeyAuth.ts}
  * - Fields: `file`, `recipientEmail`, `password`, `linkTtl`, `fileTtl` (seconds)
+ * - Original filenames are sanitized (trailing spoof extensions like `.pdf.exe` removed) and the
+ *   effective extension must be allowed by `ALLOWED_UPLOAD_EXTENSIONS` (see {@link ../lib/env.ts}).
  */
 
 import { randomBytes } from 'node:crypto';
@@ -15,6 +17,7 @@ import { addSeconds, addYears } from 'date-fns';
 import { z } from 'zod';
 import { scanBuffer } from '../lib/clamav.ts';
 import { env } from '../lib/env.ts';
+import { resolveUploadFileName } from '../lib/uploadFilename.ts';
 import { prisma } from '../lib/prisma.ts';
 import { uploadObject } from '../lib/storage/s3Client.ts';
 import { emailQueue } from '../queues/emailQueue.ts';
@@ -55,6 +58,13 @@ uploadRouter.post('/', upload.single('file'), async (req, res) => {
 
     const { recipientEmail, password, linkTtl, fileTtl } = parsed.data;
 
+    const nameResult = resolveUploadFileName(req.file.originalname, env.allowedUploadExtensions);
+    if (!nameResult.ok) {
+      res.status(nameResult.status).json({ error: nameResult.error });
+      return;
+    }
+    const { safeFileName } = nameResult;
+
     let scanResult: { clean: boolean; reason?: string };
     if (env.skipVirusScan) {
       scanResult = { clean: true };
@@ -78,7 +88,7 @@ uploadRouter.post('/', upload.single('file'), async (req, res) => {
       return;
     }
 
-    const s3Key = `documents/${randomBytes(16).toString('hex')}/${req.file.originalname}`;
+    const s3Key = `documents/${randomBytes(16).toString('hex')}/${safeFileName}`;
     await uploadObject(s3Key, req.file.buffer, req.file.mimetype);
 
     const passwordHash = await argon2.hash(password);
@@ -88,7 +98,7 @@ uploadRouter.post('/', upload.single('file'), async (req, res) => {
     const doc = await prisma.document.create({
       data: {
         s3Key,
-        fileName: req.file.originalname,
+        fileName: safeFileName,
         recipientEmail,
         passwordHash,
         downloadToken,

@@ -2,6 +2,20 @@
 
 Runtime configuration is read in `src/lib/env.ts`. Copy `.env.example` (host) or `.env.docker.example` (Compose) and adjust values.
 
+## Container images (Compose / Podman / Docker)
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `VELLUM_PROJECT` | No | `vellum` | Project prefix for built image names and OCI labels (`com.vellum.project`) |
+| `VELLUM_ENV` | No | `development` | Environment tag: **`development`** or **`production`** only. Sets image tags (`vellum-app:development`, etc.) and label `com.vellum.environment` |
+| `VELLUM_BUILD_TARGET` | No | derived | Dockerfile stage: `dev` when `VELLUM_ENV=development`, `production` when `VELLUM_ENV=production`. Override only if needed |
+
+Built services (`app`, `worker`) publish images named `{VELLUM_PROJECT}-{service}:{VELLUM_ENV}` (for example `vellum-app:development`, `vellum-worker:production`). Third-party images (Postgres, Redis, etc.) keep upstream tags; Compose adds the same `com.vellum.*` labels on those containers for stack identification.
+
+`scripts/compose.sh` validates `VELLUM_ENV` and exports `VELLUM_BUILD_TARGET` before invoking Compose.
+
+## Application runtime
+
 | Variable | Required | Default (dev) | Description |
 |----------|----------|---------------|-------------|
 | `NODE_ENV` | No | `development` | `production` enables static SPA serving and stricter logging |
@@ -24,7 +38,7 @@ Runtime configuration is read in `src/lib/env.ts`. Copy `.env.example` (host) or
 | `AUTH_PROVIDER` | No | `dev` | `dev` (mock dashboard) or `workos` |
 | `DEFAULT_ADMIN_EMAILS` | No | `["wynand22erasmus@gmail.com"]` | JSON array of emails assigned {@link UserKind} `ADMIN` on sign-in |
 | `SKIP_EMAIL_VERIFICATION` | No | `false` | Dev/E2E only: allow dashboard access without verified email (ignored in production) |
-| `SESSION_SECRET` | No | dev placeholder | Signs dashboard session JWT (32+ chars in prod) |
+| `SESSION_SECRET` | No | dev placeholder | Signs dashboard session JWT (`vellum_session` cookie; 32+ chars in prod) |
 | `WORKOS_API_KEY` | If WorkOS | — | WorkOS API key |
 | `WORKOS_CLIENT_ID` | If WorkOS | — | WorkOS client ID |
 | `WORKOS_REDIRECT_URI` | No | `{APP_URL}/api/auth/callback` | OAuth redirect URL |
@@ -33,6 +47,7 @@ Runtime configuration is read in `src/lib/env.ts`. Copy `.env.example` (host) or
 | `MAILPIT_PORT` | No | `1025` | SMTP port for local provider |
 | `REPORTING_LIFETIME_YEARS` | No | `5` | Audit log retention horizon |
 | `MAX_UPLOAD_BYTES` | No | `52428800` (50 MiB) | Upload size limit |
+| `ALLOWED_UPLOAD_EXTENSIONS` | No | built-in list (pdf, txt, docx, …) | JSON array of allowed extensions without dots (e.g. `["pdf","txt"]`). Use `["*"]` to allow any extension; misleading trailing types (e.g. `.pdf.exe`) are still stripped from stored filenames |
 | `SKIP_VIRUS_SCAN` | No | `false` | Skip ClamAV on upload in non-production (for E2E when scanner is slow) |
 
 ## E2E-only variables
@@ -57,13 +72,37 @@ WorkOS and dev sign-in upsert rows into the Postgres `users` table:
 | `kind` | `ADMIN` or `CONSUMER` — admins are listed in `DEFAULT_ADMIN_EMAILS` |
 | `firstName`, `lastName`, `profilePictureUrl` | From WorkOS profile |
 
-Admins can open generated API docs at **`/docs/`** (run `npm run docs:api` first). The home page shows an **API documentation** link when signed in as an admin.
+### Dashboard session
+
+After successful sign-in (WorkOS callback or dev `POST /api/auth/dev/request-login` when verified), the API sets an HTTP-only cookie:
+
+| Cookie | Purpose |
+|--------|---------|
+| `vellum_session` | HS256 JWT (7 days); required for `/docs/`, `/admin`, `/api/documents`, `/api/admin`, and WorkOS mode |
+
+`GET /api/auth/me` and dashboard API calls accept the cookie. In **dev** mode, `X-Dev-User-Email` (set by the SPA after login) is also accepted for API requests, but **not** for full-page routes such as `/docs/` — use the session cookie there. The **Data browser** at `/admin` uses the same session (and dev header for `/api/admin/*` in dev).
+
+`POST /api/auth/logout` clears the cookie.
+
+### Data browser (`/admin`)
+
+Read-only UI for operators with `kind: ADMIN`: documents, users, audit logs, and failed audit rows. Requires the same session as `/docs/`. API: `GET /api/admin/*` (see server `src/routes/admin.ts`).
+
+### API documentation (`/docs/`)
+
+| Step | Action |
+|------|--------|
+| 1 | `npm run docs:api` (output under `docs/api/html/`) |
+| 2 | Sign in as a user with `kind: ADMIN` |
+| 3 | Open **`/docs/`** (or use the home page / **Dev services** link) |
+
+Unauthenticated browser requests to `/docs/` redirect to sign-in with `returnTo=/docs/` and return after login. Non-admins receive `403`.
 
 ### Email verification before login
 
 - **WorkOS:** After OAuth, users with `emailVerified: false` are redirected to `/login/email-verification` and receive a WorkOS verification email. They must verify, then sign in again.
 - **Admins:** Users with `kind: ADMIN` (including emails in `DEFAULT_ADMIN_EMAILS`) may sign in without verifying email.
-- **Dev:** `POST /api/auth/dev/request-login` sends a Mailpit link to `GET /api/auth/verify-email`. After verifying, return to `/login` and continue.
+- **Dev:** `POST /api/auth/dev/request-login` sends a Mailpit link to `GET /api/auth/verify-email`. After verifying, return to `/login` and continue. A verified sign-in sets `vellum_session` and optional `returnTo` redirect (e.g. back to `/docs/`).
 - **E2E:** Set `SKIP_EMAIL_VERIFICATION=true` in non-production only (same intent as `SKIP_VIRUS_SCAN`).
 
 See [README.md](../README.md) for WorkOS and Docker-specific setup.

@@ -5,6 +5,32 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+# Compose interpolates .env for image names; load here for VELLUM_BUILD_TARGET defaults.
+if [[ -f .env ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source .env
+  set +a
+fi
+
+export VELLUM_PROJECT="${VELLUM_PROJECT:-vellum}"
+export VELLUM_ENV="${VELLUM_ENV:-development}"
+
+case "$VELLUM_ENV" in
+  development | production) ;;
+  *)
+    echo "Error: VELLUM_ENV must be 'development' or 'production' (got: $VELLUM_ENV)" >&2
+    exit 1
+    ;;
+esac
+
+if [[ -z "${VELLUM_BUILD_TARGET:-}" ]]; then
+  case "$VELLUM_ENV" in
+    production) export VELLUM_BUILD_TARGET=production ;;
+    *) export VELLUM_BUILD_TARGET=dev ;;
+  esac
+fi
+
 detect_compose() {
   if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
     printf '%s\n' 'docker compose'

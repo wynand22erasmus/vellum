@@ -6,6 +6,7 @@
  */
 
 import { parseJsonStringArray } from './env-json.ts';
+import { parseAllowedUploadExtensionsFromEnv } from './uploadFilename.ts';
 import {
   buildMinioPublicEndpoint,
   buildPublicUrl,
@@ -64,6 +65,11 @@ export const env = {
   mailpitPort: Number(optionalEnv('MAILPIT_PORT', '1025')),
   reportingLifetimeYears: Number(optionalEnv('REPORTING_LIFETIME_YEARS', '5')),
   maxUploadBytes: Number(optionalEnv('MAX_UPLOAD_BYTES', '52428800')),
+  /**
+   * Lowercase extensions without dots (e.g. `pdf`, `docx`). From `ALLOWED_UPLOAD_EXTENSIONS`
+   * JSON array; unset uses defaults. Include `"*"` to allow any extension (sanitization still applies).
+   */
+  allowedUploadExtensions: parseAllowedUploadExtensionsFromEnv(process.env.ALLOWED_UPLOAD_EXTENSIONS),
   isProduction: optionalEnv('NODE_ENV', 'development') === 'production',
   /** Dev/test only — skips ClamAV INSTREAM scans when `SKIP_VIRUS_SCAN=true`. Ignored in production. */
   skipVirusScan:

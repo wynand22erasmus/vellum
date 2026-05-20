@@ -1,5 +1,5 @@
 /**
- * Marketing landing page with links to login and product overview.
+ * Marketing landing page with login and admin API documentation link.
  *
  * @packageDocumentation
  */
@@ -60,9 +60,14 @@ export function HomePage() {
             <Link to="/login">Recipient dashboard</Link>
           </Button>
           {isAdmin ? (
-            <Button variant="outline" asChild>
-              <a href="/docs/">API documentation</a>
-            </Button>
+            <>
+              <Button variant="outline" asChild>
+                <Link to="/admin">Data browser</Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <a href="/docs/">API documentation</a>
+              </Button>
+            </>
           ) : null}
           <p className="text-xs text-[var(--color-muted-foreground)]">
             API upload: POST /api/upload with Authorization: Bearer API_KEY

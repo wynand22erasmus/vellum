@@ -46,6 +46,7 @@ export function getDevServices(): DevServiceLink[] {
   const minio = minioHost(minioPublicEndpoint);
   const mailpitUiPort = process.env.MAILPIT_UI_PORT?.trim() || '8025';
   const minioConsolePort = process.env.MINIO_CONSOLE_PORT?.trim() || '9001';
+  const prismaStudioPort = process.env.PRISMA_STUDIO_PORT?.trim() || '5555';
 
   return [
     {
@@ -77,6 +78,12 @@ export function getDevServices(): DevServiceLink[] {
       label: 'MinIO API',
       url: minioPublicEndpoint,
       description: 'S3 endpoint',
+    },
+    {
+      id: 'prisma-studio',
+      label: 'Prisma Studio',
+      url: httpUrl(host, prismaStudioPort),
+      description: 'Run npm run db:studio first (local DB UI)',
     },
   ];
 }
