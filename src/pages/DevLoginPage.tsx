@@ -114,7 +114,7 @@ export function DevLoginPage() {
           ) : null}
           {awaitingVerification ? (
             <div className="space-y-4">
-              <p className="text-sm text-[var(--color-muted-foreground)]">
+              <p className="text-sm text-muted-foreground">
                 We sent a verification link to <strong>{email}</strong>. Open it in Mailpit, then
                 return here and sign in again.
               </p>
@@ -152,18 +152,18 @@ export function DevLoginPage() {
             </form>
           )}
           {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
-          <p className="mt-4 text-center text-sm text-[var(--color-muted-foreground)]">
+          <p className="mt-4 text-center text-sm text-muted-foreground">
             Or{' '}
             <a
               href="/api/auth/login"
-              className="text-[var(--color-secondary)] underline decoration-[var(--color-accent)] underline-offset-2 hover:text-[var(--color-primary)]"
+              className="text-secondary underline decoration-brand-accent underline-offset-2 hover:text-primary"
             >
               sign in with WorkOS
             </a>{' '}
             when AUTH_PROVIDER=workos
           </p>
           <p className="text-center text-sm">
-            <Link to="/" className="text-[var(--color-secondary)] underline underline-offset-2">
+            <Link to="/" className="text-secondary underline underline-offset-2">
               Back to home
             </Link>
           </p>

@@ -1,0 +1,73 @@
+/**
+ * Vellum + shadcn preset (b1aKfgo1w) overrides for TypeDoc.
+ */
+
+:root {
+  --light-color-background: oklch(1 0 0);
+  --light-color-background-secondary: oklch(0.96 0.002 17.2);
+  --light-color-background-active: oklch(0.96 0.002 17.2);
+  --light-color-background-warning: oklch(0.95 0.03 25);
+  --light-color-accent: oklch(0.52 0.105 223.128);
+  --light-color-active-menu-item: oklch(0.52 0.105 223.128);
+  --light-color-text: oklch(0.147 0.004 49.3);
+  --light-color-text-aside: oklch(0.547 0.021 43.1);
+  --light-color-link: oklch(0.52 0.105 223.128);
+  --light-color-focus: oklch(0.714 0.014 41.2);
+  --light-color-border: oklch(0.922 0.005 34.3);
+  --light-color-scroller: oklch(0.922 0.005 34.3);
+  --light-color-scroller-background: oklch(0.96 0.002 17.2);
+
+  --dark-color-background: oklch(0.147 0.004 49.3);
+  --dark-color-background-secondary: oklch(0.268 0.011 36.5);
+  --dark-color-background-active: oklch(0.268 0.011 36.5);
+  --dark-color-background-warning: oklch(0.28 0.06 25);
+  --dark-color-accent: oklch(0.45 0.085 224.283);
+  --dark-color-active-menu-item: oklch(0.715 0.143 215.221);
+  --dark-color-text: oklch(0.986 0.002 67.8);
+  --dark-color-text-aside: oklch(0.714 0.014 41.2);
+  --dark-color-link: oklch(0.715 0.143 215.221);
+  --dark-color-focus: oklch(0.547 0.021 43.1);
+  --dark-color-border: oklch(1 0 0 / 10%);
+  --dark-color-scroller: oklch(1 0 0 / 10%);
+  --dark-color-scroller-background: oklch(0.268 0.011 36.5);
+}
+
+body {
+  font-family:
+    "Geist Mono Variable",
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+:root[data-theme="light"] body,
+:root:not([data-theme]) body {
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -15%, oklch(0.88 0.06 200 / 0.22), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, oklch(0.9 0.05 88 / 0.12), transparent 50%),
+    var(--color-background);
+}
+
+:root[data-theme="dark"] body {
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -15%, oklch(0.35 0.08 265 / 0.45), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, oklch(0.75 0.08 88 / 0.1), transparent 50%),
+    var(--color-background);
+}
+
+.tsd-toolbar {
+  border-radius: 0.45rem;
+}
+
+#vellum-back-link {
+  margin-left: auto;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-link);
+  text-decoration: none;
+}
+
+#vellum-back-link:hover {
+  text-decoration: underline;
+}

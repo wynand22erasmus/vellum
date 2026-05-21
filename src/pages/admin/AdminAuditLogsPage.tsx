@@ -153,7 +153,7 @@ export function AdminAuditLogsPage() {
             <Label htmlFor="audit-event">Event type</Label>
             <select
               id="audit-event"
-              className="flex h-9 w-full rounded-md border border-[var(--color-border)] bg-[var(--color-background)] px-2 text-sm"
+              className="flex h-9 w-full rounded-md border border-border bg-background px-2 text-sm"
               value={eventTypeInput}
               onChange={(e) => setEventTypeInput(e.target.value)}
             >
@@ -199,45 +199,45 @@ export function AdminAuditLogsPage() {
           Apply filters
         </Button>
 
-        {loading && <p className="text-sm text-[var(--color-muted-foreground)]">Loading…</p>}
-        {error && <p className="text-sm text-[var(--color-error)]">{error}</p>}
+        {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
+        {error && <p className="text-sm text-error">{error}</p>}
 
         {!loading && rows.length > 0 ? (
-          <div className="overflow-x-auto rounded-md border border-[var(--color-border)]">
+          <div className="overflow-x-auto rounded-md border border-border">
             <table className="w-full min-w-[52rem] border-collapse text-left text-sm">
-              <thead className="bg-[var(--color-muted)]">
+              <thead className="bg-muted">
                 <tr>
-                  <th className="border-b border-[var(--color-border)] px-2 py-2 font-medium">
+                  <th className="border-b border-border px-2 py-2 font-medium">
                     Time
                   </th>
-                  <th className="border-b border-[var(--color-border)] px-2 py-2 font-medium">
+                  <th className="border-b border-border px-2 py-2 font-medium">
                     Event
                   </th>
-                  <th className="border-b border-[var(--color-border)] px-2 py-2 font-medium">
+                  <th className="border-b border-border px-2 py-2 font-medium">
                     Document
                   </th>
-                  <th className="border-b border-[var(--color-border)] px-2 py-2 font-medium">
+                  <th className="border-b border-border px-2 py-2 font-medium">
                     User
                   </th>
-                  <th className="border-b border-[var(--color-border)] px-2 py-2 font-medium">
+                  <th className="border-b border-border px-2 py-2 font-medium">
                     IP
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((log) => (
-                  <tr key={log.id} className="odd:bg-[var(--color-background)]">
-                    <td className="border-b border-[var(--color-border)] px-2 py-2 whitespace-nowrap">
+                  <tr key={log.id} className="odd:bg-background">
+                    <td className="border-b border-border px-2 py-2 whitespace-nowrap">
                       {formatTs(log.timestamp)}
                     </td>
-                    <td className="border-b border-[var(--color-border)] px-2 py-2">
+                    <td className="border-b border-border px-2 py-2">
                       {log.eventType}
                     </td>
-                    <td className="border-b border-[var(--color-border)] px-2 py-2 font-mono text-xs">
+                    <td className="border-b border-border px-2 py-2 font-mono text-xs">
                       {log.documentId ? (
                         <Link
                           to={`/admin/documents/${log.documentId}`}
-                          className="text-[var(--color-primary)] underline-offset-2 hover:underline"
+                          className="text-primary underline-offset-2 hover:underline"
                         >
                           {log.documentId.slice(0, 8)}…
                         </Link>
@@ -245,10 +245,10 @@ export function AdminAuditLogsPage() {
                         '—'
                       )}
                     </td>
-                    <td className="border-b border-[var(--color-border)] px-2 py-2 font-mono text-xs">
+                    <td className="border-b border-border px-2 py-2 font-mono text-xs">
                       {log.userId ?? '—'}
                     </td>
-                    <td className="border-b border-[var(--color-border)] px-2 py-2 text-xs">
+                    <td className="border-b border-border px-2 py-2 text-xs">
                       {log.ipAddress ?? '—'}
                     </td>
                   </tr>
@@ -259,11 +259,11 @@ export function AdminAuditLogsPage() {
         ) : null}
 
         {!loading && rows.length === 0 && !error ? (
-          <p className="text-sm text-[var(--color-muted-foreground)]">No audit logs match.</p>
+          <p className="text-sm text-muted-foreground">No audit logs match.</p>
         ) : null}
 
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs text-[var(--color-muted-foreground)]">
+          <p className="text-xs text-muted-foreground">
             Showing {total === 0 ? 0 : offset + 1}–{Math.min(offset + PAGE_SIZE, total)} of {total}
           </p>
           <div className="flex gap-2">

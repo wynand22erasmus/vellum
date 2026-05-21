@@ -96,26 +96,26 @@ export function AdminFailedAuditLogsPage() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {loading && <p className="text-sm text-[var(--color-muted-foreground)]">Loading…</p>}
-        {error && <p className="text-sm text-[var(--color-error)]">{error}</p>}
+        {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
+        {error && <p className="text-sm text-error">{error}</p>}
 
         {!loading && rows.length > 0 ? (
           <ul className="space-y-4">
             {rows.map((r) => (
               <li
                 key={r.id}
-                className="rounded-md border border-[var(--color-border)] p-3 text-sm"
+                className="rounded-md border border-border p-3 text-sm"
               >
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
-                    <p className="font-mono text-xs text-[var(--color-muted-foreground)]">{r.id}</p>
-                    <p className="text-xs text-[var(--color-muted-foreground)]">
+                    <p className="font-mono text-xs text-muted-foreground">{r.id}</p>
+                    <p className="text-xs text-muted-foreground">
                       {formatTs(r.createdAt)} · retried: {r.retried ? 'yes' : 'no'}
                     </p>
                   </div>
                 </div>
-                <p className="mt-2 text-[var(--color-error)]">{r.error}</p>
-                <pre className="mt-2 max-h-48 overflow-auto rounded bg-[var(--color-muted)] p-2 text-xs whitespace-pre-wrap break-all">
+                <p className="mt-2 text-error">{r.error}</p>
+                <pre className="mt-2 max-h-48 overflow-auto rounded bg-muted p-2 text-xs whitespace-pre-wrap break-all">
                   {JSON.stringify(r.payload, null, 2)}
                 </pre>
               </li>
@@ -124,11 +124,11 @@ export function AdminFailedAuditLogsPage() {
         ) : null}
 
         {!loading && rows.length === 0 && !error ? (
-          <p className="text-sm text-[var(--color-muted-foreground)]">No failed audit rows.</p>
+          <p className="text-sm text-muted-foreground">No failed audit rows.</p>
         ) : null}
 
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs text-[var(--color-muted-foreground)]">
+          <p className="text-xs text-muted-foreground">
             Showing {total === 0 ? 0 : offset + 1}–{Math.min(offset + PAGE_SIZE, total)} of {total}
           </p>
           <div className="flex gap-2">

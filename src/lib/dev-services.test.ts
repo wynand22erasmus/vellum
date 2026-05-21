@@ -36,7 +36,7 @@ describe('getDevServices', () => {
 
     expect(byId.mailpit?.url).toBe('http://localhost:8025');
     expect(byId['minio-console']?.url).toBe('http://localhost:9001');
-    expect(byId['minio-api']?.url).toBe('http://localhost:9000');
+    expect(byId['minio-api']).toBeUndefined();
     expect(byId.docs?.url).toBe('/docs/');
   });
 
@@ -50,7 +50,7 @@ describe('getDevServices', () => {
 
     expect(byId.mailpit?.url).toBe('http://devman.wtfgang.win:8025');
     expect(byId['minio-console']?.url).toBe('http://devman.wtfgang.win:9001');
-    expect(byId['minio-api']?.url).toBe('http://devman.wtfgang.win:9000');
+    expect(byId['minio-api']).toBeUndefined();
     expect(byId['prisma-studio']?.url).toBe('http://devman.wtfgang.win:5555');
     expect(byId['db-admin']?.url).toBe(
       'http://devman.wtfgang.win:8081/?pgsql=127.0.0.1&username=vellum&db=vellum_db',

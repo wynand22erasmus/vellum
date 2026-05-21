@@ -56,7 +56,7 @@ npm run up:logs
 | Mailpit | `http://$VELLUM_HOST:8025` |
 | MinIO console | `http://$VELLUM_HOST:9001` |
 
-In non-production, use the **Dev services** menu (top-left of the app) for quick links to Mailpit, MinIO, API docs, and Prisma Studio.
+In non-production, use the **Dev services** group in the left sidebar for quick links to Mailpit, MinIO, API docs, and Prisma Studio.
 
 ```bash
 npm run down    # stop all services
@@ -170,7 +170,7 @@ npm run docs:coverage     # coverage gate + docs/doc-inventory.json
 | Generate | Run `npm run docs:api` once (creates `docs/api/html/`) |
 | Role | `ADMIN` only (`DEFAULT_ADMIN_EMAILS` on first sign-in) |
 | URL | **`/docs/`** (admin-only; uses the same `vellum_session` cookie as the dashboard) |
-| Discover | Home page link when signed in as admin; **Dev services** menu in non-production |
+| Discover | Sidebar when signed in as admin; **Dev services** group in non-production |
 
 If you open `/docs/` without a session, you are redirected to sign in and then returned to `/docs/`. If HTML has not been generated, the server responds with `503` and instructions to run `docs:api`.
 

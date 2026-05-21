@@ -76,12 +76,6 @@ export function getDevServices(): DevServiceLink[] {
       description: 'Object storage',
     },
     {
-      id: 'minio-api',
-      label: 'MinIO API',
-      url: minioPublicEndpoint,
-      description: 'S3 endpoint',
-    },
-    {
       id: 'prisma-studio',
       label: 'Prisma Studio',
       url: httpUrl(host, prismaStudioPort),

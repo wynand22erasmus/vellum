@@ -98,48 +98,48 @@ export function AdminUsersPage() {
         <CardDescription>{total} dashboard accounts.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {loading && <p className="text-sm text-[var(--color-muted-foreground)]">Loading…</p>}
-        {error && <p className="text-sm text-[var(--color-error)]">{error}</p>}
+        {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
+        {error && <p className="text-sm text-error">{error}</p>}
 
         {!loading && rows.length > 0 ? (
-          <div className="overflow-x-auto rounded-md border border-[var(--color-border)]">
+          <div className="overflow-x-auto rounded-md border border-border">
             <table className="w-full min-w-[40rem] border-collapse text-left text-sm">
-              <thead className="bg-[var(--color-muted)]">
+              <thead className="bg-muted">
                 <tr>
-                  <th className="border-b border-[var(--color-border)] px-2 py-2 font-medium">
+                  <th className="border-b border-border px-2 py-2 font-medium">
                     Email
                   </th>
-                  <th className="border-b border-[var(--color-border)] px-2 py-2 font-medium">
+                  <th className="border-b border-border px-2 py-2 font-medium">
                     Role
                   </th>
-                  <th className="border-b border-[var(--color-border)] px-2 py-2 font-medium">
+                  <th className="border-b border-border px-2 py-2 font-medium">
                     Verified
                   </th>
-                  <th className="border-b border-[var(--color-border)] px-2 py-2 font-medium">
+                  <th className="border-b border-border px-2 py-2 font-medium">
                     Last sign-in
                   </th>
-                  <th className="border-b border-[var(--color-border)] px-2 py-2 font-medium">
+                  <th className="border-b border-border px-2 py-2 font-medium">
                     Created
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((u) => (
-                  <tr key={u.id} className="odd:bg-[var(--color-background)]">
-                    <td className="border-b border-[var(--color-border)] px-2 py-2">
+                  <tr key={u.id} className="odd:bg-background">
+                    <td className="border-b border-border px-2 py-2">
                       <span className="font-medium">{u.email}</span>
-                      <p className="font-mono text-xs text-[var(--color-muted-foreground)]">
+                      <p className="font-mono text-xs text-muted-foreground">
                         {u.id}
                       </p>
                     </td>
-                    <td className="border-b border-[var(--color-border)] px-2 py-2">{u.kind}</td>
-                    <td className="border-b border-[var(--color-border)] px-2 py-2">
+                    <td className="border-b border-border px-2 py-2">{u.kind}</td>
+                    <td className="border-b border-border px-2 py-2">
                       {u.emailVerified ? 'yes' : 'no'}
                     </td>
-                    <td className="border-b border-[var(--color-border)] px-2 py-2 whitespace-nowrap">
+                    <td className="border-b border-border px-2 py-2 whitespace-nowrap">
                       {u.lastSignInAt ? formatTs(u.lastSignInAt) : '—'}
                     </td>
-                    <td className="border-b border-[var(--color-border)] px-2 py-2 whitespace-nowrap">
+                    <td className="border-b border-border px-2 py-2 whitespace-nowrap">
                       {formatTs(u.createdAt)}
                     </td>
                   </tr>
@@ -150,11 +150,11 @@ export function AdminUsersPage() {
         ) : null}
 
         {!loading && rows.length === 0 && !error ? (
-          <p className="text-sm text-[var(--color-muted-foreground)]">No users.</p>
+          <p className="text-sm text-muted-foreground">No users.</p>
         ) : null}
 
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs text-[var(--color-muted-foreground)]">
+          <p className="text-xs text-muted-foreground">
             Showing {total === 0 ? 0 : offset + 1}–{Math.min(offset + PAGE_SIZE, total)} of {total}
           </p>
           <div className="flex gap-2">

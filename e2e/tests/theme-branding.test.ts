@@ -31,7 +31,7 @@ describe('Theme and branding', () => {
     const page = await newPage(browser);
     await page.goto(BASE_URL, { waitUntil: 'networkidle0' });
 
-    const toggle = await page.waitForSelector('.pointer-events-auto button[type="button"]');
+    const toggle = await page.waitForSelector('aside button[aria-label]');
     assert.ok(toggle, 'theme toggle should exist in app shell');
 
     const before = await page.evaluate(() => ({

@@ -102,7 +102,7 @@ export function AdminDocumentDetailPage() {
   if (!id) {
     return (
       <div className="space-y-4">
-        <p className="text-sm text-[var(--color-error)]">Missing document id.</p>
+        <p className="text-sm text-error">Missing document id.</p>
         <Button variant="outline" asChild>
           <Link to="/admin/documents">Back to documents</Link>
         </Button>
@@ -111,12 +111,12 @@ export function AdminDocumentDetailPage() {
   }
 
   if (loading) {
-    return <p className="text-sm text-[var(--color-muted-foreground)]">Loading…</p>;
+    return <p className="text-sm text-muted-foreground">Loading…</p>;
   }
   if (error) {
     return (
       <div className="space-y-4">
-        <p className="text-sm text-[var(--color-error)]">{error}</p>
+        <p className="text-sm text-error">{error}</p>
         <Button variant="outline" asChild>
           <Link to="/admin/documents">Back to documents</Link>
         </Button>
@@ -143,31 +143,31 @@ export function AdminDocumentDetailPage() {
         <CardContent className="space-y-3 text-sm">
           <dl className="grid gap-2 sm:grid-cols-2">
             <div>
-              <dt className="text-[var(--color-muted-foreground)]">Recipient</dt>
+              <dt className="text-muted-foreground">Recipient</dt>
               <dd>{doc.recipientEmail}</dd>
             </div>
             <div>
-              <dt className="text-[var(--color-muted-foreground)]">Created</dt>
+              <dt className="text-muted-foreground">Created</dt>
               <dd>{formatTs(doc.createdAt)}</dd>
             </div>
             <div>
-              <dt className="text-[var(--color-muted-foreground)]">Link expires</dt>
+              <dt className="text-muted-foreground">Link expires</dt>
               <dd>{formatTs(doc.linkExpiresAt)}</dd>
             </div>
             <div>
-              <dt className="text-[var(--color-muted-foreground)]">File expires</dt>
+              <dt className="text-muted-foreground">File expires</dt>
               <dd>{formatTs(doc.fileExpiresAt)}</dd>
             </div>
             <div>
-              <dt className="text-[var(--color-muted-foreground)]">Record expires</dt>
+              <dt className="text-muted-foreground">Record expires</dt>
               <dd>{formatTs(doc.recordExpiresAt)}</dd>
             </div>
             <div>
-              <dt className="text-[var(--color-muted-foreground)]">Storage</dt>
+              <dt className="text-muted-foreground">Storage</dt>
               <dd>{doc.storageAttached ? 'Object attached' : 'No object key'}</dd>
             </div>
             <div>
-              <dt className="text-[var(--color-muted-foreground)]">Flags</dt>
+              <dt className="text-muted-foreground">Flags</dt>
               <dd className="space-x-2">
                 <span>Used: {doc.isUsed ? 'yes' : 'no'}</span>
                 <span>Deleted: {doc.deletedAt ? formatTs(doc.deletedAt) : '—'}</span>
@@ -187,46 +187,46 @@ export function AdminDocumentDetailPage() {
         </CardHeader>
         <CardContent>
           {doc.auditLogs.length === 0 ? (
-            <p className="text-sm text-[var(--color-muted-foreground)]">No audit events yet.</p>
+            <p className="text-sm text-muted-foreground">No audit events yet.</p>
           ) : (
-            <div className="overflow-x-auto rounded-md border border-[var(--color-border)]">
+            <div className="overflow-x-auto rounded-md border border-border">
               <table className="w-full min-w-[48rem] border-collapse text-left text-sm">
-                <thead className="bg-[var(--color-muted)]">
+                <thead className="bg-muted">
                   <tr>
-                    <th className="border-b border-[var(--color-border)] px-2 py-2 font-medium">
+                    <th className="border-b border-border px-2 py-2 font-medium">
                       Time
                     </th>
-                    <th className="border-b border-[var(--color-border)] px-2 py-2 font-medium">
+                    <th className="border-b border-border px-2 py-2 font-medium">
                       Event
                     </th>
-                    <th className="border-b border-[var(--color-border)] px-2 py-2 font-medium">
+                    <th className="border-b border-border px-2 py-2 font-medium">
                       User
                     </th>
-                    <th className="border-b border-[var(--color-border)] px-2 py-2 font-medium">
+                    <th className="border-b border-border px-2 py-2 font-medium">
                       IP
                     </th>
-                    <th className="border-b border-[var(--color-border)] px-2 py-2 font-medium">
+                    <th className="border-b border-border px-2 py-2 font-medium">
                       Metadata
                     </th>
                   </tr>
                 </thead>
                 <tbody>
                   {doc.auditLogs.map((log) => (
-                    <tr key={log.id} className="align-top odd:bg-[var(--color-background)]">
-                      <td className="border-b border-[var(--color-border)] px-2 py-2 whitespace-nowrap">
+                    <tr key={log.id} className="align-top odd:bg-background">
+                      <td className="border-b border-border px-2 py-2 whitespace-nowrap">
                         {formatTs(log.timestamp)}
                       </td>
-                      <td className="border-b border-[var(--color-border)] px-2 py-2">
+                      <td className="border-b border-border px-2 py-2">
                         {log.eventType}
                       </td>
-                      <td className="border-b border-[var(--color-border)] px-2 py-2 font-mono text-xs">
+                      <td className="border-b border-border px-2 py-2 font-mono text-xs">
                         {log.userId ?? '—'}
                       </td>
-                      <td className="border-b border-[var(--color-border)] px-2 py-2 text-xs">
+                      <td className="border-b border-border px-2 py-2 text-xs">
                         {log.ipAddress ?? '—'}
                       </td>
-                      <td className="border-b border-[var(--color-border)] px-2 py-2 text-xs">
-                        <pre className="max-h-40 max-w-md overflow-auto whitespace-pre-wrap break-all rounded bg-[var(--color-muted)] p-2">
+                      <td className="border-b border-border px-2 py-2 text-xs">
+                        <pre className="max-h-40 max-w-md overflow-auto whitespace-pre-wrap break-all rounded bg-muted p-2">
                           {log.metadata == null
                             ? '—'
                             : JSON.stringify(log.metadata, null, 2)}

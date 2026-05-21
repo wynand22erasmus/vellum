@@ -136,55 +136,55 @@ export function AdminDocumentsPage() {
             </Button>
           </div>
 
-          {loading && <p className="text-sm text-[var(--color-muted-foreground)]">Loading…</p>}
-          {error && <p className="text-sm text-[var(--color-error)]">{error}</p>}
+          {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
+          {error && <p className="text-sm text-error">{error}</p>}
 
           {!loading && !error && rows.length === 0 ? (
-            <p className="text-sm text-[var(--color-muted-foreground)]">No documents match.</p>
+            <p className="text-sm text-muted-foreground">No documents match.</p>
           ) : null}
 
           {!loading && rows.length > 0 ? (
-            <div className="overflow-x-auto rounded-md border border-[var(--color-border)]">
+            <div className="overflow-x-auto rounded-md border border-border">
               <table className="w-full min-w-[56rem] border-collapse text-left text-sm">
-                <thead className="bg-[var(--color-muted)]">
+                <thead className="bg-muted">
                   <tr>
-                    <th className="border-b border-[var(--color-border)] px-2 py-2 font-medium">
+                    <th className="border-b border-border px-2 py-2 font-medium">
                       File
                     </th>
-                    <th className="border-b border-[var(--color-border)] px-2 py-2 font-medium">
+                    <th className="border-b border-border px-2 py-2 font-medium">
                       Recipient
                     </th>
-                    <th className="border-b border-[var(--color-border)] px-2 py-2 font-medium">
+                    <th className="border-b border-border px-2 py-2 font-medium">
                       Created
                     </th>
-                    <th className="border-b border-[var(--color-border)] px-2 py-2 font-medium">
+                    <th className="border-b border-border px-2 py-2 font-medium">
                       Status
                     </th>
-                    <th className="border-b border-[var(--color-border)] px-2 py-2 font-medium" />
+                    <th className="border-b border-border px-2 py-2 font-medium" />
                   </tr>
                 </thead>
                 <tbody>
                   {rows.map((doc) => (
-                    <tr key={doc.id} className="odd:bg-[var(--color-background)]">
-                      <td className="border-b border-[var(--color-border)] px-2 py-2">
+                    <tr key={doc.id} className="odd:bg-background">
+                      <td className="border-b border-border px-2 py-2">
                         <span className="font-medium">{doc.fileName}</span>
-                        <p className="font-mono text-xs text-[var(--color-muted-foreground)]">
+                        <p className="font-mono text-xs text-muted-foreground">
                           {doc.id}
                         </p>
                       </td>
-                      <td className="border-b border-[var(--color-border)] px-2 py-2">
+                      <td className="border-b border-border px-2 py-2">
                         {doc.recipientEmail}
                       </td>
-                      <td className="border-b border-[var(--color-border)] px-2 py-2 whitespace-nowrap">
+                      <td className="border-b border-border px-2 py-2 whitespace-nowrap">
                         {formatTs(doc.createdAt)}
                       </td>
-                      <td className="border-b border-[var(--color-border)] px-2 py-2 text-xs">
+                      <td className="border-b border-border px-2 py-2 text-xs">
                         <div className="flex flex-wrap gap-1">
                           <span
                             className={
                               doc.linkActive
-                                ? 'rounded bg-[var(--color-badge-active)] px-1.5 py-0.5'
-                                : 'rounded bg-[var(--color-badge-inactive)] px-1.5 py-0.5'
+                                ? 'rounded bg-badge-active px-1.5 py-0.5'
+                                : 'rounded bg-badge-inactive px-1.5 py-0.5'
                             }
                           >
                             link {doc.linkActive ? 'on' : 'off'}
@@ -192,25 +192,25 @@ export function AdminDocumentsPage() {
                           <span
                             className={
                               doc.fileAvailable
-                                ? 'rounded bg-[var(--color-badge-active)] px-1.5 py-0.5'
-                                : 'rounded bg-[var(--color-badge-inactive)] px-1.5 py-0.5'
+                                ? 'rounded bg-badge-active px-1.5 py-0.5'
+                                : 'rounded bg-badge-inactive px-1.5 py-0.5'
                             }
                           >
                             file {doc.fileAvailable ? 'on' : 'off'}
                           </span>
                           {doc.isUsed ? (
-                            <span className="rounded bg-[var(--color-muted)] px-1.5 py-0.5">
+                            <span className="rounded bg-muted px-1.5 py-0.5">
                               downloaded
                             </span>
                           ) : null}
                           {doc.deletedAt ? (
-                            <span className="rounded bg-[var(--color-muted)] px-1.5 py-0.5">
+                            <span className="rounded bg-muted px-1.5 py-0.5">
                               deleted
                             </span>
                           ) : null}
                         </div>
                       </td>
-                      <td className="border-b border-[var(--color-border)] px-2 py-2 text-right">
+                      <td className="border-b border-border px-2 py-2 text-right">
                         <Button variant="outline" size="sm" asChild>
                           <Link to={`/admin/documents/${doc.id}`}>Detail</Link>
                         </Button>
@@ -223,7 +223,7 @@ export function AdminDocumentsPage() {
           ) : null}
 
           <div className="flex items-center justify-between gap-2">
-            <p className="text-xs text-[var(--color-muted-foreground)]">
+            <p className="text-xs text-muted-foreground">
               Showing {total === 0 ? 0 : offset + 1}–{Math.min(offset + PAGE_SIZE, total)} of{' '}
               {total}
             </p>

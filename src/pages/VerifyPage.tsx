@@ -90,7 +90,7 @@ export function VerifyPage() {
 
             {error && (
               <div
-                className="rounded-md bg-[var(--color-error-muted)] p-3 text-sm text-[var(--color-error)]"
+                className="rounded-md bg-error-muted p-3 text-sm text-error"
                 role="alert"
               >
                 {error}
