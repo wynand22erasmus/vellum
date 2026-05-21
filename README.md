@@ -35,7 +35,7 @@ Set **`VELLUM_HOST`** to your public domain (for example `devman.wtfgang.win`). 
 npm run up
 ```
 
-This builds and starts the app, worker, nginx, Postgres, Redis, MinIO, ClamAV, and Mailpit. Migrations run automatically on app startup.
+This builds and starts the app, worker, nginx, Postgres (with Prisma Studio and Adminer), Redis, MinIO, ClamAV, and Mailpit. Migrations run automatically on app startup.
 
 Wait for ClamAV to become healthy on first start (2–5 minutes). Follow progress:
 
@@ -51,11 +51,12 @@ npm run up:logs
 | Web UI (direct) | `http://$VELLUM_HOST:5173` when using the app container port |
 | API docs (admin) | `/docs/` after `npm run docs:api` — sign in as an admin first |
 | Data browser (admin) | `/admin` — read-only lists for documents, users, audit logs (session + `ADMIN` role) |
-| Prisma Studio (local) | Run `npm run db:studio` (default http://localhost:5555) — full DB UI; also linked from **Dev services** when Studio is running |
-| Mailpit | http://localhost:8025 |
-| MinIO console | http://localhost:9001 |
+| Prisma Studio | `http://$VELLUM_HOST:5555` (runs in **postgres** container) |
+| DB Admin (Adminer) | `http://$VELLUM_HOST:8081` (runs in **postgres** container; user `vellum`, password `password`) |
+| Mailpit | `http://$VELLUM_HOST:8025` |
+| MinIO console | `http://$VELLUM_HOST:9001` |
 
-In non-production, use the **Dev services** menu (top-left of the app) for quick links to Mailpit, MinIO, API docs, and Prisma Studio (open the link after starting `npm run db:studio` in another terminal).
+In non-production, use the **Dev services** menu (top-left of the app) for quick links to Mailpit, MinIO, API docs, and Prisma Studio.
 
 ```bash
 npm run down    # stop all services
@@ -71,7 +72,7 @@ npm run infra:up
 npm install && npm run db:generate && npm run db:migrate:deploy
 npm run dev          # terminal 1
 npm run worker       # terminal 2
-# optional: npm run db:studio   # terminal 3 — browse/edit Postgres in Prisma Studio
+# optional: npm run db:studio   # ensure Prisma Studio is up (also started by npm run up)
 ```
 
 Compose helper detection order: `docker compose` → `podman compose` → `docker-compose` → `podman-compose`.

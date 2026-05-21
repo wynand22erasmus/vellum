@@ -14,7 +14,8 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 FROM base AS deps
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json .npmrc ./
+RUN npm install -g npm@11.14.1
 RUN npm ci
 
 # Development: Vite + Express API (vite-plugin-node), used by docker compose.

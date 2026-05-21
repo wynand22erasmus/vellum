@@ -47,6 +47,8 @@ export function getDevServices(): DevServiceLink[] {
   const mailpitUiPort = process.env.MAILPIT_UI_PORT?.trim() || '8025';
   const minioConsolePort = process.env.MINIO_CONSOLE_PORT?.trim() || '9001';
   const prismaStudioPort = process.env.PRISMA_STUDIO_PORT?.trim() || '5555';
+  const dbAdminPort = process.env.DB_ADMIN_PORT?.trim() || '8081';
+  const adminerUrl = `${httpUrl(host, dbAdminPort)}/?pgsql=127.0.0.1&username=vellum&db=vellum_db`;
 
   return [
     {
@@ -83,7 +85,13 @@ export function getDevServices(): DevServiceLink[] {
       id: 'prisma-studio',
       label: 'Prisma Studio',
       url: httpUrl(host, prismaStudioPort),
-      description: 'Run npm run db:studio first (local DB UI)',
+      description: 'Schema browser (postgres container)',
+    },
+    {
+      id: 'db-admin',
+      label: 'DB Admin (Adminer)',
+      url: adminerUrl,
+      description: 'SQL UI in postgres container (password: password)',
     },
   ];
 }

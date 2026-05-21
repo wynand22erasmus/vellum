@@ -45,6 +45,9 @@ Built services (`app`, `worker`) publish images named `{VELLUM_PROJECT}-{service
 | `EMAIL_PROVIDER` | No | `local` | `local` (Mailpit) or `ses` |
 | `MAILPIT_HOST` | No | `localhost` | SMTP host for local provider |
 | `MAILPIT_PORT` | No | `1025` | SMTP port for local provider |
+| `PRISMA_STUDIO_PORT` | No | `5555` | Prisma Studio in the **postgres** container |
+| `DB_ADMIN_PORT` | No | `8081` | Adminer SQL UI in the **postgres** container |
+| `DATABASE_URL_HOST` | No | — | PostgreSQL URL for host-side tools when Compose is not running (`localhost:5432`) |
 | `REPORTING_LIFETIME_YEARS` | No | `5` | Audit log retention horizon |
 | `MAX_UPLOAD_BYTES` | No | `52428800` (50 MiB) | Upload size limit |
 | `ALLOWED_UPLOAD_EXTENSIONS` | No | built-in list (pdf, txt, docx, …) | JSON array of allowed extensions without dots (e.g. `["pdf","txt"]`). Use `["*"]` to allow any extension; misleading trailing types (e.g. `.pdf.exe`) are still stripped from stored filenames |
