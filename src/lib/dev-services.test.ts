@@ -9,6 +9,8 @@ const envKeys = [
   'MINIO_PUBLIC_ENDPOINT',
   'MAILPIT_UI_PORT',
   'MINIO_CONSOLE_PORT',
+  'PRISMA_STUDIO_PORT',
+  'DB_ADMIN_PORT',
 ] as const;
 
 function clearDevServicesEnv(): void {
@@ -49,5 +51,9 @@ describe('getDevServices', () => {
     expect(byId.mailpit?.url).toBe('http://devman.wtfgang.win:8025');
     expect(byId['minio-console']?.url).toBe('http://devman.wtfgang.win:9001');
     expect(byId['minio-api']?.url).toBe('http://devman.wtfgang.win:9000');
+    expect(byId['prisma-studio']?.url).toBe('http://devman.wtfgang.win:5555');
+    expect(byId['db-admin']?.url).toBe(
+      'http://devman.wtfgang.win:8081/?pgsql=127.0.0.1&username=vellum&db=vellum_db',
+    );
   });
 });

@@ -8,6 +8,9 @@
     "npm": ">=11.0.0"
   },
   "packageManager": "npm@11.14.1",
+  "overrides": {
+    "axios": "^1.16.1"
+  },
   "scripts": {
     "dev": "tsx src/dev-server.ts",
     "build": "tsc -b && vite build",
@@ -17,7 +20,8 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:push": "prisma db push",
-    "db:studio": "prisma studio",
+    "db:studio": "bash scripts/db-studio.sh",
+    "db:studio:logs": "bash scripts/compose.sh logs -f postgres",
     "worker": "tsx src/workers/index.ts",
     "compose": "bash scripts/compose.sh",
     "up": "bash scripts/compose.sh up -d --build",
@@ -89,7 +93,7 @@
     "@types/pg": "^8.20.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@usebruno/cli": "^3.0.0",
+    "@usebruno/cli": "^3.4.0",
     "@vitejs/plugin-react": "^6.0.2",
     "babel-plugin-react-compiler": "^1.0.0",
     "eslint": "^10.4.0",
