@@ -97,7 +97,7 @@ Read-only UI for operators with `kind: ADMIN`: documents, users, audit logs, and
 |------|--------|
 | 1 | `npm run docs:api` (output under `docs/api/html/`) |
 | 2 | Sign in as a user with `kind: ADMIN` |
-| 3 | Open **`/docs/`** (or use the home page / **Dev services** link) |
+| 3 | Open **`/docs/`** (or use the sidebar **Dev services** / **API documentation** link) |
 
 Unauthenticated browser requests to `/docs/` redirect to sign-in with `returnTo=/docs/` and return after login. Non-admins receive `403`.
 

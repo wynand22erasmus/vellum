@@ -20,7 +20,7 @@ export type VellumLogoProps = {
 };
 
 const logoFrameClass =
-  'rounded-xl border border-[var(--color-border)] bg-[var(--color-logo-surface)] shadow-sm';
+  'rounded-xl border border-border bg-logo-surface shadow-sm';
 
 /** @internal */
 function LogoFrame({ children, className }: { children: ReactNode; className?: string }) {
@@ -31,10 +31,10 @@ function LogoFrame({ children, className }: { children: ReactNode; className?: s
 function LogoWordmark({ className }: { className?: string }) {
   return (
     <div className={cn('hidden flex-col items-center text-center dark:flex', className)}>
-      <span className="text-3xl font-bold tracking-[0.2em] text-[var(--color-foreground)]">
+      <span className="text-3xl font-bold tracking-[0.2em] text-foreground">
         VELLUM
       </span>
-      <span className="mt-1.5 text-xs font-medium tracking-[0.18em] text-[var(--color-accent)]">
+      <span className="mt-1.5 text-xs font-medium tracking-[0.18em] text-brand-accent">
         DOCUMENT | API | HOSTING
       </span>
     </div>
@@ -94,7 +94,7 @@ export function VellumLogo({
   return (
     <Link
       to={href}
-      className="inline-flex rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-background)]"
+      className="inline-flex rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
     >
       {image}
     </Link>

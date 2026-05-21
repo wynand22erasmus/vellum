@@ -17,8 +17,8 @@ export function AdminIndexPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-[var(--color-foreground)]">Data browser</h1>
-        <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
+        <h1 className="text-2xl font-semibold text-foreground">Data browser</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Read-only views of Postgres data. Secrets (download tokens, password hashes, object keys)
           are never shown.
         </p>
@@ -31,7 +31,7 @@ export function AdminIndexPage() {
               <CardTitle className="text-lg">
                 <Link
                   to="/admin/documents"
-                  className="text-[var(--color-primary)] underline-offset-2 hover:underline"
+                  className="text-primary underline-offset-2 hover:underline"
                 >
                   Documents
                 </Link>
@@ -46,7 +46,7 @@ export function AdminIndexPage() {
               <CardTitle className="text-lg">
                 <Link
                   to="/admin/users"
-                  className="text-[var(--color-primary)] underline-offset-2 hover:underline"
+                  className="text-primary underline-offset-2 hover:underline"
                 >
                   Users
                 </Link>
@@ -61,7 +61,7 @@ export function AdminIndexPage() {
               <CardTitle className="text-lg">
                 <Link
                   to="/admin/audit-logs"
-                  className="text-[var(--color-primary)] underline-offset-2 hover:underline"
+                  className="text-primary underline-offset-2 hover:underline"
                 >
                   Audit logs
                 </Link>
@@ -76,7 +76,7 @@ export function AdminIndexPage() {
               <CardTitle className="text-lg">
                 <Link
                   to="/admin/failed-audit-logs"
-                  className="text-[var(--color-primary)] underline-offset-2 hover:underline"
+                  className="text-primary underline-offset-2 hover:underline"
                 >
                   Failed audit queue
                 </Link>

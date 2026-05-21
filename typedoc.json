@@ -8,6 +8,8 @@
   "exclude": ["**/*.test.ts"],
   "excludeInternal": true,
   "readme": "README.md",
+  "customCss": "docs/typedoc/typedoc-vellum.css",
+  "customJs": "docs/typedoc/typedoc-vellum.js",
   "navigation": {
     "includeFolders": true
   }

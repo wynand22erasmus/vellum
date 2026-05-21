@@ -6,7 +6,6 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { VellumLogo } from '../components/vellum-logo.tsx';
 import { Button } from '../components/ui/button.tsx';
 import {
   Card,
@@ -15,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from '../components/ui/card.tsx';
-import { apiFetch, clearDevEmail, getDevEmail } from '../lib/api.ts';
+import { apiFetch } from '../lib/api.ts';
 
 interface DocumentRow {
   id: string;
@@ -93,31 +92,8 @@ export function DashboardPage() {
     void loadDocuments();
   }
 
-  function handleLogout() {
-    clearDevEmail();
-    void apiFetch('/api/auth/logout', { method: 'POST' });
-    window.location.href = '/login';
-  }
-
-  const devEmail = getDevEmail();
-
   return (
-    <div className="min-h-screen bg-[var(--color-background)]">
-      <header className="border-b border-[var(--color-border)] bg-[var(--color-card)]">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-3">
-            <VellumLogo variant="mark" />
-            {devEmail && (
-              <p className="text-sm text-[var(--color-muted-foreground)]">{devEmail}</p>
-            )}
-          </div>
-          <Button variant="outline" onClick={handleLogout}>
-            Sign out
-          </Button>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-5xl p-4">
+    <main className="mx-auto max-w-5xl flex-1 p-4">
         <Card>
           <CardHeader>
             <CardTitle>Your documents</CardTitle>
@@ -127,23 +103,23 @@ export function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {loading && <p className="text-sm text-[var(--color-muted-foreground)]">Loading…</p>}
-            {error && <p className="text-sm text-[var(--color-error)]">{error}</p>}
-            {message && <p className="mb-4 text-sm text-[var(--color-success)]">{message}</p>}
+            {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
+            {error && <p className="text-sm text-error">{error}</p>}
+            {message && <p className="mb-4 text-sm text-success">{message}</p>}
 
             {!loading && documents.length === 0 && (
-              <p className="text-sm text-[var(--color-muted-foreground)]">No documents yet.</p>
+              <p className="text-sm text-muted-foreground">No documents yet.</p>
             )}
 
             <ul className="space-y-4">
               {documents.map((doc) => (
                 <li
                   key={doc.id}
-                  className="flex flex-col gap-3 rounded-md border border-[var(--color-border)] p-4 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-3 rounded-md border border-border p-4 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div>
                     <p className="font-medium">{doc.fileName}</p>
-                    <p className="text-xs text-[var(--color-muted-foreground)]">
+                    <p className="text-xs text-muted-foreground">
                       Received {new Date(doc.createdAt).toLocaleString()}
                     </p>
                     <div className="mt-2 flex flex-wrap gap-2">
@@ -156,7 +132,7 @@ export function DashboardPage() {
                         active={doc.fileAvailable}
                       />
                       {doc.isUsed && (
-                        <span className="rounded-full bg-[var(--color-muted)] px-2 py-0.5 text-xs">
+                        <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
                           Downloaded
                         </span>
                       )}
@@ -175,16 +151,15 @@ export function DashboardPage() {
           </CardContent>
         </Card>
 
-        <p className="mt-4 text-center text-sm text-[var(--color-muted-foreground)]">
+        <p className="mt-4 text-center text-sm text-muted-foreground">
           <Link
             to="/"
-            className="text-[var(--color-secondary)] underline decoration-[var(--color-accent)] underline-offset-2 hover:text-[var(--color-primary)]"
+            className="text-secondary underline decoration-brand-accent underline-offset-2 hover:text-primary"
           >
             Home
           </Link>
         </p>
-      </main>
-    </div>
+    </main>
   );
 }
 
@@ -193,8 +168,8 @@ function StatusBadge({ label, active }: { label: string; active: boolean }) {
     <span
       className={`rounded-full px-2 py-0.5 text-xs ${
         active
-          ? 'bg-[var(--color-badge-active)] text-[var(--color-badge-active-foreground)]'
-          : 'bg-[var(--color-badge-inactive)] text-[var(--color-badge-inactive-foreground)]'
+          ? 'bg-badge-active text-badge-active-foreground'
+          : 'bg-badge-inactive text-badge-inactive-foreground'
       }`}
     >
       {label}

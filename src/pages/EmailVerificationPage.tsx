@@ -64,7 +64,7 @@ export function EmailVerificationPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-[var(--color-muted-foreground)]">
+          <p className="text-sm text-muted-foreground">
             After verifying, use the same sign-in method you tried before (WorkOS or dev login).
           </p>
           {canResend ? (

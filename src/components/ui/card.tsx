@@ -5,14 +5,15 @@
  */
 
 import type { HTMLAttributes } from 'react';
-import { cn } from '../../lib/utils.ts';
+import { cn } from '@/lib/utils.ts';
 
 /** Bordered card container. */
 export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
+      data-slot="card"
       className={cn(
-        'rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] shadow-sm ring-1 ring-[var(--color-accent)]/15',
+        'flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm ring-1 ring-brand-accent/15',
         className,
       )}
       {...props}
@@ -22,22 +23,40 @@ export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
 
 /** Top section of a card (title area). */
 export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('flex flex-col gap-1.5 p-6 pb-0', className)} {...props} />;
+  return (
+    <div
+      data-slot="card-header"
+      className={cn('flex flex-col gap-1.5 px-6 pb-0', className)}
+      {...props}
+    />
+  );
 }
 
 /** Card heading (`h3`). */
 export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
-  return <h3 className={cn('text-lg font-semibold', className)} {...props} />;
+  return (
+    <h3
+      data-slot="card-title"
+      className={cn('leading-none font-semibold', className)}
+      {...props}
+    />
+  );
 }
 
 /** Muted subtitle text under the title. */
 export function CardDescription({ className, ...props }: HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <p className={cn('text-sm text-[var(--color-muted-foreground)]', className)} {...props} />
+    <p
+      data-slot="card-description"
+      className={cn('text-sm text-muted-foreground', className)}
+      {...props}
+    />
   );
 }
 
 /** Main card body below the header. */
 export function CardContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('p-6', className)} {...props} />;
+  return (
+    <div data-slot="card-content" className={cn('px-6', className)} {...props} />
+  );
 }
