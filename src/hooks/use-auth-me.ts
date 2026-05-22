@@ -8,10 +8,15 @@ import { useEffect, useState } from 'react';
 import { apiFetch } from '../lib/api.ts';
 import type { AuthUser } from '../lib/auth/types.ts';
 
+/** Result payload returned by {@link useAuthMe}. */
 export type UseAuthMeResult = {
+  /** Current authenticated user (`null` when absent or `/api/auth/me` errors). */
   user: AuthUser | null;
+  /** True while fetching or refetching the session user. */
   loading: boolean;
+  /** Convenience flag comparing `AuthUser.kind` to ADMIN. */
   isAdmin: boolean;
+  /** Bumps hook effect to rerun the fetch pipeline. */
   refresh: () => void;
 };
 

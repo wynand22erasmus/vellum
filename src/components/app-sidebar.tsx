@@ -1,18 +1,29 @@
 /**
- * Application sidebar: user panel, collapsible nav groups, theme toggle.
+ * Application sidebar (shadcn sidebar-08 inset variant).
  *
  * @packageDocumentation
  */
 
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { VellumLogo } from './vellum-logo.tsx';
-import { ThemeToggle } from './theme-toggle.tsx';
-import { Button } from './ui/button.tsx';
-import { SidebarNavGroup, SidebarNavSingleLink } from './sidebar-nav-group.tsx';
+import { Link, useLocation } from 'react-router-dom';
+import { NavGuestFooter } from './nav-guest-footer.tsx';
+import { NavUser } from './nav-user.tsx';
+import { VellumSidebarNav } from './vellum-sidebar-nav.tsx';
+import { PanelLeft } from 'lucide-react';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+  useSidebar,
+} from '@/components/ui/sidebar.tsx';
 import { useAuthMe } from '../hooks/use-auth-me.ts';
 import { apiFetch, clearDevEmail } from '../lib/api.ts';
-import { buildSidebarNav, displayUserName } from '../lib/sidebar-nav.ts';
+import { buildSidebarNav } from '../lib/sidebar-nav.ts';
 import type { DevServiceLink } from '../lib/dev-services.ts';
 
 type MetaResponse = {
@@ -20,7 +31,24 @@ type MetaResponse = {
   devServices: DevServiceLink[];
 };
 
-/** Left navigation column for all authenticated and public app routes. */
+function SidebarCollapseButton() {
+  const { toggleSidebar, state } = useSidebar();
+  if (state === 'collapsed') {
+    return null;
+  }
+  return (
+    <SidebarMenuButton
+      type="button"
+      tooltip="Collapse sidebar"
+      onClick={toggleSidebar}
+    >
+      <PanelLeft className="size-4" aria-hidden />
+      <span>Collapse</span>
+    </SidebarMenuButton>
+  );
+}
+
+/** Left navigation column (sidebar-08 inset, icon collapsible). */
 export function AppSidebar() {
   const { pathname } = useLocation();
   const { user, loading } = useAuthMe();
@@ -48,6 +76,7 @@ export function AppSidebar() {
   }, []);
 
   const groups = buildSidebarNav({ pathname, user, devServices });
+  const homeHref = user ? '/dashboard' : '/login';
 
   async function handleSignOut() {
     clearDevEmail();
@@ -56,76 +85,48 @@ export function AppSidebar() {
   }
 
   return (
-    <aside
-      className="flex w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground"
-      aria-label="Application navigation"
-    >
-      <div className="border-b border-sidebar-border px-4 py-4">
-        <VellumLogo variant="mark" />
-      </div>
-
-      {user ? (
-        <div className="border-b border-sidebar-border px-4 py-3">
-          <div className="flex items-start gap-3">
-            {user.profilePictureUrl ? (
-              <img
-                src={user.profilePictureUrl}
-                alt=""
-                className="h-9 w-9 shrink-0 rounded-full object-cover"
-              />
-            ) : (
-              <div
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sidebar-accent text-xs font-medium text-sidebar-accent-foreground"
-                aria-hidden
-              >
-                {displayUserName(user).charAt(0).toUpperCase()}
-              </div>
-            )}
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium">{displayUserName(user)}</p>
-              <p className="truncate text-xs text-muted-foreground">{user.email}</p>
-              <span className="mt-1 inline-block rounded-full bg-sidebar-accent px-2 py-0.5 text-xs text-sidebar-accent-foreground">
-                {user.kind === 'ADMIN' ? 'Admin' : 'Recipient'}
-              </span>
-            </div>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="mt-3 w-full"
-            onClick={() => void handleSignOut()}
-          >
-            Sign out
-          </Button>
-        </div>
-      ) : loading ? (
-        <div className="border-b border-sidebar-border px-4 py-3">
-          <p className="text-xs text-muted-foreground">Loading…</p>
-        </div>
-      ) : null}
-
-      <nav className="flex flex-1 flex-col gap-3 overflow-y-auto px-3 py-4">
-        {groups.map((group) =>
-          group.children ? (
-            <SidebarNavGroup
-              key={group.id}
-              id={group.id}
-              label={group.label}
-              children={group.children}
-              defaultOpen={group.id === 'dev-services' ? pathname === '/' : true}
-            />
-          ) : group.href ? (
-            <div key={group.id}>
-              <SidebarNavSingleLink label={group.label} href={group.href} />
-            </div>
-          ) : null,
+    <Sidebar variant="inset" collapsible="icon">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <Link to={homeHref}>
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg border border-sidebar-border bg-logo-surface">
+                  <img
+                    src="/favicon.png"
+                    alt=""
+                    width={28}
+                    height={28}
+                    className="size-7 object-contain"
+                  />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">Vellum</span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    Secure document transfer
+                  </span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarCollapseButton />
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <VellumSidebarNav groups={groups} />
+      </SidebarContent>
+      <SidebarFooter>
+        {user ? (
+          <NavUser user={user} onSignOut={() => void handleSignOut()} />
+        ) : loading ? (
+          <p className="px-2 py-1 text-xs text-muted-foreground">Loading…</p>
+        ) : (
+          <NavGuestFooter />
         )}
-      </nav>
-
-      <div className="border-t border-sidebar-border px-4 py-3">
-        <ThemeToggle />
-      </div>
-    </aside>
+      </SidebarFooter>
+      <SidebarRail />
+    </Sidebar>
   );
 }

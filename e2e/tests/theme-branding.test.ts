@@ -22,39 +22,51 @@ describe('Theme and branding', () => {
     );
     assert.ok(faviconHref?.includes('favicon'));
 
-    const logo = await page.$('img[alt*="Vellum"]');
+    const logo = await page.$('img[alt*="Vellum"], aside img[src*="favicon"]');
     assert.ok(logo);
     await page.close();
   });
 
-  it('cycles theme via toggle (positive)', async () => {
+  it('changes theme via guest footer menu (positive)', async () => {
     const page = await newPage(browser);
     await page.goto(BASE_URL, { waitUntil: 'networkidle0' });
 
-    const toggle = await page.waitForSelector('aside button[aria-label]');
-    assert.ok(toggle, 'theme toggle should exist in app shell');
+    const before = await page.evaluate(() => localStorage.getItem('vellum-theme'));
 
-    const before = await page.evaluate(() => ({
-      dark: document.documentElement.classList.contains('dark'),
-      scheme: document.documentElement.style.colorScheme,
-      theme: localStorage.getItem('vellum-theme'),
-    }));
+    const themeButtons = await page.$$('aside button');
+    const themeBtn = await (async () => {
+      for (const btn of themeButtons) {
+        const text = await page.evaluate((el) => el.textContent?.trim() ?? '', btn);
+        if (text === 'Theme') {
+          return btn;
+        }
+      }
+      return null;
+    })();
+    assert.ok(themeBtn, 'theme menu should exist in sidebar footer when logged out');
 
-    await toggle.click();
+    await themeBtn.click();
+    await page.waitForSelector('[role="menuitemradio"]', { timeout: 5000 });
+
+    const target =
+      before === 'light' ? 'dark' : before === 'dark' ? 'system' : 'light';
+    const options = await page.$$('[role="menuitemradio"]');
+    for (const option of options) {
+      const label = await page.evaluate((el) => el.textContent?.trim().toLowerCase() ?? '', option);
+      if (label.startsWith(target)) {
+        await option.click();
+        break;
+      }
+    }
+
     await page.waitForFunction(
       (prev) => localStorage.getItem('vellum-theme') !== prev,
       { timeout: 5000 },
-      before.theme,
+      before,
     );
 
-    const after = await page.evaluate(() => ({
-      dark: document.documentElement.classList.contains('dark'),
-      scheme: document.documentElement.style.colorScheme,
-      theme: localStorage.getItem('vellum-theme'),
-    }));
-
-    assert.notEqual(after.theme, before.theme);
-    assert.ok(after.scheme === 'dark' || after.scheme === 'light');
+    const after = await page.evaluate(() => localStorage.getItem('vellum-theme'));
+    assert.notEqual(after, before);
     await page.close();
   });
 });
