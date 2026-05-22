@@ -6,12 +6,17 @@
 
 import type { AuthUser } from './auth/types.ts';
 import type { DevServiceLink } from './dev-services.ts';
+import { buildExperimentalLinks } from './experimental-services.ts';
 
 export type SidebarLinkItem = {
   id: string;
   label: string;
   href: string;
   external?: boolean;
+  /** Open in a new browser tab (e.g. API docs). */
+  newTab?: boolean;
+  /** Load inside the experimental iframe panel (in-app route). */
+  embed?: boolean;
   description?: string;
 };
 
@@ -20,6 +25,7 @@ export type SidebarNavItem = {
   label: string;
   href?: string;
   external?: boolean;
+  newTab?: boolean;
   children?: SidebarLinkItem[];
 };
 
@@ -63,11 +69,13 @@ function filterDevServices(
 }
 
 function devServiceToLink(service: DevServiceLink): SidebarLinkItem {
+  const external = isExternalUrl(service.url);
   return {
     id: service.id,
     label: service.label,
     href: service.url,
-    external: isExternalUrl(service.url),
+    external,
+    newTab: external || service.url.startsWith('/docs'),
     description: service.description,
   };
 }
@@ -85,18 +93,13 @@ export function buildSidebarNav(options: {
   const isLanding = pathname === '/';
   const groups: SidebarNavItem[] = [];
 
-  const mainChildren: SidebarLinkItem[] = [
-    { id: 'home', label: 'Recipient dashboard', href: '/' },
-    { id: 'login', label: 'Login', href: '/login' },
-  ];
-
-  if (user) {
-    mainChildren.push({
-      id: 'dashboard',
-      label: 'Your documents',
-      href: '/dashboard',
-    });
+  if (!user) {
+    return groups;
   }
+
+  const mainChildren: SidebarLinkItem[] = [
+    { id: 'dashboard', label: 'Recipient dashboard', href: '/dashboard' },
+  ];
 
   groups.push({
     id: 'main',
@@ -127,7 +130,7 @@ export function buildSidebarNav(options: {
         id: 'api-docs',
         label: 'API documentation',
         href: '/docs/',
-        external: false,
+        newTab: true,
       });
     }
   }
@@ -138,7 +141,7 @@ export function buildSidebarNav(options: {
   if (isAdmin && isLanding) {
     devChildren.unshift(
       { id: 'admin-app', label: 'Data browser', href: '/admin' },
-      { id: 'admin-docs', label: 'API documentation', href: '/docs/' },
+      { id: 'admin-docs', label: 'API documentation', href: '/docs/', newTab: true },
     );
   }
 
@@ -147,6 +150,15 @@ export function buildSidebarNav(options: {
       id: 'dev-services',
       label: 'Dev services',
       children: devChildren,
+    });
+  }
+
+  const experimentalChildren = buildExperimentalLinks(devServices);
+  if (experimentalChildren.length > 0) {
+    groups.push({
+      id: 'experimental',
+      label: 'Experimental',
+      children: experimentalChildren,
     });
   }
 

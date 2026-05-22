@@ -17,6 +17,7 @@ import { AdminUsersPage } from './pages/admin/AdminUsersPage.tsx';
 import { DashboardPage } from './pages/DashboardPage.tsx';
 import { DevLoginPage } from './pages/DevLoginPage.tsx';
 import { EmailVerificationPage } from './pages/EmailVerificationPage.tsx';
+import { ExperimentalEmbedPage } from './pages/ExperimentalEmbedPage.tsx';
 import { HomePage } from './pages/HomePage.tsx';
 import { VerifyPage } from './pages/VerifyPage.tsx';
 
@@ -32,6 +33,7 @@ export default function App() {
             <Route path="/login" element={<DevLoginPage />} />
             <Route path="/login/email-verification" element={<EmailVerificationPage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/experimental/:serviceId" element={<ExperimentalEmbedPage />} />
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminIndexPage />} />
               <Route path="documents" element={<AdminDocumentsPage />} />

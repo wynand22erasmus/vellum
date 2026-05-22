@@ -8,7 +8,8 @@
  */
 
 import { useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
+import { useAuthMe } from '../hooks/use-auth-me.ts';
 import { VellumLogo } from '../components/vellum-logo.tsx';
 import { Button } from '../components/ui/button.tsx';
 import { Input } from '../components/ui/input.tsx';
@@ -32,6 +33,7 @@ type RequestLoginResponse = {
 
 /** Dev auth route (`/login`); not used when `AUTH_PROVIDER=workos`. */
 export function DevLoginPage() {
+  const { user, loading: authLoading } = useAuthMe();
   const [searchParams] = useSearchParams();
   const verifiedBanner = searchParams.get('verified') === '1';
   const returnTo = safeReturnTo(searchParams.get('returnTo') ?? undefined);
@@ -40,6 +42,18 @@ export function DevLoginPage() {
   const [pendingToken, setPendingToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen flex-1 items-center justify-center p-4">
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      </div>
+    );
+  }
+
+  if (user) {
+    return <Navigate to={returnTo} replace />;
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -97,7 +111,7 @@ export function DevLoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex min-h-full flex-1 items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="items-center">
           <VellumLogo variant="full" linked={false} />

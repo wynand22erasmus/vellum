@@ -13,28 +13,24 @@ describe('Home page', () => {
     await browser.close();
   });
 
-  it('shows branding and navigates to login (positive)', async () => {
+  it('redirects home to login and shows branding (positive)', async () => {
     const page = await newPage(browser);
     await page.goto(BASE_URL, { waitUntil: 'networkidle0' });
+
+    assert.equal(new URL(page.url()).pathname, '/login');
 
     const logo = await page.$('img[alt*="Vellum"]');
     assert.ok(logo, 'logo image should be visible');
 
-    const description = await page.$eval('body', (el) => el.textContent ?? '');
-    assert.match(description, /Secure document transfer/i);
-
-    await Promise.all([
-      page.waitForNavigation({ waitUntil: 'networkidle0' }),
-      page.click('a[href="/login"]'),
-    ]);
-    assert.equal(new URL(page.url()).pathname, '/login');
+    const title = await page.title();
+    assert.match(title, /Secure document transfer/i);
     await page.close();
   });
 
-  it('redirects unknown routes to home (positive)', async () => {
+  it('redirects unknown routes to login (positive)', async () => {
     const page = await newPage(browser);
     await page.goto(`${BASE_URL}/does-not-exist`, { waitUntil: 'networkidle0' });
-    assert.equal(new URL(page.url()).pathname, '/');
+    assert.equal(new URL(page.url()).pathname, '/login');
     const logo = await page.$('img[alt*="Vellum"]');
     assert.ok(logo);
     await page.close();
