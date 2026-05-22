@@ -1,21 +1,34 @@
+/**
+ * Context menu / action list opened from a trigger (Radix).
+ *
+ * @packageDocumentation
+ */
+
 import * as React from "react"
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
 import { Check, ChevronRight, Circle } from "lucide-react"
 
 import { cn } from "@/lib/utils.ts"
 
+/** Root tying trigger, positioning, and items together. */
 const DropdownMenu = DropdownMenuPrimitive.Root
 
+/** Wraps element that toggles visibility of the dropdown. */
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
 
+/** Optional grouping wrapper for adjacent items. */
 const DropdownMenuGroup = DropdownMenuPrimitive.Group
 
+/** Renders dropdown content outside the DOM hierarchy scroll parent. */
 const DropdownMenuPortal = DropdownMenuPrimitive.Portal
 
+/** Starts a submenu tree (nested dropdown). */
 const DropdownMenuSub = DropdownMenuPrimitive.Sub
 
+/** Radio-group scope for mutually exclusive selectable items. */
 const DropdownMenuRadioGroup = DropdownMenuPrimitive.RadioGroup
 
+/** Opens a nested submenu row (chevron on the right). */
 const DropdownMenuSubTrigger = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.SubTrigger>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> & {
@@ -38,6 +51,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
 DropdownMenuSubTrigger.displayName =
   DropdownMenuPrimitive.SubTrigger.displayName
 
+/** Nested panel aligned to SubTrigger. */
 const DropdownMenuSubContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.SubContent>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubContent>
@@ -54,6 +68,7 @@ const DropdownMenuSubContent = React.forwardRef<
 DropdownMenuSubContent.displayName =
   DropdownMenuPrimitive.SubContent.displayName
 
+/** Floating menu positioned under the trigger. */
 const DropdownMenuContent = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content>
@@ -73,6 +88,7 @@ const DropdownMenuContent = React.forwardRef<
 ))
 DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName
 
+/** Plain selectable menu row (kbd/focus styling). */
 const DropdownMenuItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
@@ -91,6 +107,7 @@ const DropdownMenuItem = React.forwardRef<
 ))
 DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName
 
+/** Toggle-style row drawn with checkbox indicator slot. */
 const DropdownMenuCheckboxItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.CheckboxItem>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.CheckboxItem>
@@ -115,6 +132,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
 DropdownMenuCheckboxItem.displayName =
   DropdownMenuPrimitive.CheckboxItem.displayName
 
+/** Radio selectable row drawn with circular indicator slot. */
 const DropdownMenuRadioItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.RadioItem>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.RadioItem>
@@ -137,6 +155,7 @@ const DropdownMenuRadioItem = React.forwardRef<
 ))
 DropdownMenuRadioItem.displayName = DropdownMenuPrimitive.RadioItem.displayName
 
+/** Non-interactive heading text before a cluster of rows. */
 const DropdownMenuLabel = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Label>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Label> & {
@@ -155,6 +174,7 @@ const DropdownMenuLabel = React.forwardRef<
 ))
 DropdownMenuLabel.displayName = DropdownMenuPrimitive.Label.displayName
 
+/** Hairline spacer between dropdown sections. */
 const DropdownMenuSeparator = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Separator>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Separator>
@@ -167,6 +187,7 @@ const DropdownMenuSeparator = React.forwardRef<
 ))
 DropdownMenuSeparator.displayName = DropdownMenuPrimitive.Separator.displayName
 
+/** Muted keyboard shortcut hint appended to rows. */
 const DropdownMenuShortcut = ({
   className,
   ...props

@@ -1,14 +1,24 @@
+/**
+ * Hover/focus tooltip (Radix) with themed content.
+ *
+ * @packageDocumentation
+ */
+
 import * as React from "react"
 import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
 import { cn } from "@/lib/utils.ts"
 
+/** Wraps subtree to enable themed delay and layering. */
 const TooltipProvider = TooltipPrimitive.Provider
 
+/** Root that pairs a trigger with floating content. */
 const Tooltip = TooltipPrimitive.Root
 
+/** Element that receives focus/hover and shows the tooltip. */
 const TooltipTrigger = TooltipPrimitive.Trigger
 
+/** Floating tooltip bubble. */
 const TooltipContent = React.forwardRef<
   React.ElementRef<typeof TooltipPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>

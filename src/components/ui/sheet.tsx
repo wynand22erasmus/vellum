@@ -1,3 +1,9 @@
+/**
+ * Slide-over dialog panel (“sheet”) anchored to viewport edges (Radix dialog).
+ *
+ * @packageDocumentation
+ */
+
 import * as React from "react"
 import * as SheetPrimitive from "@radix-ui/react-dialog"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -5,14 +11,19 @@ import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils.ts"
 
+/** Root controlling open state and layering. */
 const Sheet = SheetPrimitive.Root
 
+/** Element that switches the sheet open without extra wiring. */
 const SheetTrigger = SheetPrimitive.Trigger
 
+/** Programmatic dismiss control wired to primitive close. */
 const SheetClose = SheetPrimitive.Close
 
+/** Portals overlay + content beneath `body`-level portals. */
 const SheetPortal = SheetPrimitive.Portal
 
+/** Dim backdrop behind slide-over content. */
 const SheetOverlay = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>
@@ -51,6 +62,7 @@ interface SheetContentProps
   extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
     VariantProps<typeof sheetVariants> {}
 
+/** Slide-over panel paired with overlay; includes close button slot. */
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
@@ -72,6 +84,7 @@ const SheetContent = React.forwardRef<
 ))
 SheetContent.displayName = SheetPrimitive.Content.displayName
 
+/** Top stack of titles above sheet body (`text`-aligned). */
 const SheetHeader = ({
   className,
   ...props
@@ -86,6 +99,7 @@ const SheetHeader = ({
 )
 SheetHeader.displayName = "SheetHeader"
 
+/** Footer row grouping primary/secondary sheet actions. */
 const SheetFooter = ({
   className,
   ...props
@@ -100,6 +114,7 @@ const SheetFooter = ({
 )
 SheetFooter.displayName = "SheetFooter"
 
+/** Accessible title element for dialogs (screen reader). */
 const SheetTitle = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Title>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Title>
@@ -112,6 +127,7 @@ const SheetTitle = React.forwardRef<
 ))
 SheetTitle.displayName = SheetPrimitive.Title.displayName
 
+/** Supplementary muted description paired with SheetTitle. */
 const SheetDescription = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Description>,
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Description>

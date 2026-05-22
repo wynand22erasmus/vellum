@@ -1,8 +1,15 @@
+/**
+ * Horizontal or vertical divider (Radix separator).
+ *
+ * @packageDocumentation
+ */
+
 import * as React from "react"
 import * as SeparatorPrimitive from "@radix-ui/react-separator"
 
 import { cn } from "@/lib/utils.ts"
 
+/** Divider line (`horizontal` by default). */
 const Separator = React.forwardRef<
   React.ElementRef<typeof SeparatorPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof SeparatorPrimitive.Root>

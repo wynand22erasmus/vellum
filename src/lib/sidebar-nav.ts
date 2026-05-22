@@ -8,6 +8,7 @@ import type { AuthUser } from './auth/types.ts';
 import type { DevServiceLink } from './dev-services.ts';
 import { buildExperimentalLinks } from './experimental-services.ts';
 
+/** Leaf link describing one sidebar navigation entry. */
 export type SidebarLinkItem = {
   id: string;
   label: string;
@@ -20,6 +21,7 @@ export type SidebarLinkItem = {
   description?: string;
 };
 
+/** Sidebar section with optional children rows or lone top-level anchor. */
 export type SidebarNavItem = {
   id: string;
   label: string;

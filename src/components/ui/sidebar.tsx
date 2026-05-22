@@ -1,4 +1,10 @@
 /* eslint-disable react-refresh/only-export-components -- shadcn sidebar exports hooks and primitives together */
+/**
+ * App shell sidebar (responsive sheet + desktop dock) and menu primitives.
+ *
+ * @packageDocumentation
+ */
+
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -56,6 +62,11 @@ type SidebarContextProps = {
 
 const SidebarContext = React.createContext<SidebarContextProps | null>(null)
 
+/**
+ * Sidebar open state, breakpoints, and keyboard toggle helpers.
+ *
+ * Must be rendered under {@link SidebarProvider}.
+ */
 function useSidebar() {
   const context = React.useContext(SidebarContext)
   if (!context) {
@@ -65,6 +76,7 @@ function useSidebar() {
   return context
 }
 
+/** Wrap layout and persist expanded/collapsed desktop state (cookie-backed). */
 const SidebarProvider = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {
@@ -174,6 +186,7 @@ const SidebarProvider = React.forwardRef<
 )
 SidebarProvider.displayName = "SidebarProvider"
 
+/** Primary sidebar surface (desktop column or mobile Sheet). */
 const Sidebar = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {
@@ -281,6 +294,7 @@ const Sidebar = React.forwardRef<
 )
 Sidebar.displayName = "Sidebar"
 
+/** Icon button calling {@link useSidebar}'s toggle. */
 const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button>
@@ -307,6 +321,7 @@ const SidebarTrigger = React.forwardRef<
 })
 SidebarTrigger.displayName = "SidebarTrigger"
 
+/** Narrow hit strip at pane edge resizing/toggling collapsed state. */
 const SidebarRail = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button">
@@ -336,6 +351,7 @@ const SidebarRail = React.forwardRef<
 })
 SidebarRail.displayName = "SidebarRail"
 
+/** Main content column beside sidebar (responds to collapsed peer). */
 const SidebarInset = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"main">
@@ -354,6 +370,7 @@ const SidebarInset = React.forwardRef<
 })
 SidebarInset.displayName = "SidebarInset"
 
+/** Sidebar-styled wrapper around text input primitives. */
 const SidebarInput = React.forwardRef<
   React.ElementRef<typeof Input>,
   React.ComponentProps<typeof Input>
@@ -372,6 +389,7 @@ const SidebarInput = React.forwardRef<
 })
 SidebarInput.displayName = "SidebarInput"
 
+/** Upper slot for branding/logo rows above nav groups. */
 const SidebarHeader = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
@@ -387,6 +405,7 @@ const SidebarHeader = React.forwardRef<
 })
 SidebarHeader.displayName = "SidebarHeader"
 
+/** Footer slot pinned under scrollable sidebar content (user menu, etc.). */
 const SidebarFooter = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
@@ -402,6 +421,7 @@ const SidebarFooter = React.forwardRef<
 })
 SidebarFooter.displayName = "SidebarFooter"
 
+/** Divider using sidebar-themed border color tokens. */
 const SidebarSeparator = React.forwardRef<
   React.ElementRef<typeof Separator>,
   React.ComponentProps<typeof Separator>
@@ -417,6 +437,7 @@ const SidebarSeparator = React.forwardRef<
 })
 SidebarSeparator.displayName = "SidebarSeparator"
 
+/** Scrollable nav body sandwiched between header/footer chrome. */
 const SidebarContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
@@ -435,6 +456,7 @@ const SidebarContent = React.forwardRef<
 })
 SidebarContent.displayName = "SidebarContent"
 
+/** Semantic grouping wrapping label + actionable menu list. */
 const SidebarGroup = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
@@ -450,6 +472,7 @@ const SidebarGroup = React.forwardRef<
 })
 SidebarGroup.displayName = "SidebarGroup"
 
+/** Quiet heading label above a SidebarGroup cluster. */
 const SidebarGroupLabel = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & { asChild?: boolean }
@@ -471,6 +494,7 @@ const SidebarGroupLabel = React.forwardRef<
 })
 SidebarGroupLabel.displayName = "SidebarGroupLabel"
 
+/** Secondary icon/text action anchored to group's top-right corner. */
 const SidebarGroupAction = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button"> & { asChild?: boolean }
@@ -494,6 +518,7 @@ const SidebarGroupAction = React.forwardRef<
 })
 SidebarGroupAction.displayName = "SidebarGroupAction"
 
+/** Flow container for SidebarMenu stacks inside a SidebarGroup. */
 const SidebarGroupContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
@@ -507,6 +532,7 @@ const SidebarGroupContent = React.forwardRef<
 ))
 SidebarGroupContent.displayName = "SidebarGroupContent"
 
+/** Vertical unordered list holding sidebar navigation items. */
 const SidebarMenu = React.forwardRef<
   HTMLUListElement,
   React.ComponentProps<"ul">
@@ -520,6 +546,7 @@ const SidebarMenu = React.forwardRef<
 ))
 SidebarMenu.displayName = "SidebarMenu"
 
+/** Single clickable row wrapping menu button + optional actions/badges. */
 const SidebarMenuItem = React.forwardRef<
   HTMLLIElement,
   React.ComponentProps<"li">
@@ -555,6 +582,7 @@ const sidebarMenuButtonVariants = cva(
   }
 )
 
+/** Primary clickable nav row (`default`/`outline`) with collapsed tooltip helpers. */
 const SidebarMenuButton = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button"> & {
@@ -614,6 +642,7 @@ const SidebarMenuButton = React.forwardRef<
 )
 SidebarMenuButton.displayName = "SidebarMenuButton"
 
+/** Compact icon/text action anchored on a SidebarMenuItem (hover fades). */
 const SidebarMenuAction = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button"> & {
@@ -645,6 +674,7 @@ const SidebarMenuAction = React.forwardRef<
 })
 SidebarMenuAction.displayName = "SidebarMenuAction"
 
+/** Badge pill aligned to menu row trailing edge (counts, tags). */
 const SidebarMenuBadge = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div">
@@ -666,6 +696,7 @@ const SidebarMenuBadge = React.forwardRef<
 ))
 SidebarMenuBadge.displayName = "SidebarMenuBadge"
 
+/** Loading placeholder mimic for menu rows (+ optional faux icon skeleton). */
 const SidebarMenuSkeleton = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {
@@ -701,6 +732,7 @@ const SidebarMenuSkeleton = React.forwardRef<
 })
 SidebarMenuSkeleton.displayName = "SidebarMenuSkeleton"
 
+/** Indented bordered list for submenu links rooted under expanded parents. */
 const SidebarMenuSub = React.forwardRef<
   HTMLUListElement,
   React.ComponentProps<"ul">
@@ -718,12 +750,14 @@ const SidebarMenuSub = React.forwardRef<
 ))
 SidebarMenuSub.displayName = "SidebarMenuSub"
 
+/** List item wrapping individual submenu anchors. */
 const SidebarMenuSubItem = React.forwardRef<
   HTMLLIElement,
   React.ComponentProps<"li">
 >(({ ...props }, ref) => <li ref={ref} {...props} />)
 SidebarMenuSubItem.displayName = "SidebarMenuSubItem"
 
+/** Styled anchor/button for indented submenu hierarchy. */
 const SidebarMenuSubButton = React.forwardRef<
   HTMLAnchorElement,
   React.ComponentProps<"a"> & {
