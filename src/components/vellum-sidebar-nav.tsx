@@ -5,7 +5,7 @@
  */
 
 import { NavLink, useLocation } from 'react-router-dom';
-import { sidebarLinkIcon } from '../lib/sidebar-icons.ts';
+import { SidebarLinkIcon } from './sidebar-link-icon.tsx';
 import type { SidebarLinkItem, SidebarNavItem } from '../lib/sidebar-nav.ts';
 import {
   SidebarGroup,
@@ -39,14 +39,13 @@ function linkIsActive(pathname: string, href: string): boolean {
 
 function NavLinkItem({ item }: { item: SidebarLinkItem }) {
   const { pathname } = useLocation();
-  const Icon = sidebarLinkIcon(item.id);
   const isActive = linkIsActive(pathname, item.href);
 
   if (opensNewTab(item)) {
     return (
       <SidebarMenuButton asChild tooltip={item.label}>
         <a href={item.href} target="_blank" rel="noopener noreferrer">
-          <Icon className="size-4" aria-hidden />
+          <SidebarLinkIcon id={item.id} />
           <span>{item.label}</span>
         </a>
       </SidebarMenuButton>
@@ -57,7 +56,7 @@ function NavLinkItem({ item }: { item: SidebarLinkItem }) {
     return (
       <SidebarMenuButton asChild tooltip={item.label}>
         <a href={item.href}>
-          <Icon className="size-4" aria-hidden />
+          <SidebarLinkIcon id={item.id} />
           <span>{item.label}</span>
         </a>
       </SidebarMenuButton>
@@ -74,7 +73,7 @@ function NavLinkItem({ item }: { item: SidebarLinkItem }) {
           item.href.startsWith('/experimental/')
         }
       >
-        <Icon className="size-4" aria-hidden />
+        <SidebarLinkIcon id={item.id} />
         <span>{item.label}</span>
       </NavLink>
     </SidebarMenuButton>
