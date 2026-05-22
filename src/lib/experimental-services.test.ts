@@ -1,5 +1,4 @@
-import { describe, it } from 'node:test';
-import assert from 'node:assert/strict';
+import { describe, expect, it } from 'vitest';
 import {
   buildExperimentalLinks,
   resolveExperimentalUrl,
@@ -15,17 +14,17 @@ const services: DevServiceLink[] = [
 describe('experimental-services', () => {
   it('maps web services to in-app experimental routes (positive)', () => {
     const links = buildExperimentalLinks(services);
-    assert.equal(links.length, 2);
-    assert.ok(links.every((link) => link.embed));
-    assert.deepEqual(
-      links.map((link) => link.href),
-      ['/experimental/docs', '/experimental/mailpit'],
-    );
-    assert.ok(links.every((link) => !link.href.includes('app')));
+    expect(links).toHaveLength(2);
+    expect(links.every((link) => link.embed)).toBe(true);
+    expect(links.map((link) => link.href)).toEqual([
+      '/experimental/docs',
+      '/experimental/mailpit',
+    ]);
+    expect(links.every((link) => !link.href.includes('app'))).toBe(true);
   });
 
   it('resolves experimental service by id (positive)', () => {
-    assert.equal(resolveExperimentalUrl('mailpit', services)?.label, 'Mailpit');
-    assert.equal(resolveExperimentalUrl('missing', services), undefined);
+    expect(resolveExperimentalUrl('mailpit', services)?.label).toBe('Mailpit');
+    expect(resolveExperimentalUrl('missing', services)).toBeUndefined();
   });
 });
