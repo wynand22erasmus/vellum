@@ -42,8 +42,8 @@ export function useAuthMe(): UseAuthMeResult {
           setUser(null);
           return;
         }
-        const data = (await res.json()) as { user: AuthUser };
-        setUser(data.user);
+        const data = (await res.json()) as { user: AuthUser | null };
+        setUser(data.user ?? null);
       } catch {
         if (!cancelled) {
           setUser(null);

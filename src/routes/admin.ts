@@ -10,7 +10,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma.ts';
-import { AuditEventType } from '../../generated/enums.ts';
+import { AuditEventType, UserKind } from '../../generated/enums.ts';
 
 /** Express router mounted at `/api/admin`. */
 export const adminRouter = Router();
@@ -28,6 +28,43 @@ const auditEventTypeSchema = z.enum([
   AuditEventType.FILE_DOWNLOAD_FAILED,
   AuditEventType.FILE_SCRUBBED,
 ]);
+
+function trimQueryString(value: unknown, maxLen: number): string | undefined {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  if (trimmed.length === 0) {
+    return undefined;
+  }
+  return trimmed.slice(0, maxLen);
+}
+
+function parseBooleanQuery(value: unknown): boolean | undefined {
+  if (value === 'true') {
+    return true;
+  }
+  if (value === 'false') {
+    return false;
+  }
+  return undefined;
+}
+
+function parseDateRangeQuery(query: Record<string, unknown>) {
+  const fromRaw = trimQueryString(query.from, 64);
+  const toRaw = trimQueryString(query.to, 64);
+  const from = fromRaw ? new Date(fromRaw) : undefined;
+  const to = toRaw ? new Date(toRaw) : undefined;
+
+  if (from && Number.isNaN(from.getTime())) {
+    return { error: 'Invalid from date.' as const };
+  }
+  if (to && Number.isNaN(to.getTime())) {
+    return { error: 'Invalid to date.' as const };
+  }
+
+  return { from, to };
+}
 
 function mapDocumentRow(
   doc: {
@@ -67,12 +104,20 @@ adminRouter.get('/documents', async (req, res) => {
     return;
   }
   const { limit, offset } = parsed.data;
-  const recipientEmail =
-    typeof req.query.recipientEmail === 'string' && req.query.recipientEmail.trim().length > 0
-      ? req.query.recipientEmail.trim().slice(0, 320)
-      : undefined;
+  const recipientEmail = trimQueryString(req.query.recipientEmail, 320);
+  const fileName = trimQueryString(req.query.fileName, 255);
 
-  const where = recipientEmail ? { recipientEmail } : {};
+  const where = {
+    ...(recipientEmail ? { recipientEmail } : {}),
+    ...(fileName
+      ? {
+          fileName: {
+            contains: fileName,
+            mode: 'insensitive' as const,
+          },
+        }
+      : {}),
+  };
 
   const [total, rows] = await Promise.all([
     prisma.document.count({ where }),
@@ -170,10 +215,34 @@ adminRouter.get('/users', async (req, res) => {
     return;
   }
   const { limit, offset } = parsed.data;
+  const email = trimQueryString(req.query.email, 320);
+  const kindRaw = trimQueryString(req.query.kind, 32);
+  const kind =
+    kindRaw === UserKind.ADMIN || kindRaw === UserKind.CONSUMER ? kindRaw : undefined;
+  const emailVerified = parseBooleanQuery(req.query.emailVerified);
+
+  if (kindRaw && !kind) {
+    res.status(400).json({ error: 'Invalid kind filter.' });
+    return;
+  }
+
+  const where = {
+    ...(email
+      ? {
+          email: {
+            contains: email,
+            mode: 'insensitive' as const,
+          },
+        }
+      : {}),
+    ...(kind ? { kind } : {}),
+    ...(emailVerified !== undefined ? { emailVerified } : {}),
+  };
 
   const [total, users] = await Promise.all([
-    prisma.user.count(),
+    prisma.user.count({ where }),
     prisma.user.findMany({
+      where,
       orderBy: { createdAt: 'desc' },
       take: limit,
       skip: offset,
@@ -223,28 +292,14 @@ adminRouter.get('/audit-logs', async (req, res) => {
     return;
   }
 
-  const documentId =
-    typeof req.query.documentId === 'string' && req.query.documentId.trim().length > 0
-      ? req.query.documentId.trim()
-      : undefined;
+  const documentId = trimQueryString(req.query.documentId, 64);
 
-  const from =
-    typeof req.query.from === 'string' && req.query.from.length > 0
-      ? new Date(req.query.from)
-      : undefined;
-  const to =
-    typeof req.query.to === 'string' && req.query.to.length > 0
-      ? new Date(req.query.to)
-      : undefined;
-
-  if (from && Number.isNaN(from.getTime())) {
-    res.status(400).json({ error: 'Invalid from date.' });
+  const dateRange = parseDateRangeQuery(req.query);
+  if ('error' in dateRange) {
+    res.status(400).json({ error: dateRange.error });
     return;
   }
-  if (to && Number.isNaN(to.getTime())) {
-    res.status(400).json({ error: 'Invalid to date.' });
-    return;
-  }
+  const { from, to } = dateRange;
 
   const where = {
     ...(eventTypeParsed.data ? { eventType: eventTypeParsed.data } : {}),
@@ -303,10 +358,37 @@ adminRouter.get('/failed-audit-logs', async (req, res) => {
     return;
   }
   const { limit, offset } = parsed.data;
+  const errorFilter = trimQueryString(req.query.error, 500);
+  const retried = parseBooleanQuery(req.query.retried);
+  const dateRange = parseDateRangeQuery(req.query);
+  if ('error' in dateRange) {
+    res.status(400).json({ error: dateRange.error });
+    return;
+  }
+  const { from, to } = dateRange;
+
+  const where = {
+    ...(errorFilter
+      ? {
+          error: {
+            contains: errorFilter,
+            mode: 'insensitive' as const,
+          },
+        }
+      : {}),
+    ...(retried !== undefined ? { retried } : {}),
+    ...((from || to) && {
+      createdAt: {
+        ...(from ? { gte: from } : {}),
+        ...(to ? { lte: to } : {}),
+      },
+    }),
+  };
 
   const [total, rows] = await Promise.all([
-    prisma.failedAuditLog.count(),
+    prisma.failedAuditLog.count({ where }),
     prisma.failedAuditLog.findMany({
+      where,
       orderBy: { createdAt: 'desc' },
       take: limit,
       skip: offset,

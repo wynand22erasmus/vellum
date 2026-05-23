@@ -9,7 +9,7 @@
  * - `POST /api/auth/dev/request-login` — dev: email verification or immediate access if verified
  * - `POST /api/auth/resend-verification` — resend WorkOS or dev verification email
  * - `POST /api/auth/logout` — clears session cookie
- * - `GET /api/auth/me` — current user (`vellum_session` cookie; dev also accepts `X-Dev-User-Email`)
+ * - `GET /api/auth/me` — current user or `{ user: null }` (`vellum_session` cookie; dev also accepts `X-Dev-User-Email`)
  */
 
 import { Router } from 'express';
@@ -191,7 +191,7 @@ authRouter.post('/logout', (_req, res) => {
 authRouter.get('/me', async (req, res) => {
   const user = await resolveRequestUser(req);
   if (!user) {
-    res.status(401).json({ error: 'Not authenticated.' });
+    res.json({ user: null, provider: env.authProvider });
     return;
   }
   res.json({ user, provider: env.authProvider });

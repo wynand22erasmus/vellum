@@ -24,6 +24,7 @@ import { documentsRouter } from './routes/documents.ts';
 import { authRouter } from './routes/auth.ts';
 import { adminRouter } from './routes/admin.ts';
 import { mountApiDocs } from './routes/docs.ts';
+import { studioRouter } from './routes/studio.ts';
 
 /**
  * Builds the Express app with security middleware and mounted API routers.
@@ -46,6 +47,7 @@ export async function createApp(): Promise<express.Application> {
   app.use('/api/verify', verifyRouter);
   app.use('/api/documents', dashboardAuth, documentsRouter);
   app.use('/api/admin', adminAuth, adminRouter);
+  app.use('/api/studio', adminAuth, studioRouter);
   app.use('/api/auth', authRouter);
   mountApiDocs(app);
 

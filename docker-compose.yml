@@ -147,6 +147,8 @@ services:
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
+      # Console subpath when embedded in ui-v2 (see ui-v2/vite-minio-console-proxy.ts).
+      MINIO_BROWSER_REDIRECT_URL: http://${VELLUM_HOST:-localhost}:5174/dev-proxy/minio-console/
 
   clamav:
     image: clamav/clamav:latest
@@ -166,9 +168,32 @@ services:
     labels:
       <<: *vellum-labels
       com.vellum.service: mailpit
+    environment:
+      MP_WEBROOT: /dev-proxy/mailpit
+      # Allow ui-v2 proxy origin when Host cannot be preserved (dev only).
+      MP_API_CORS: "http://${VELLUM_HOST:-localhost}:5174,http://127.0.0.1:5174,http://localhost:5174"
     ports:
       - "8025:8025"
       - "1025:1025"
+
+  ui-v2:
+    image: ${VELLUM_PROJECT:-vellum}-app:${VELLUM_ENV:-development}
+    labels:
+      <<: *vellum-labels
+      com.vellum.service: ui-v2
+    env_file: .env
+    environment:
+      <<: *app-env
+      VELLUM_API_URL: http://app:5173
+    ports:
+      - "5174:5174"
+    volumes:
+      - .:/app
+      - app_node_modules:/app/node_modules
+    depends_on:
+      app:
+        condition: service_healthy
+    command: ["npm", "run", "dev:ui-v2"]
 
   nginx:
     image: nginx:alpine

@@ -20,15 +20,15 @@ export function AdminLayout() {
       if (cancelled) {
         return;
       }
-      if (res.status === 401) {
-        window.location.href = `/login?returnTo=${encodeURIComponent('/admin')}`;
-        return;
-      }
       if (!res.ok) {
         navigate('/', { replace: true });
         return;
       }
-      const data = (await res.json()) as { user: { kind: string } };
+      const data = (await res.json()) as { user: { kind: string } | null };
+      if (!data.user) {
+        window.location.href = `/login?returnTo=${encodeURIComponent('/admin')}`;
+        return;
+      }
       if (data.user.kind !== 'ADMIN') {
         navigate('/', { replace: true });
         return;
