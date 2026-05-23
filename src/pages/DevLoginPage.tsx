@@ -1,28 +1,17 @@
-/**
- * Development login form (stores recipient email for `X-Dev-User-Email`).
- *
- * @packageDocumentation
- * @remarks
- * Users must verify their email via Mailpit before the dashboard accepts requests.
- * Set `SKIP_EMAIL_VERIFICATION=true` only for automated E2E runs.
- */
-
 import { useState } from 'react';
-import { Link, Navigate, useSearchParams } from 'react-router-dom';
-import { useAuthMe } from '../hooks/use-auth-me.ts';
-import { VellumLogo } from '../components/vellum-logo.tsx';
-import { Button } from '../components/ui/button.tsx';
-import { Input } from '../components/ui/input.tsx';
-import { Label } from '../components/ui/label.tsx';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '../components/ui/card.tsx';
-import { safeReturnTo } from '../lib/auth/returnTo.ts';
-import { setDevEmail } from '../lib/api.ts';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { toast } from 'sonner';
+import { VellumLogo } from '@/components/vellum-logo';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useAuthMe } from '@/hooks/use-auth-me';
+import { setDevEmail } from '@/lib/api';
+import { PAGE_LABELS, panelDescription } from '@/lib/page-labels';
+import { safeReturnTo } from '@/lib/auth';
 
 type RequestLoginResponse = {
   verified: boolean;
@@ -31,9 +20,9 @@ type RequestLoginResponse = {
   message?: string;
 };
 
-/** Dev auth route (`/login`); not used when `AUTH_PROVIDER=workos`. */
 export function DevLoginPage() {
-  const { user, loading: authLoading } = useAuthMe();
+  const { user, loading: authLoading, refresh } = useAuthMe();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const verifiedBanner = searchParams.get('verified') === '1';
   const returnTo = safeReturnTo(searchParams.get('returnTo') ?? undefined);
@@ -45,8 +34,8 @@ export function DevLoginPage() {
 
   if (authLoading) {
     return (
-      <div className="flex min-h-screen flex-1 items-center justify-center p-4">
-        <p className="text-sm text-muted-foreground">Loading…</p>
+      <div className="flex flex-1 items-center justify-center p-4">
+        <Skeleton className="h-8 w-40" />
       </div>
     );
   }
@@ -74,7 +63,13 @@ export function DevLoginPage() {
 
       if (data.verified) {
         setDevEmail(data.email);
-        window.location.assign(returnTo);
+        const signedInUser = await refresh();
+        if (!signedInUser) {
+          setError('Signed in, but your session could not be loaded. Please try again.');
+          return;
+        }
+        toast.success('Signed in');
+        navigate(returnTo, { replace: true });
         return;
       }
 
@@ -88,9 +83,7 @@ export function DevLoginPage() {
   }
 
   async function handleResend() {
-    if (!pendingToken) {
-      return;
-    }
+    if (!pendingToken) return;
     setLoading(true);
     setError(null);
     try {
@@ -103,6 +96,7 @@ export function DevLoginPage() {
       if (!res.ok) {
         throw new Error(data.error ?? 'Could not resend verification email.');
       }
+      toast.success('Verification email sent');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not resend verification email.');
     } finally {
@@ -115,16 +109,16 @@ export function DevLoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="items-center">
           <VellumLogo variant="full" linked={false} />
-          <CardTitle className="pt-2">Dev Login</CardTitle>
-          <CardDescription>
-            Enter your email to access the dashboard. You must verify your address before signing in.
-          </CardDescription>
+          <CardTitle className="pt-2">{PAGE_LABELS.devLogin.nav}</CardTitle>
+          <CardDescription>{panelDescription(PAGE_LABELS.devLogin)}</CardDescription>
         </CardHeader>
         <CardContent>
           {verifiedBanner ? (
-            <p className="mb-4 text-sm text-green-700 dark:text-green-400">
-              Email verified. Enter your address below to continue.
-            </p>
+            <Alert className="mb-4 border-success/30 bg-success-muted">
+              <AlertDescription className="text-success">
+                Email verified. Enter your address below to continue.
+              </AlertDescription>
+            </Alert>
           ) : null}
           {awaitingVerification ? (
             <div className="space-y-4">
@@ -165,7 +159,11 @@ export function DevLoginPage() {
               </Button>
             </form>
           )}
-          {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
+          {error ? (
+            <Alert variant="destructive" className="mt-3">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          ) : null}
           <p className="mt-4 text-center text-sm text-muted-foreground">
             Or{' '}
             <a

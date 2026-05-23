@@ -29,7 +29,7 @@ import { studioRouter } from './routes/studio.ts';
 /**
  * Builds the Express app with security middleware and mounted API routers.
  *
- * @returns Configured Express application (static `dist/` in production only)
+ * @returns Configured Express application (SPA in production)
  */
 export async function createApp(): Promise<express.Application> {
   const app = express();
@@ -53,10 +53,11 @@ export async function createApp(): Promise<express.Application> {
 
   if (env.isProduction) {
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    const distPath = path.join(__dirname, '..', 'dist');
-    app.use(express.static(distPath));
+    const dist = path.join(__dirname, '..', 'dist');
+
+    app.use(express.static(dist));
     app.get(/^(?!\/api).*/, (_req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+      res.sendFile(path.join(dist, 'index.html'));
     });
   }
 

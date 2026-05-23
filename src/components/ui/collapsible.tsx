@@ -1,18 +1,33 @@
-/**
- * Collapsible expand/collapse region (Radix primitive wrappers).
- *
- * @packageDocumentation
- */
+"use client"
 
-import * as CollapsiblePrimitive from "@radix-ui/react-collapsible"
+import { Collapsible as CollapsiblePrimitive } from "radix-ui"
 
-/** Root that toggles visibility of collapsible sections. */
-const Collapsible = CollapsiblePrimitive.Root
+function Collapsible({
+  ...props
+}: React.ComponentProps<typeof CollapsiblePrimitive.Root>) {
+  return <CollapsiblePrimitive.Root data-slot="collapsible" {...props} />
+}
 
-/** Opens or closes the associated content. */
-const CollapsibleTrigger = CollapsiblePrimitive.CollapsibleTrigger
+function CollapsibleTrigger({
+  ...props
+}: React.ComponentProps<typeof CollapsiblePrimitive.CollapsibleTrigger>) {
+  return (
+    <CollapsiblePrimitive.CollapsibleTrigger
+      data-slot="collapsible-trigger"
+      {...props}
+    />
+  )
+}
 
-/** Animated region revealed when expanded. */
-const CollapsibleContent = CollapsiblePrimitive.CollapsibleContent
+function CollapsibleContent({
+  ...props
+}: React.ComponentProps<typeof CollapsiblePrimitive.CollapsibleContent>) {
+  return (
+    <CollapsiblePrimitive.CollapsibleContent
+      data-slot="collapsible-content"
+      {...props}
+    />
+  )
+}
 
 export { Collapsible, CollapsibleTrigger, CollapsibleContent }

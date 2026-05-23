@@ -5,7 +5,8 @@ import { launchBrowser, loadState, newPage } from '../helpers.ts';
 describe('Verify page', () => {
   let state: ReturnType<typeof loadState>;
   let browser: Awaited<ReturnType<typeof launchBrowser>>;
-  const isUiV2Target = () => /:5174(?:\/|$)/.test(state.baseUrl);
+  const isUiV2Target = () =>
+    /:5174(?:\/|$)/.test(state.baseUrl) || /:8080(?:\/|$)/.test(state.baseUrl);
 
   before(async () => {
     state = loadState();
@@ -59,7 +60,7 @@ describe('Verify page', () => {
 
   it('navigates to complete page after correct password (positive)', async (t) => {
     if (!isUiV2Target()) {
-      t.skip('Requires ui-v2 at E2E_BASE_URL (e.g. http://localhost:5174)');
+      t.skip('Requires the web UI at E2E_BASE_URL (e.g. http://localhost:5174)');
       return;
     }
     const page = await newPage(browser);

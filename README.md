@@ -47,9 +47,9 @@ npm run up:logs
 
 | Service | URL |
 |---------|-----|
-| Web UI (via nginx) | `http://$VELLUM_HOST:8080` (default host: `localhost`) |
-| Web UI (direct) | `http://$VELLUM_HOST:5173` when using the app container port |
-| Web UI v2 (direct) | `http://$VELLUM_HOST:5174` when the `ui-v2` Compose service is running |
+| **Web UI (via nginx)** | `http://$VELLUM_HOST:8080` (default host: `localhost`) |
+| Web UI (direct) | `http://$VELLUM_HOST:5174` |
+| API (direct) | `http://$VELLUM_HOST:5173/api/…` |
 | API docs (admin) | `/docs/` after `npm run docs:api` — sign in as an admin first |
 | Data browser (admin) | `/admin` — read-only lists for documents, users, audit logs (session + `ADMIN` role) |
 | Prisma Studio | `http://$VELLUM_HOST:5555` (runs in **postgres** container) |
@@ -71,12 +71,14 @@ Run backing services in containers and the app on the host (requires Node.js 24 
 cp .env.example .env
 npm run infra:up
 npm install && npm run db:generate && npm run db:migrate:deploy
-npm run dev          # terminal 1
-npm run worker       # terminal 2
-# optional: npm run db:studio   # ensure Prisma Studio is up (also started by npm run up)
+npm run dev:stack   # terminal 1: API :5173 + Vite :5174
+npm run worker      # terminal 2
+# optional: npm run db:studio
 ```
 
 Compose helper detection order: `docker compose` → `podman compose` → `docker-compose` → `podman-compose`.
+
+The legacy ui-v1 React app lives under `backup/ui-v1/` for reference and is **not** built or served. The active UI is in `src/` (pages, components, hooks) alongside the API.
 
 ## API usage
 
@@ -100,7 +102,7 @@ Allowed file types come from `ALLOWED_UPLOAD_EXTENSIONS` (JSON array of extensio
 
 1. Open the link from email: `/verify/{token}`
 2. Enter the file password
-3. Browser redirects to a 30-second presigned MinIO URL
+3. Download starts; the tab shows a completion screen (`/verify/{token}/complete`)
 
 ### Dashboard sign-in
 

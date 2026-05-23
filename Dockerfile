@@ -32,7 +32,7 @@ ENV DATABASE_URL=${DATABASE_URL}
 COPY . .
 RUN npx prisma generate
 EXPOSE 5173
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "dev:api"]
 
 # Production: built static assets + Express on PORT.
 FROM deps AS build

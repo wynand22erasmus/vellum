@@ -2,7 +2,7 @@
  * Production HTTP server entrypoint (`npm run` via container CMD).
  *
  * @packageDocumentation
- * @remarks Listens on `env.port` (default 3000). Serves built SPA from `dist/` when `NODE_ENV=production`.
+ * @remarks Listens on `env.port` (default 3000). Serves the SPA from `dist/` when `NODE_ENV=production`.
  */
 
 import { createApp } from './app.ts';

@@ -65,6 +65,7 @@ services:
       timeout: 10s
       retries: 10
       start_period: 60s
+    command: ["npm", "run", "dev:api"]
 
   worker:
     image: ${VELLUM_PROJECT:-vellum}-worker:${VELLUM_ENV:-development}
@@ -147,8 +148,8 @@ services:
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
-      # Console subpath when embedded in ui-v2 (see ui-v2/vite-minio-console-proxy.ts).
-      MINIO_BROWSER_REDIRECT_URL: http://${VELLUM_HOST:-localhost}:5174/dev-proxy/minio-console/
+      # Console subpath when embedded in the dev UI (see vite-minio-console-proxy.ts).
+      MINIO_BROWSER_REDIRECT_URL: http://${VELLUM_HOST:-localhost}:8080/dev-proxy/minio-console/
 
   clamav:
     image: clamav/clamav:latest
@@ -170,17 +171,17 @@ services:
       com.vellum.service: mailpit
     environment:
       MP_WEBROOT: /dev-proxy/mailpit
-      # Allow ui-v2 proxy origin when Host cannot be preserved (dev only).
-      MP_API_CORS: "http://${VELLUM_HOST:-localhost}:5174,http://127.0.0.1:5174,http://localhost:5174"
+      # Allow dev UI proxy origin when Host cannot be preserved (dev only).
+      MP_API_CORS: "http://${VELLUM_HOST:-localhost}:8080,http://${VELLUM_HOST:-localhost}:5174,http://127.0.0.1:5174,http://localhost:5174"
     ports:
       - "8025:8025"
       - "1025:1025"
 
-  ui-v2:
+  web:
     image: ${VELLUM_PROJECT:-vellum}-app:${VELLUM_ENV:-development}
     labels:
       <<: *vellum-labels
-      com.vellum.service: ui-v2
+      com.vellum.service: web
     env_file: .env
     environment:
       <<: *app-env
@@ -193,7 +194,7 @@ services:
     depends_on:
       app:
         condition: service_healthy
-    command: ["npm", "run", "dev:ui-v2"]
+    command: ["npm", "run", "dev"]
 
   nginx:
     image: nginx:alpine
@@ -211,6 +212,8 @@ services:
     depends_on:
       app:
         condition: service_healthy
+      web:
+        condition: service_started
 
 volumes:
   postgres_data:

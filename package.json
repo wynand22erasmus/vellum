@@ -12,9 +12,9 @@
     "axios": "^1.16.1"
   },
   "scripts": {
-    "dev": "tsx src/dev-server.ts",
-    "dev:ui-v2": "vite --config ui-v2/vite.config.ts",
-    "build:ui-v2": "vite build --config ui-v2/vite.config.ts",
+    "dev": "vite",
+    "dev:stack": "node scripts/dev-stack.mjs",
+    "dev:api": "tsx src/api-server.ts",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",

@@ -1,20 +1,14 @@
-/**
- * Public home route: sends visitors to login or authenticated users to the dashboard.
- *
- * @packageDocumentation
- */
-
 import { Navigate } from 'react-router-dom';
-import { useAuthMe } from '../hooks/use-auth-me.ts';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useAuthMe } from '@/hooks/use-auth-me';
 
-/** Public home route (`/`). */
 export function HomePage() {
   const { user, loading } = useAuthMe();
 
   if (loading) {
     return (
-      <div className="flex min-h-screen flex-1 items-center justify-center p-4">
-        <p className="text-sm text-muted-foreground">Loading…</p>
+      <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6">
+        <Skeleton className="h-6 w-32" />
       </div>
     );
   }
