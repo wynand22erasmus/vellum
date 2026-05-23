@@ -54,6 +54,8 @@ jobs:
 
       - run: npm run build
 
+      - run: npm run build:ui-v2
+
       - run: npm test
 
       - run: npm run docs:api

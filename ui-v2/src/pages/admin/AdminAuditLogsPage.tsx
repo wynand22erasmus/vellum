@@ -6,7 +6,6 @@ import {
 } from '@/components/layout/admin-table-filters';
 import { EmptyState } from '@/components/layout/empty-state';
 import { PageContainer } from '@/components/layout/page-container';
-import { PageTitleBlock } from '@/components/layout/page-title-block';
 import { TableLoadingSkeleton } from '@/components/layout/table-loading-skeleton';
 import { TablePagination } from '@/components/layout/table-pagination';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -153,8 +152,6 @@ export function AdminAuditLogsPage() {
 
   return (
     <div className="space-y-4">
-      <PageTitleBlock />
-
       <AdminTableFilters
         fields={FILTER_FIELDS}
         values={filterInputs}

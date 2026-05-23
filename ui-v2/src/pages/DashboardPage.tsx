@@ -4,7 +4,6 @@ import { toast } from 'sonner';
 import { DocumentStatusBadges } from '@/components/features/document-status-badges';
 import { EmptyState } from '@/components/layout/empty-state';
 import { PageContainer } from '@/components/layout/page-container';
-import { PageTitleBlock } from '@/components/layout/page-title-block';
 import { TableLoadingSkeleton } from '@/components/layout/table-loading-skeleton';
 import { RequireAuth } from '@/components/layout/require-auth';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -66,8 +65,6 @@ function DashboardContent() {
 
   return (
     <PageContainer variant="narrow">
-      <PageTitleBlock title="Your documents" />
-
       {error ? (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>

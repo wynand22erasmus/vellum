@@ -6,7 +6,6 @@ import {
 import { EmptyState } from '@/components/layout/empty-state';
 import { PageContainer } from '@/components/layout/page-container';
 import { PageSection } from '@/components/layout/page-section';
-import { PageTitleBlock } from '@/components/layout/page-title-block';
 import { TableLoadingSkeleton } from '@/components/layout/table-loading-skeleton';
 import { TablePagination } from '@/components/layout/table-pagination';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -157,7 +156,6 @@ export function AdminFailedAuditLogsPage() {
 
   return (
     <>
-      <PageTitleBlock />
       <PageSection description="Payloads may contain sensitive data.">
         <AdminTableFilters
           fields={FILTER_FIELDS}

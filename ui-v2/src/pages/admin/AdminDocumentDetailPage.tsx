@@ -4,7 +4,6 @@ import { DocumentStatusBadges } from '@/components/features/document-status-badg
 import { EmptyState } from '@/components/layout/empty-state';
 import { PageContainer } from '@/components/layout/page-container';
 import { PageSection } from '@/components/layout/page-section';
-import { PageTitleBlock } from '@/components/layout/page-title-block';
 import { useRouteChrome } from '@/components/layout/route-chrome-provider';
 import { TableLoadingSkeleton } from '@/components/layout/table-loading-skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -19,7 +18,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { apiFetch } from '@/lib/api';
-import { PAGE_LABELS } from '@/lib/page-labels';
 
 type AuditRow = {
   id: string;
@@ -104,8 +102,6 @@ export function AdminDocumentDetailPage() {
 
   return (
     <div className="space-y-6">
-      <PageTitleBlock title={doc?.fileName ?? PAGE_LABELS.adminDocumentDetail.nav} />
-
       {doc ? <p className="font-mono text-xs text-muted-foreground">{doc.id}</p> : null}
 
       {error ? (

@@ -1,5 +1,4 @@
 import { NavTileGrid } from '@/components/layout/nav-tile-grid';
-import { PageTitleBlock } from '@/components/layout/page-title-block';
 import { useSidebarNavGroups } from '@/hooks/use-sidebar-nav-groups';
 
 export function DevIndexPage() {
@@ -16,7 +15,6 @@ export function DevIndexPage() {
 
   return (
     <>
-      <PageTitleBlock />
       <NavTileGrid items={tiles} />
     </>
   );

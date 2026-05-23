@@ -18,7 +18,7 @@ export function AppHeader() {
   const { pathname } = useLocation();
   const { serviceId } = useParams<{ serviceId?: string }>();
   const nav = useSidebarNavGroups();
-  const { mode, trailTailLabel } = useRouteChrome();
+  const { trailTailLabel } = useRouteChrome();
 
   const [devServices, setDevServices] = useState<DevServiceLink[]>([]);
   const isDevEmbed = pathname.startsWith('/dev/') && Boolean(serviceId);
@@ -62,7 +62,7 @@ export function AppHeader() {
     return next;
   }, [trail, trailTailLabel]);
 
-  const showSubheader = mode === 'header' && subheader;
+  const showSubheader = Boolean(subheader);
 
   return (
     <header className="shrink-0 border-b border-border">

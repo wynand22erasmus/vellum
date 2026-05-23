@@ -5,7 +5,10 @@ import { PAGE_LABELS, panelDescription } from '@/lib/page-labels';
 
 export function VerifyCompletePage() {
   return (
-    <div className="flex min-h-full flex-1 items-center justify-center p-4">
+    <div
+      className="flex min-h-full flex-1 items-center justify-center p-4"
+      data-testid="verify-complete"
+    >
       <Card className="w-full max-w-md">
         <CardHeader className="items-center text-center">
           <VellumLogo variant="full" linked={false} />

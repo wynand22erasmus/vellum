@@ -85,7 +85,9 @@ export function DevEmbedPage() {
   }
 
   const iframeKey =
-    service.id === 'mailpit' || service.id === 'db-admin'
+    service.id === 'mailpit' ||
+    service.id === 'minio-console' ||
+    service.id === 'db-admin'
       ? `${service.id}-${resolvedTheme}`
       : service.id;
 

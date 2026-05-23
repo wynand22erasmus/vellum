@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-20T12:05:26.783Z",
+  "generatedAt": "2026-05-23T20:15:25.927Z",
   "minCoveragePercent": 95,
   "files": [
     {
@@ -8,7 +8,7 @@
         {
           "name": "createApp",
           "kind": "function",
-          "line": 33,
+          "line": 34,
           "status": "complete"
         }
       ]
@@ -19,7 +19,7 @@
         {
           "name": "default",
           "kind": "function",
-          "line": 23,
+          "line": 25,
           "status": "complete"
         }
       ]
@@ -83,18 +83,51 @@
         {
           "name": "AppShell",
           "kind": "function",
-          "line": 16,
+          "line": 10,
           "status": "complete"
         }
       ]
     },
     {
-      "path": "src/components/dev-services-menu.tsx",
+      "path": "src/components/app-sidebar.tsx",
       "exports": [
         {
-          "name": "DevServicesMenu",
+          "name": "AppSidebar",
           "kind": "function",
-          "line": 28,
+          "line": 52,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/nav-guest-footer.tsx",
+      "exports": [
+        {
+          "name": "NavGuestFooter",
+          "kind": "function",
+          "line": 44,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/nav-user.tsx",
+      "exports": [
+        {
+          "name": "NavUser",
+          "kind": "function",
+          "line": 37,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/sidebar-link-icon.tsx",
+      "exports": [
+        {
+          "name": "SidebarLinkIcon",
+          "kind": "function",
+          "line": 16,
           "status": "complete"
         }
       ]
@@ -139,12 +172,62 @@
       ]
     },
     {
+      "path": "src/components/vellum-sidebar-nav.tsx",
+      "exports": [
+        {
+          "name": "VellumSidebarNav",
+          "kind": "function",
+          "line": 88,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/use-auth-me.ts",
+      "exports": [
+        {
+          "name": "useAuthMe",
+          "kind": "function",
+          "line": 26,
+          "status": "complete"
+        },
+        {
+          "name": "UseAuthMeResult",
+          "kind": "type",
+          "line": 12,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/use-mobile.ts",
+      "exports": [
+        {
+          "name": "useIsMobile",
+          "kind": "function",
+          "line": 19,
+          "status": "complete"
+        }
+      ]
+    },
+    {
       "path": "src/hooks/use-theme.ts",
       "exports": [
         {
           "name": "useTheme",
           "kind": "function",
           "line": 15,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/layouts/sidebar-layout.tsx",
+      "exports": [
+        {
+          "name": "SidebarLayout",
+          "kind": "function",
+          "line": 12,
           "status": "complete"
         }
       ]
@@ -235,6 +318,23 @@
       ]
     },
     {
+      "path": "src/lib/experimental-services.ts",
+      "exports": [
+        {
+          "name": "buildExperimentalLinks",
+          "kind": "function",
+          "line": 16,
+          "status": "complete"
+        },
+        {
+          "name": "resolveExperimentalUrl",
+          "kind": "function",
+          "line": 31,
+          "status": "complete"
+        }
+      ]
+    },
+    {
       "path": "src/lib/prisma.ts",
       "exports": [
         {
@@ -281,6 +381,57 @@
           "name": "redisConnection",
           "kind": "variable",
           "line": 11,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/sidebar-icons.ts",
+      "exports": [
+        {
+          "name": "sidebarLinkIcon",
+          "kind": "function",
+          "line": 49,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/sidebar-nav.ts",
+      "exports": [
+        {
+          "name": "buildSidebarNav",
+          "kind": "function",
+          "line": 88,
+          "status": "complete"
+        },
+        {
+          "name": "displayUserName",
+          "kind": "function",
+          "line": 173,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarLinkItem",
+          "kind": "type",
+          "line": 12,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarNavItem",
+          "kind": "type",
+          "line": 25,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/studio-pg-executor.ts",
+      "exports": [
+        {
+          "name": "createPgStudioExecutor",
+          "kind": "function",
+          "line": 44,
           "status": "complete"
         }
       ]
@@ -445,7 +596,7 @@
         {
           "name": "DashboardPage",
           "kind": "function",
-          "line": 32,
+          "line": 31,
           "status": "complete"
         }
       ]
@@ -456,7 +607,7 @@
         {
           "name": "DevLoginPage",
           "kind": "function",
-          "line": 34,
+          "line": 35,
           "status": "complete"
         }
       ]
@@ -473,12 +624,23 @@
       ]
     },
     {
+      "path": "src/pages/ExperimentalEmbedPage.tsx",
+      "exports": [
+        {
+          "name": "ExperimentalEmbedPage",
+          "kind": "function",
+          "line": 18,
+          "status": "complete"
+        }
+      ]
+    },
+    {
       "path": "src/pages/HomePage.tsx",
       "exports": [
         {
           "name": "HomePage",
           "kind": "function",
-          "line": 24,
+          "line": 11,
           "status": "complete"
         }
       ]
@@ -606,6 +768,17 @@
       ]
     },
     {
+      "path": "src/routes/studio.ts",
+      "exports": [
+        {
+          "name": "studioRouter",
+          "kind": "variable",
+          "line": 12,
+          "status": "missing"
+        }
+      ]
+    },
+    {
       "path": "src/routes/upload.ts",
       "exports": [
         {
@@ -672,18 +845,41 @@
       ]
     },
     {
-      "path": "src/components/ui/button.tsx",
+      "path": "src/components/ui/avatar.tsx",
       "exports": [
         {
-          "name": "Button",
-          "kind": "function",
-          "line": 47,
+          "name": "Avatar",
+          "kind": "variable",
+          "line": 13,
           "status": "complete"
         },
         {
+          "name": "AvatarImage",
+          "kind": "variable",
+          "line": 29,
+          "status": "complete"
+        },
+        {
+          "name": "AvatarFallback",
+          "kind": "variable",
+          "line": 42,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/ui/button.tsx",
+      "exports": [
+        {
           "name": "ButtonProps",
           "kind": "interface",
-          "line": 39,
+          "line": 42,
+          "status": "complete"
+        },
+        {
+          "name": "Button",
+          "kind": "variable",
+          "line": 50,
           "status": "complete"
         }
       ]
@@ -700,25 +896,149 @@
         {
           "name": "CardHeader",
           "kind": "function",
-          "line": 24,
+          "line": 25,
           "status": "complete"
         },
         {
           "name": "CardTitle",
           "kind": "function",
-          "line": 29,
+          "line": 36,
           "status": "complete"
         },
         {
           "name": "CardDescription",
           "kind": "function",
-          "line": 34,
+          "line": 47,
           "status": "complete"
         },
         {
           "name": "CardContent",
           "kind": "function",
-          "line": 41,
+          "line": 58,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/ui/collapsible.tsx",
+      "exports": [
+        {
+          "name": "Collapsible",
+          "kind": "variable",
+          "line": 10,
+          "status": "complete"
+        },
+        {
+          "name": "CollapsibleTrigger",
+          "kind": "variable",
+          "line": 13,
+          "status": "complete"
+        },
+        {
+          "name": "CollapsibleContent",
+          "kind": "variable",
+          "line": 16,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/ui/dropdown-menu.tsx",
+      "exports": [
+        {
+          "name": "DropdownMenu",
+          "kind": "variable",
+          "line": 14,
+          "status": "complete"
+        },
+        {
+          "name": "DropdownMenuTrigger",
+          "kind": "variable",
+          "line": 17,
+          "status": "complete"
+        },
+        {
+          "name": "DropdownMenuContent",
+          "kind": "variable",
+          "line": 72,
+          "status": "complete"
+        },
+        {
+          "name": "DropdownMenuItem",
+          "kind": "variable",
+          "line": 92,
+          "status": "complete"
+        },
+        {
+          "name": "DropdownMenuCheckboxItem",
+          "kind": "variable",
+          "line": 111,
+          "status": "complete"
+        },
+        {
+          "name": "DropdownMenuRadioItem",
+          "kind": "variable",
+          "line": 136,
+          "status": "complete"
+        },
+        {
+          "name": "DropdownMenuLabel",
+          "kind": "variable",
+          "line": 159,
+          "status": "complete"
+        },
+        {
+          "name": "DropdownMenuSeparator",
+          "kind": "variable",
+          "line": 178,
+          "status": "complete"
+        },
+        {
+          "name": "DropdownMenuShortcut",
+          "kind": "variable",
+          "line": 191,
+          "status": "complete"
+        },
+        {
+          "name": "DropdownMenuShortcut",
+          "kind": "export",
+          "line": 202,
+          "status": "missing"
+        },
+        {
+          "name": "DropdownMenuGroup",
+          "kind": "variable",
+          "line": 20,
+          "status": "complete"
+        },
+        {
+          "name": "DropdownMenuPortal",
+          "kind": "variable",
+          "line": 23,
+          "status": "complete"
+        },
+        {
+          "name": "DropdownMenuSub",
+          "kind": "variable",
+          "line": 26,
+          "status": "complete"
+        },
+        {
+          "name": "DropdownMenuSubContent",
+          "kind": "variable",
+          "line": 55,
+          "status": "complete"
+        },
+        {
+          "name": "DropdownMenuSubTrigger",
+          "kind": "variable",
+          "line": 32,
+          "status": "complete"
+        },
+        {
+          "name": "DropdownMenuRadioGroup",
+          "kind": "variable",
+          "line": 29,
           "status": "complete"
         }
       ]
@@ -728,7 +1048,7 @@
       "exports": [
         {
           "name": "Input",
-          "kind": "function",
+          "kind": "variable",
           "line": 11,
           "status": "complete"
         }
@@ -741,6 +1061,283 @@
           "name": "Label",
           "kind": "function",
           "line": 12,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/ui/separator.tsx",
+      "exports": [
+        {
+          "name": "Separator",
+          "kind": "variable",
+          "line": 13,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/ui/sheet.tsx",
+      "exports": [
+        {
+          "name": "Sheet",
+          "kind": "variable",
+          "line": 15,
+          "status": "complete"
+        },
+        {
+          "name": "SheetPortal",
+          "kind": "variable",
+          "line": 24,
+          "status": "complete"
+        },
+        {
+          "name": "SheetOverlay",
+          "kind": "variable",
+          "line": 27,
+          "status": "complete"
+        },
+        {
+          "name": "SheetTrigger",
+          "kind": "variable",
+          "line": 18,
+          "status": "complete"
+        },
+        {
+          "name": "SheetClose",
+          "kind": "variable",
+          "line": 21,
+          "status": "complete"
+        },
+        {
+          "name": "SheetContent",
+          "kind": "variable",
+          "line": 66,
+          "status": "complete"
+        },
+        {
+          "name": "SheetHeader",
+          "kind": "variable",
+          "line": 88,
+          "status": "complete"
+        },
+        {
+          "name": "SheetHeader",
+          "kind": "export",
+          "line": 100,
+          "status": "missing"
+        },
+        {
+          "name": "SheetFooter",
+          "kind": "variable",
+          "line": 103,
+          "status": "complete"
+        },
+        {
+          "name": "SheetFooter",
+          "kind": "export",
+          "line": 115,
+          "status": "missing"
+        },
+        {
+          "name": "SheetTitle",
+          "kind": "variable",
+          "line": 118,
+          "status": "complete"
+        },
+        {
+          "name": "SheetDescription",
+          "kind": "variable",
+          "line": 131,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/ui/sidebar.tsx",
+      "exports": [
+        {
+          "name": "Sidebar",
+          "kind": "variable",
+          "line": 190,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarContent",
+          "kind": "variable",
+          "line": 441,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarFooter",
+          "kind": "variable",
+          "line": 409,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarGroup",
+          "kind": "variable",
+          "line": 460,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarGroupAction",
+          "kind": "variable",
+          "line": 498,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarGroupContent",
+          "kind": "variable",
+          "line": 522,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarGroupLabel",
+          "kind": "variable",
+          "line": 476,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarHeader",
+          "kind": "variable",
+          "line": 393,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarInput",
+          "kind": "variable",
+          "line": 374,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarInset",
+          "kind": "variable",
+          "line": 355,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarMenu",
+          "kind": "variable",
+          "line": 536,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarMenuAction",
+          "kind": "variable",
+          "line": 646,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarMenuBadge",
+          "kind": "variable",
+          "line": 678,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarMenuButton",
+          "kind": "variable",
+          "line": 586,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarMenuItem",
+          "kind": "variable",
+          "line": 550,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarMenuSkeleton",
+          "kind": "variable",
+          "line": 700,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarMenuSub",
+          "kind": "variable",
+          "line": 736,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarMenuSubButton",
+          "kind": "variable",
+          "line": 761,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarMenuSubItem",
+          "kind": "variable",
+          "line": 754,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarProvider",
+          "kind": "variable",
+          "line": 80,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarRail",
+          "kind": "variable",
+          "line": 325,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarSeparator",
+          "kind": "variable",
+          "line": 425,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarTrigger",
+          "kind": "variable",
+          "line": 298,
+          "status": "complete"
+        },
+        {
+          "name": "useSidebar",
+          "kind": "function",
+          "line": 70,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/ui/skeleton.tsx",
+      "exports": [
+        {
+          "name": "Skeleton",
+          "kind": "function",
+          "line": 12,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/ui/tooltip.tsx",
+      "exports": [
+        {
+          "name": "Tooltip",
+          "kind": "variable",
+          "line": 16,
+          "status": "complete"
+        },
+        {
+          "name": "TooltipTrigger",
+          "kind": "variable",
+          "line": 19,
+          "status": "complete"
+        },
+        {
+          "name": "TooltipContent",
+          "kind": "variable",
+          "line": 22,
+          "status": "complete"
+        },
+        {
+          "name": "TooltipProvider",
+          "kind": "variable",
+          "line": 13,
           "status": "complete"
         }
       ]
@@ -1053,7 +1650,7 @@
         {
           "name": "AdminLayout",
           "kind": "function",
-          "line": 23,
+          "line": 12,
           "status": "complete"
         }
       ]
@@ -1093,8 +1690,8 @@
     }
   ],
   "summary": {
-    "total": 124,
-    "documented": 121,
-    "coveragePercent": 97.6
+    "total": 206,
+    "documented": 199,
+    "coveragePercent": 96.6
   }
 }
