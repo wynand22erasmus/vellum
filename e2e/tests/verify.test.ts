@@ -5,6 +5,8 @@ import { launchBrowser, loadState, newPage } from '../helpers.ts';
 describe('Verify page', () => {
   let state: ReturnType<typeof loadState>;
   let browser: Awaited<ReturnType<typeof launchBrowser>>;
+  const isUiV2Target = () =>
+    /:5174(?:\/|$)/.test(state.baseUrl) || /:8080(?:\/|$)/.test(state.baseUrl);
 
   before(async () => {
     state = loadState();
@@ -53,6 +55,31 @@ describe('Verify page', () => {
 
     assert.equal(result.status, 200);
     assert.ok((result.body as { downloadUrl?: string }).downloadUrl?.length);
+    await page.close();
+  });
+
+  it('navigates to complete page after correct password (positive)', async (t) => {
+    if (!isUiV2Target()) {
+      t.skip('Requires the web UI at E2E_BASE_URL (e.g. http://localhost:5174)');
+      return;
+    }
+    const page = await newPage(browser);
+    await page.goto(`${state.baseUrl}/verify/${state.downloadToken}`, {
+      waitUntil: 'networkidle0',
+    });
+
+    await page.type('#password', state.password);
+    await page.click('button[type="submit"]');
+
+    await page.waitForFunction(
+      (token) => window.location.pathname.endsWith(`/verify/${token}/complete`),
+      { timeout: 15_000 },
+      state.downloadToken,
+    );
+
+    const body = await page.$eval('body', (el) => el.textContent ?? '');
+    assert.match(body, /Download complete/i);
+    assert.match(body, /close this browser tab/i);
     await page.close();
   });
 

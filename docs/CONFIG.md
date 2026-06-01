@@ -21,7 +21,7 @@ Built services (`app`, `worker`) publish images named `{VELLUM_PROJECT}-{service
 | `NODE_ENV` | No | `development` | `production` enables static SPA serving and stricter logging |
 | `VELLUM_HOST` | No | `localhost` | Public hostname for links, nginx, and Vite (substitute your domain) |
 | `VELLUM_PUBLIC_SCHEME` | No | `http` | URL scheme when deriving `APP_URL` |
-| `VELLUM_PUBLIC_PORT` | No | `5173` (localhost) / unset (other hosts) | Public port when deriving `APP_URL` |
+| `VELLUM_PUBLIC_PORT` | No | `5174` (localhost) / unset (other hosts) | Public port when deriving `APP_URL` (web UI origin for email links) |
 | `APP_URL` | No | derived from `VELLUM_*` | Public base URL for links in email (overrides derivation) |
 | `PORT` | No | `3000` | HTTP listen port (production Node server) |
 | `API_KEY` | No | `dev-api-key-change-in-production` | Bearer token for `POST /api/upload` |

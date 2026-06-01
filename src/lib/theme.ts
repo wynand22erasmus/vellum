@@ -10,6 +10,9 @@ export type Theme = 'light' | 'dark' | 'system';
 /** `localStorage` key for the persisted theme preference. */
 export const THEME_STORAGE_KEY = 'vellum-theme';
 
+/** Read by dev-service iframe proxies (Mailpit, Adminer) for light/dark styling. */
+export const RESOLVED_THEME_COOKIE = 'vellum-resolved-theme';
+
 /**
  * Reads the persisted theme from `localStorage`, if any.
  *
@@ -33,12 +36,20 @@ export function resolveTheme(theme: Theme): 'light' | 'dark' {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
+function syncResolvedThemeCookie(resolved: 'light' | 'dark'): void {
+  if (typeof document === 'undefined') return;
+  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `${RESOLVED_THEME_COOKIE}=${resolved}; Path=/; SameSite=Lax; Max-Age=31536000${secure}`;
+}
+
 /**
- * Applies resolved light/dark class on `document.documentElement`.
+ * Applies the theme to the document root and syncs the resolved-theme cookie.
  *
- * @param theme - Selected theme mode (including `system`)
+ * @param theme - Selected theme mode
  */
 export function applyTheme(theme: Theme): void {
   const resolved = resolveTheme(theme);
   document.documentElement.classList.toggle('dark', resolved === 'dark');
+  document.documentElement.style.colorScheme = resolved;
+  syncResolvedThemeCookie(resolved);
 }

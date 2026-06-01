@@ -32,6 +32,12 @@ async function userFromSessionCookie(req: Request): Promise<AuthUser | null> {
   }
 }
 
+/**
+ * Resolves the authenticated user for an Express request (session or dev header).
+ *
+ * @param req - Incoming Express request
+ * @returns Dashboard user, or `null` when unauthenticated or unverified
+ */
 export async function resolveRequestUser(req: Request): Promise<AuthUser | null> {
   const sessionUser = await userFromSessionCookie(req);
   if (sessionUser) {

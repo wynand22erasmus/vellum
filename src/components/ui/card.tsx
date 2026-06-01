@@ -4,59 +4,110 @@
  * @packageDocumentation
  */
 
-import type { HTMLAttributes } from 'react';
-import { cn } from '@/lib/utils.ts';
+import * as React from "react"
 
-/** Bordered card container. */
-export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+import { cn } from "@/lib/utils"
+
+/** Bordered card container with optional compact `size`. */
+function Card({
+  className,
+  size = "default",
+  ...props
+}: React.ComponentProps<"div"> & { size?: "default" | "sm" }) {
   return (
     <div
       data-slot="card"
+      data-size={size}
       className={cn(
-        'flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm ring-1 ring-brand-accent/15',
-        className,
+        "group/card flex flex-col gap-6 overflow-hidden rounded-4xl bg-card py-6 text-sm text-card-foreground shadow-md ring-1 ring-foreground/5 has-[>img:first-child]:pt-0 data-[size=sm]:gap-4 data-[size=sm]:py-4 dark:ring-foreground/10 *:[img:first-child]:rounded-t-4xl *:[img:last-child]:rounded-b-4xl",
+        className
       )}
       {...props}
     />
-  );
+  )
 }
 
 /** Top section of a card (title area). */
-export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-header"
-      className={cn('flex flex-col gap-1.5 px-6 pb-0', className)}
+      className={cn(
+        "group/card-header @container/card-header grid auto-rows-min items-start gap-1.5 rounded-t-4xl px-6 group-data-[size=sm]/card:px-4 has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-6 group-data-[size=sm]/card:[.border-b]:pb-4",
+        className
+      )}
       {...props}
     />
-  );
+  )
 }
 
-/** Card heading (`h3`). */
-export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
+/** Card heading text. */
+function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <h3
+    <div
       data-slot="card-title"
-      className={cn('leading-none font-semibold', className)}
+      className={cn("font-heading text-base font-medium", className)}
       {...props}
     />
-  );
+  )
 }
 
 /** Muted subtitle text under the title. */
-export function CardDescription({ className, ...props }: HTMLAttributes<HTMLParagraphElement>) {
+function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <p
+    <div
       data-slot="card-description"
-      className={cn('text-sm text-muted-foreground', className)}
+      className={cn("text-sm text-muted-foreground", className)}
       {...props}
     />
-  );
+  )
+}
+
+/** Optional action slot aligned to the card header corner. */
+function CardAction({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-action"
+      className={cn(
+        "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
+        className
+      )}
+      {...props}
+    />
+  )
 }
 
 /** Main card body below the header. */
-export function CardContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <div data-slot="card-content" className={cn('px-6', className)} {...props} />
-  );
+    <div
+      data-slot="card-content"
+      className={cn("px-6 group-data-[size=sm]/card:px-4", className)}
+      {...props}
+    />
+  )
+}
+
+/** Bottom section for card actions or metadata. */
+function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-footer"
+      className={cn(
+        "flex items-center rounded-b-4xl px-6 group-data-[size=sm]/card:px-4 [.border-t]:pt-6 group-data-[size=sm]/card:[.border-t]:pt-4",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+export {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardAction,
+  CardDescription,
+  CardContent,
 }

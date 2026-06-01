@@ -18,7 +18,7 @@ COPY package.json package-lock.json .npmrc ./
 RUN npm install -g npm@11.14.1
 RUN npm ci
 
-# Development: Vite + Express API (vite-plugin-node), used by docker compose.
+# Development: API-only image (`dev:api`); Vite UI runs in compose `web` service.
 FROM deps AS dev
 ARG VELLUM_PROJECT=vellum
 ARG VELLUM_ENV=development
@@ -32,7 +32,7 @@ ENV DATABASE_URL=${DATABASE_URL}
 COPY . .
 RUN npx prisma generate
 EXPOSE 5173
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "dev:api"]
 
 # Production: built static assets + Express on PORT.
 FROM deps AS build

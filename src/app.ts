@@ -24,11 +24,12 @@ import { documentsRouter } from './routes/documents.ts';
 import { authRouter } from './routes/auth.ts';
 import { adminRouter } from './routes/admin.ts';
 import { mountApiDocs } from './routes/docs.ts';
+import { studioRouter } from './routes/studio.ts';
 
 /**
  * Builds the Express app with security middleware and mounted API routers.
  *
- * @returns Configured Express application (static `dist/` in production only)
+ * @returns Configured Express application (SPA in production)
  */
 export async function createApp(): Promise<express.Application> {
   const app = express();
@@ -46,15 +47,17 @@ export async function createApp(): Promise<express.Application> {
   app.use('/api/verify', verifyRouter);
   app.use('/api/documents', dashboardAuth, documentsRouter);
   app.use('/api/admin', adminAuth, adminRouter);
+  app.use('/api/studio', adminAuth, studioRouter);
   app.use('/api/auth', authRouter);
   mountApiDocs(app);
 
   if (env.isProduction) {
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    const distPath = path.join(__dirname, '..', 'dist');
-    app.use(express.static(distPath));
+    const dist = path.join(__dirname, '..', 'dist');
+
+    app.use(express.static(dist));
     app.get(/^(?!\/api).*/, (_req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
+      res.sendFile(path.join(dist, 'index.html'));
     });
   }
 

@@ -6,7 +6,7 @@ import {
 import type { DevServiceLink } from './dev-services.ts';
 
 const services: DevServiceLink[] = [
-  { id: 'app', label: 'Web app', url: 'http://localhost:5173' },
+  { id: 'app', label: 'Web app', url: 'http://localhost:5174' },
   { id: 'docs', label: 'API docs', url: '/docs/' },
   { id: 'mailpit', label: 'Mailpit', url: 'http://localhost:8025' },
 ];

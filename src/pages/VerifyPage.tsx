@@ -1,26 +1,24 @@
 /**
- * Recipient password gate for email download links (`/verify/:token`).
+ * Secure document download password gate for recipients.
  *
  * @packageDocumentation
  */
 
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { VellumLogo } from '../components/vellum-logo.tsx';
-import { Button } from '../components/ui/button.tsx';
-import { Input } from '../components/ui/input.tsx';
-import { Label } from '../components/ui/label.tsx';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '../components/ui/card.tsx';
+import { useNavigate, useParams } from 'react-router-dom';
+import { VellumLogo } from '@/components/vellum-logo';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { PAGE_LABELS, panelDescription } from '@/lib/page-labels';
+import { triggerFileDownload } from '@/lib/verify-routes';
 
-/** Public verify route; posts to `POST /api/verify`. */
+/** Verify a download password and trigger the file transfer (`/verify/:token`). */
 export function VerifyPage() {
   const { token } = useParams<{ token: string }>();
+  const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [actionRequired, setActionRequired] = useState<string | null>(null);
@@ -45,6 +43,7 @@ export function VerifyPage() {
         error?: string;
         actionRequired?: string;
         downloadUrl?: string;
+        fileName?: string;
       };
 
       if (!res.ok) {
@@ -54,7 +53,8 @@ export function VerifyPage() {
       }
 
       if (data.downloadUrl) {
-        window.location.href = data.downloadUrl;
+        triggerFileDownload(data.downloadUrl, data.fileName);
+        navigate(`/verify/${token}/complete`, { replace: true });
       }
     } catch {
       setError('Network error. Please try again.');
@@ -64,18 +64,15 @@ export function VerifyPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex min-h-full flex-1 items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="items-center">
           <VellumLogo variant="full" linked={false} />
-          <CardTitle className="pt-2">Secure Document Download</CardTitle>
-          <CardDescription>
-            Enter the file password you received separately. If your download does not start,
-            log in to your Vellum dashboard to request a new link.
-          </CardDescription>
+          <CardTitle className="pt-2">{PAGE_LABELS.secureDocumentDownload.nav}</CardTitle>
+          <CardDescription>{panelDescription(PAGE_LABELS.secureDocumentDownload)}</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="password">File password</Label>
               <Input
@@ -88,17 +85,14 @@ export function VerifyPage() {
               />
             </div>
 
-            {error && (
-              <div
-                className="rounded-md bg-error-muted p-3 text-sm text-error"
-                role="alert"
-              >
-                {error}
-                {actionRequired && (
-                  <p className="mt-2 opacity-90">{actionRequired}</p>
-                )}
-              </div>
-            )}
+            {error ? (
+              <Alert variant="destructive" role="alert">
+                <AlertDescription>
+                  {error}
+                  {actionRequired ? <p className="mt-2 opacity-90">{actionRequired}</p> : null}
+                </AlertDescription>
+              </Alert>
+            ) : null}
 
             <Button type="submit" className="w-full" disabled={loading || !token}>
               {loading ? 'Verifying…' : 'Download document'}

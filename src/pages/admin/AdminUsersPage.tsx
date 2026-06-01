@@ -1,21 +1,61 @@
 /**
- * Admin user list (read-only).
+ * Admin user list with role and verification filters.
  *
  * @packageDocumentation
  */
 
 import { useEffect, useState } from 'react';
-import { Button } from '../../components/ui/button.tsx';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '../../components/ui/card.tsx';
-import { apiFetch } from '../../lib/api.ts';
+  AdminTableFilters,
+  setOptionalQueryParam,
+} from '@/components/layout/admin-table-filters';
+import { EmptyState } from '@/components/layout/empty-state';
+import { PageContainer } from '@/components/layout/page-container';
+import { TableLoadingSkeleton } from '@/components/layout/table-loading-skeleton';
+import { TablePagination } from '@/components/layout/table-pagination';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  ADMIN_BOOLEAN_FILTER_OPTIONS,
+  ADMIN_USER_KIND_OPTIONS,
+  emptyAdminFilterValues,
+  optionalBooleanQueryValue,
+  optionalSelectValue,
+} from '@/lib/admin-filter-options';
+import { apiFetch } from '@/lib/api';
 
 const PAGE_SIZE = 50;
+
+const FILTER_FIELDS = [
+  {
+    id: 'email',
+    label: 'Email',
+    type: 'text' as const,
+    placeholder: 'user@example.com',
+  },
+  {
+    id: 'kind',
+    label: 'Role',
+    type: 'select' as const,
+    options: ADMIN_USER_KIND_OPTIONS,
+  },
+  {
+    id: 'emailVerified',
+    label: 'Verified',
+    type: 'select' as const,
+    options: ADMIN_BOOLEAN_FILTER_OPTIONS,
+  },
+];
+
+const FILTER_IDS = FILTER_FIELDS.map((field) => field.id);
 
 type UserRow = {
   id: string;
@@ -26,25 +66,38 @@ type UserRow = {
   lastName: string | null;
   lastSignInAt: string | null;
   createdAt: string;
-  updatedAt: string;
 };
 
 type ListResponse = {
   users: UserRow[];
   total: number;
-  limit: number;
-  offset: number;
+};
+
+type AppliedFilters = {
+  email?: string;
+  kind?: string;
+  emailVerified?: string;
 };
 
 function formatTs(iso: string): string {
   return new Date(iso).toLocaleString();
 }
 
-/** Paginated users table (`/admin/users`). */
+function parseAppliedFilters(values: Record<string, string>): AppliedFilters {
+  return {
+    email: optionalSelectValue(values.email ?? ''),
+    kind: optionalSelectValue(values.kind ?? ''),
+    emailVerified: optionalBooleanQueryValue(values.emailVerified ?? ''),
+  };
+}
+
+/** Paginated user table with email, role, and verification filters (`/admin/users`). */
 export function AdminUsersPage() {
   const [rows, setRows] = useState<UserRow[]>([]);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
+  const [filterInputs, setFilterInputs] = useState(() => emptyAdminFilterValues(FILTER_IDS));
+  const [filters, setFilters] = useState<AppliedFilters>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,14 +111,12 @@ export function AdminUsersPage() {
         limit: String(PAGE_SIZE),
         offset: String(offset),
       });
+      setOptionalQueryParam(params, 'email', filters.email);
+      setOptionalQueryParam(params, 'kind', filters.kind);
+      setOptionalQueryParam(params, 'emailVerified', filters.emailVerified);
+
       const res = await apiFetch(`/api/admin/users?${params.toString()}`);
-      if (cancelled) {
-        return;
-      }
-      if (res.status === 401) {
-        window.location.href = `/login?returnTo=${encodeURIComponent('/admin/users')}`;
-        return;
-      }
+      if (cancelled) return;
       if (res.status === 403) {
         setError('Admin access required.');
         setLoading(false);
@@ -86,99 +137,83 @@ export function AdminUsersPage() {
     return () => {
       cancelled = true;
     };
-  }, [offset]);
+  }, [offset, filters]);
 
-  const canPrev = offset > 0;
-  const canNext = offset + PAGE_SIZE < total;
+  function handleFilterChange(id: string, value: string) {
+    setFilterInputs((current) => ({ ...current, [id]: value }));
+  }
+
+  function applyFilters() {
+    setOffset(0);
+    setFilters(parseAppliedFilters(filterInputs));
+  }
+
+  function clearFilters() {
+    const empty = emptyAdminFilterValues(FILTER_IDS);
+    setFilterInputs(empty);
+    setOffset(0);
+    setFilters({});
+  }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Users</CardTitle>
-        <CardDescription>{total} dashboard accounts.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
-        {error && <p className="text-sm text-error">{error}</p>}
+    <div className="space-y-4">
+      <AdminTableFilters
+        fields={FILTER_FIELDS}
+        values={filterInputs}
+        onChange={handleFilterChange}
+        onApply={applyFilters}
+        onClear={clearFilters}
+      />
 
-        {!loading && rows.length > 0 ? (
-          <div className="overflow-x-auto rounded-md border border-border">
-            <table className="w-full min-w-[40rem] border-collapse text-left text-sm">
-              <thead className="bg-muted">
-                <tr>
-                  <th className="border-b border-border px-2 py-2 font-medium">
-                    Email
-                  </th>
-                  <th className="border-b border-border px-2 py-2 font-medium">
-                    Role
-                  </th>
-                  <th className="border-b border-border px-2 py-2 font-medium">
-                    Verified
-                  </th>
-                  <th className="border-b border-border px-2 py-2 font-medium">
-                    Last sign-in
-                  </th>
-                  <th className="border-b border-border px-2 py-2 font-medium">
-                    Created
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((u) => (
-                  <tr key={u.id} className="odd:bg-background">
-                    <td className="border-b border-border px-2 py-2">
-                      <span className="font-medium">{u.email}</span>
-                      <p className="font-mono text-xs text-muted-foreground">
-                        {u.id}
-                      </p>
-                    </td>
-                    <td className="border-b border-border px-2 py-2">{u.kind}</td>
-                    <td className="border-b border-border px-2 py-2">
-                      {u.emailVerified ? 'yes' : 'no'}
-                    </td>
-                    <td className="border-b border-border px-2 py-2 whitespace-nowrap">
-                      {u.lastSignInAt ? formatTs(u.lastSignInAt) : '—'}
-                    </td>
-                    <td className="border-b border-border px-2 py-2 whitespace-nowrap">
-                      {formatTs(u.createdAt)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : null}
+      {error ? (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
 
-        {!loading && rows.length === 0 && !error ? (
-          <p className="text-sm text-muted-foreground">No users.</p>
-        ) : null}
+      {loading ? (
+        <TableLoadingSkeleton rows={2} />
+      ) : rows.length === 0 ? (
+        <EmptyState title="No users match" />
+      ) : (
+        <PageContainer.TableFrame>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Verified</TableHead>
+                <TableHead>Last sign-in</TableHead>
+                <TableHead>Created</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell className="font-medium">{user.email}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{user.kind}</Badge>
+                  </TableCell>
+                  <TableCell>{user.emailVerified ? 'Yes' : 'No'}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {user.lastSignInAt ? formatTs(user.lastSignInAt) : '—'}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">{formatTs(user.createdAt)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </PageContainer.TableFrame>
+      )}
 
-        <div className="flex items-center justify-between gap-2">
-          <p className="text-xs text-muted-foreground">
-            Showing {total === 0 ? 0 : offset + 1}–{Math.min(offset + PAGE_SIZE, total)} of {total}
-          </p>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={!canPrev || loading}
-              onClick={() => setOffset((o) => Math.max(0, o - PAGE_SIZE))}
-            >
-              Previous
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={!canNext || loading}
-              onClick={() => setOffset((o) => o + PAGE_SIZE)}
-            >
-              Next
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+      <TablePagination
+        offset={offset}
+        pageSize={PAGE_SIZE}
+        total={total}
+        loading={loading}
+        onPrevious={() => setOffset((o) => Math.max(0, o - PAGE_SIZE))}
+        onNext={() => setOffset((o) => o + PAGE_SIZE)}
+      />
+    </div>
   );
 }

@@ -61,31 +61,31 @@ export function getDevServices(): DevServiceLink[] {
       id: 'docs',
       label: 'API docs',
       url: '/docs/',
-      description: 'Admin only',
+      description: 'Interactive OpenAPI reference for the Vellum API.',
     },
     {
       id: 'mailpit',
       label: 'Mailpit',
       url: httpUrl(host, mailpitUiPort),
-      description: 'Email inbox',
+      description: 'Catch and inspect outbound email in development.',
     },
     {
       id: 'minio-console',
       label: 'MinIO console',
       url: httpUrl(minio, minioConsolePort),
-      description: 'Object storage',
+      description: 'Browse buckets and objects in local object storage.',
     },
     {
       id: 'prisma-studio',
       label: 'Prisma Studio',
       url: httpUrl(host, prismaStudioPort),
-      description: 'Schema browser (postgres container)',
+      description: 'Browse and edit Postgres data with Prisma Studio.',
     },
     {
       id: 'db-admin',
       label: 'DB Admin (Adminer)',
       url: adminerUrl,
-      description: 'SQL UI in postgres container (password: password)',
+      description: 'Run SQL against Postgres via Adminer (password: password).',
     },
   ];
 }

@@ -1,38 +1,28 @@
 /**
- * Shown when sign-in succeeds at the identity provider but email is not yet verified.
+ * Post-registration email verification instructions and resend flow.
  *
  * @packageDocumentation
  */
 
 import { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { VellumLogo } from '../components/vellum-logo.tsx';
-import { Button } from '../components/ui/button.tsx';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '../components/ui/card.tsx';
+import { toast } from 'sonner';
+import { VellumLogo } from '@/components/vellum-logo';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { PAGE_LABELS, panelDescription } from '@/lib/page-labels';
 
-/**
- * Route: `/login/email-verification?pending=…`
- *
- * Displays instructions and a resend button backed by `POST /api/auth/resend-verification`.
- */
+/** Prompt for email verification and allow resending the confirmation link. */
 export function EmailVerificationPage() {
   const [searchParams] = useSearchParams();
   const pending = searchParams.get('pending') ?? '';
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
   const canResend = useMemo(() => pending.length > 0, [pending]);
 
   async function handleResend() {
-    if (!canResend) {
-      return;
-    }
+    if (!canResend) return;
     setStatus('sending');
     setErrorMessage(null);
     try {
@@ -46,6 +36,7 @@ export function EmailVerificationPage() {
         throw new Error(data.error ?? 'Failed to resend verification email.');
       }
       setStatus('sent');
+      toast.success('Verification email sent');
     } catch (err) {
       setStatus('error');
       setErrorMessage(err instanceof Error ? err.message : 'Failed to resend verification email.');
@@ -53,15 +44,12 @@ export function EmailVerificationPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex min-h-full flex-1 items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="items-center">
           <VellumLogo variant="full" linked={false} />
-          <CardTitle className="pt-2">Verify your email</CardTitle>
-          <CardDescription>
-            We sent a verification message to your inbox. Confirm your email address, then return
-            here to sign in.
-          </CardDescription>
+          <CardTitle className="pt-2">{PAGE_LABELS.verifyEmail.nav}</CardTitle>
+          <CardDescription>{panelDescription(PAGE_LABELS.verifyEmail)}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
@@ -78,9 +66,15 @@ export function EmailVerificationPage() {
             </Button>
           ) : null}
           {status === 'sent' ? (
-            <p className="text-sm text-green-700 dark:text-green-400">Verification email sent.</p>
+            <Alert className="border-success/30 bg-success-muted">
+              <AlertDescription className="text-success">Verification email sent.</AlertDescription>
+            </Alert>
           ) : null}
-          {errorMessage ? <p className="text-sm text-red-600">{errorMessage}</p> : null}
+          {errorMessage ? (
+            <Alert variant="destructive">
+              <AlertDescription>{errorMessage}</AlertDescription>
+            </Alert>
+          ) : null}
           <Button variant="outline" asChild className="w-full">
             <Link to="/login">Back to sign in</Link>
           </Button>
