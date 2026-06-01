@@ -33,8 +33,13 @@ const reportingYears = Number(process.env.REPORTING_LIFETIME_YEARS ?? 5);
 
 const recipientEmail = process.env.E2E_RECIPIENT_EMAIL ?? `e2e-${Date.now()}@example.com`;
 const password = process.env.E2E_FILE_PASSWORD ?? 'e2eSecure1!';
-const fileName = 'e2e-sample.txt';
-const fileContent = 'Vellum E2E test document — safe sample content.';
+
+const fixturesDir = path.join(root, 'bruno/collections/vellum-api/fixtures');
+const { fileName } = JSON.parse(
+  fs.readFileSync(path.join(fixturesDir, 'e2e-upload.fixture.json'), 'utf8'),
+);
+const uploadFixturePath = path.join(fixturesDir, fileName);
+const fileContent = fs.readFileSync(uploadFixturePath);
 const linkTtlSeconds = 86_400;
 const fileTtlSeconds = 604_800;
 
@@ -96,7 +101,7 @@ async function fetchDownloadToken(documentId) {
 
 async function seedViaUpload() {
   const form = new FormData();
-  form.append('file', new Blob([fileContent], { type: 'text/plain' }), fileName);
+  form.append('file', new Blob([fileContent], { type: 'application/pdf' }), fileName);
   form.append('recipientEmail', recipientEmail);
   form.append('password', password);
   form.append('linkTtl', String(linkTtlSeconds));
@@ -159,8 +164,8 @@ async function seedDirect() {
     new PutObjectCommand({
       Bucket: minioBucket,
       Key: s3Key,
-      Body: Buffer.from(fileContent, 'utf8'),
-      ContentType: 'text/plain',
+      Body: fileContent,
+      ContentType: 'application/pdf',
     }),
   );
 

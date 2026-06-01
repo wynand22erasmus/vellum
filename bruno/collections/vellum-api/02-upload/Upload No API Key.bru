@@ -11,7 +11,7 @@ post {
 }
 
 body:multipart-form {
-  file: @file(./fixtures/e2e-sample.txt)
+  file: @file(./fixtures/{{fileName}})
   recipientEmail: {{devEmail}}
   password: {{filePassword}}
   linkTtl: 86400

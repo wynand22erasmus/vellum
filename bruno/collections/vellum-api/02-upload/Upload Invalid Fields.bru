@@ -15,7 +15,7 @@ headers {
 }
 
 body:multipart-form {
-  file: @file(./fixtures/e2e-sample.txt)
+  file: @file(./fixtures/{{fileName}})
   recipientEmail: not-an-email
   password: short
   linkTtl: 999999

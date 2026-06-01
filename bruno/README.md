@@ -15,7 +15,7 @@ bruno/
 ├── collections/
 │   └── vellum-api/               # Collection root (bruno.json)
 │       ├── environments/         # Local, Remote, Seeded (generated)
-│       ├── fixtures/               # Sample upload file
+│       ├── fixtures/               # E2E upload PDF + e2e-upload.fixture.json
 │       └── 01-health … 06-request-link/
 ```
 

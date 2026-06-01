@@ -12,7 +12,7 @@ import path from 'node:path';
 
 /**
  * Default allowed extensions when `ALLOWED_UPLOAD_EXTENSIONS` is unset (common document
- * transfer types, including `.txt` for API/E2E fixtures).
+ * transfer types, including `.pdf` for API/E2E fixtures).
  */
 export const DEFAULT_ALLOWED_UPLOAD_EXTENSIONS = [
   'pdf',
