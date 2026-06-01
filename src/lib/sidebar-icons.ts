@@ -9,6 +9,7 @@ import {
   AlertTriangle,
   AppWindow,
   BookOpen,
+  Construction,
   Database,
   FileText,
   Globe,
@@ -18,34 +19,32 @@ import {
   Mail,
   ScrollText,
   Users,
-  Wrench,
-  FlaskConical,
 } from 'lucide-react';
 
 const ICONS: Record<string, LucideIcon> = {
   login: LogIn,
   dashboard: LayoutDashboard,
-  'admin-overview': LayoutDashboard,
+  admin: Database,
+  development: Construction,
   'admin-documents': FileText,
   'admin-users': Users,
   'admin-audit': ScrollText,
   'admin-failed-audit': AlertTriangle,
   'admin-app': Database,
   'admin-docs': BookOpen,
-  'api-docs': BookOpen,
   docs: BookOpen,
   mailpit: Mail,
   'minio-console': HardDrive,
   'prisma-studio': Database,
   'db-admin': Database,
   app: AppWindow,
-  'dev-services': Wrench,
-  main: LayoutDashboard,
-  'data-browser': Database,
-  experimental: FlaskConical,
 };
 
-/** Icon for a sidebar link or group id. */
+/**
+ * Returns the Lucide icon for a sidebar link id, defaulting to `Globe`.
+ *
+ * @param id - Sidebar link id
+ */
 export function sidebarLinkIcon(id: string): LucideIcon {
   return ICONS[id] ?? Globe;
 }

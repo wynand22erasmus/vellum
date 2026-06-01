@@ -1,21 +1,19 @@
 /**
- * Pulsing placeholder block for loading states.
+ * Loading placeholder skeleton block.
  *
  * @packageDocumentation
  */
 
-import type { HTMLAttributes } from "react"
+import type * as React from "react"
 
-import { cn } from "@/lib/utils.ts"
+import { cn } from "@/lib/utils"
 
-/** Gray animated rectangle used while content loads. */
-function Skeleton({
-  className,
-  ...props
-}: HTMLAttributes<HTMLDivElement>) {
+/** Animated placeholder block for loading states. */
+function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      className={cn("animate-pulse rounded-md bg-primary/10", className)}
+      data-slot="skeleton"
+      className={cn("animate-pulse rounded-2xl bg-muted", className)}
       {...props}
     />
   )

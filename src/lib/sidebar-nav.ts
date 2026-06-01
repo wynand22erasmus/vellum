@@ -4,171 +4,119 @@
  * @packageDocumentation
  */
 
-import type { AuthUser } from './auth/types.ts';
-import type { DevServiceLink } from './dev-services.ts';
-import { buildExperimentalLinks } from './experimental-services.ts';
+import type { AuthUser } from './auth.ts';
+import type { DevServiceLink } from '@/lib/dev-services.ts';
+import { buildDevServiceLinks } from './dev-embed.ts';
+import { PAGE_LABELS } from './page-labels.ts';
 
-/** Leaf link describing one sidebar navigation entry. */
-export type SidebarLinkItem = {
-  id: string;
-  label: string;
-  href: string;
-  external?: boolean;
-  /** Open in a new browser tab (e.g. API docs). */
-  newTab?: boolean;
-  /** Load inside the experimental iframe panel (in-app route). */
-  embed?: boolean;
-  description?: string;
-};
-
-/** Sidebar section with optional children rows or lone top-level anchor. */
-export type SidebarNavItem = {
+/** Base sidebar navigation entry (leaf or section parent). */
+export type SidebarNavEntry = {
   id: string;
   label: string;
   href?: string;
-  external?: boolean;
-  newTab?: boolean;
-  children?: SidebarLinkItem[];
+  embed?: boolean;
+  description?: string;
+  children?: SidebarNavEntry[];
 };
 
-const LANDING_ONLY_DEV_IDS = new Set(['minio-console']);
-const LANDING_HIDDEN_DEV_IDS = new Set(['app']);
-const INFRA_DEV_IDS = new Set([
-  'mailpit',
-  'minio-console',
-  'prisma-studio',
-  'db-admin',
-]);
+/** Leaf nav item (always has `href`). */
+export type SidebarLinkItem = SidebarNavEntry & { href: string };
 
-function isExternalUrl(url: string): boolean {
-  return /^https?:\/\//i.test(url);
-}
+/** Labeled sidebar block (Admin, Development) with optional parent link. */
+export type SidebarNavSection = {
+  id: string;
+  label: string;
+  /** When set, the section title row links here (e.g. Admin → `/admin` overview). */
+  href?: string;
+  children: SidebarLinkItem[];
+};
 
-function filterDevServices(
-  services: DevServiceLink[],
-  pathname: string,
-): DevServiceLink[] {
-  const isLanding = pathname === '/';
+/** Top-level links and grouped sections for the dashboard sidebar. */
+export type SidebarNavModel = {
+  topLinks: SidebarLinkItem[];
+  sections: SidebarNavSection[];
+};
 
-  return services.filter((service) => {
-    if (service.id === 'minio-api') {
-      return false;
-    }
-    if (isLanding) {
-      if (LANDING_HIDDEN_DEV_IDS.has(service.id)) {
-        return false;
-      }
-      if (INFRA_DEV_IDS.has(service.id)) {
-        return LANDING_ONLY_DEV_IDS.has(service.id);
-      }
-      return false;
-    }
-    if (service.id === 'docs') {
-      return false;
-    }
-    return true;
-  });
-}
+const HIDDEN_DEV_IDS = new Set(['minio-api', 'app']);
 
-function devServiceToLink(service: DevServiceLink): SidebarLinkItem {
-  const external = isExternalUrl(service.url);
-  return {
-    id: service.id,
-    label: service.label,
-    href: service.url,
-    external,
-    newTab: external || service.url.startsWith('/docs'),
-    description: service.description,
-  };
+function filterDevServices(services: DevServiceLink[]): DevServiceLink[] {
+  return services.filter((service) => !HIDDEN_DEV_IDS.has(service.id));
 }
 
 /**
- * Builds sidebar groups for the current route and user.
+ * Builds the sidebar navigation model for the current user and dev services.
+ *
+ * @param options - Pathname, session user, and available dev service links
  */
 export function buildSidebarNav(options: {
   pathname: string;
   user: AuthUser | null;
   devServices: DevServiceLink[];
-}): SidebarNavItem[] {
-  const { pathname, user, devServices } = options;
+}): SidebarNavModel {
+  const { user, devServices } = options;
   const isAdmin = user?.kind === 'ADMIN';
-  const isLanding = pathname === '/';
-  const groups: SidebarNavItem[] = [];
 
   if (!user) {
-    return groups;
+    return { topLinks: [], sections: [] };
   }
 
-  const mainChildren: SidebarLinkItem[] = [
-    { id: 'dashboard', label: 'Recipient dashboard', href: '/dashboard' },
+  const topLinks: SidebarLinkItem[] = [
+    {
+      id: 'dashboard',
+      label: PAGE_LABELS.dashboard.nav,
+      href: PAGE_LABELS.dashboard.href!,
+    },
   ];
 
-  groups.push({
-    id: 'main',
-    label: 'Main',
-    children: mainChildren,
-  });
+  const sections: SidebarNavSection[] = [];
 
   if (isAdmin) {
-    if (isLanding) {
-      // Admin app links live under Dev services on the landing page.
-    } else {
-      groups.push({
-        id: 'data-browser',
-        label: 'Data browser',
-        children: [
-          { id: 'admin-overview', label: 'Overview', href: '/admin' },
-          { id: 'admin-documents', label: 'Documents', href: '/admin/documents' },
-          { id: 'admin-users', label: 'Users', href: '/admin/users' },
-          { id: 'admin-audit', label: 'Audit logs', href: '/admin/audit-logs' },
-          {
-            id: 'admin-failed-audit',
-            label: 'Failed audit',
-            href: '/admin/failed-audit-logs',
-          },
-        ],
-      });
-      groups.push({
-        id: 'api-docs',
-        label: 'API documentation',
-        href: '/docs/',
-        newTab: true,
+    sections.push({
+      id: 'admin',
+      label: PAGE_LABELS.admin.nav,
+      href: PAGE_LABELS.admin.href,
+      children: [
+        {
+          id: 'admin-documents',
+          label: PAGE_LABELS.adminDocuments.nav,
+          href: PAGE_LABELS.adminDocuments.href!,
+        },
+        {
+          id: 'admin-users',
+          label: PAGE_LABELS.adminUsers.nav,
+          href: PAGE_LABELS.adminUsers.href!,
+        },
+        {
+          id: 'admin-audit',
+          label: PAGE_LABELS.adminAuditLogs.nav,
+          href: PAGE_LABELS.adminAuditLogs.href!,
+        },
+        {
+          id: 'admin-failed-audit',
+          label: PAGE_LABELS.adminFailedAuditLogs.nav,
+          href: PAGE_LABELS.adminFailedAuditLogs.href!,
+        },
+      ],
+    });
+
+    const devChildren = buildDevServiceLinks(filterDevServices(devServices));
+    if (devChildren.length > 0) {
+      sections.push({
+        id: 'development',
+        label: PAGE_LABELS.development.nav,
+        href: PAGE_LABELS.development.href,
+        children: devChildren,
       });
     }
   }
 
-  const filteredDev = filterDevServices(devServices, pathname);
-  const devChildren: SidebarLinkItem[] = filteredDev.map(devServiceToLink);
-
-  if (isAdmin && isLanding) {
-    devChildren.unshift(
-      { id: 'admin-app', label: 'Data browser', href: '/admin' },
-      { id: 'admin-docs', label: 'API documentation', href: '/docs/', newTab: true },
-    );
-  }
-
-  if (devChildren.length > 0) {
-    groups.push({
-      id: 'dev-services',
-      label: 'Dev services',
-      children: devChildren,
-    });
-  }
-
-  const experimentalChildren = buildExperimentalLinks(devServices);
-  if (experimentalChildren.length > 0) {
-    groups.push({
-      id: 'experimental',
-      label: 'Experimental',
-      children: experimentalChildren,
-    });
-  }
-
-  return groups;
+  return { topLinks, sections };
 }
 
 /**
- * Display name for the sidebar user panel.
+ * Formats a display name from profile fields, falling back to email.
+ *
+ * @param user - Authenticated dashboard user
  */
 export function displayUserName(user: AuthUser): string {
   const parts = [user.firstName, user.lastName].filter(Boolean);

@@ -31,8 +31,8 @@ describe('buildPublicUrl', () => {
     expect(buildPublicUrl()).toBe('https://app.example.com');
   });
 
-  it('defaults localhost to port 5173', () => {
-    expect(buildPublicUrl()).toBe('http://localhost:5173');
+  it('defaults localhost to port 5174', () => {
+    expect(buildPublicUrl()).toBe('http://localhost:5174');
   });
 
   it('builds URL from VELLUM_HOST and public port', () => {

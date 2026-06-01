@@ -1,0 +1,241 @@
+/**
+ * Vellum brand overrides for Adminer 4.8.x (embedded in dev UI).
+ */
+@import url("https://cdn.jsdelivr.net/npm/@fontsource-variable/geist-mono@5.5.0/index.min.css");
+
+body.vellum-theme {
+  font-family: "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    monospace !important;
+}
+
+body.vellum-theme-light {
+  color: oklch(0.28 0.05 265) !important;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -15%, oklch(0.58 0.12 200 / 0.2), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, oklch(0.88 0.09 88 / 0.14), transparent 50%),
+    oklch(0.98 0.012 250) !important;
+}
+
+body.vellum-theme-dark {
+  color: oklch(0.95 0.015 250) !important;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -15%, oklch(0.42 0.14 265 / 0.35), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, oklch(0.86 0.1 88 / 0.12), transparent 50%),
+    oklch(0.17 0.04 265) !important;
+}
+
+body.vellum-theme-light a,
+body.vellum-theme-light a:visited {
+  color: oklch(0.58 0.12 200) !important;
+}
+
+body.vellum-theme-light a:link:hover,
+body.vellum-theme-light a:visited:hover {
+  color: oklch(0.42 0.14 265) !important;
+}
+
+body.vellum-theme-dark a,
+body.vellum-theme-dark a:visited {
+  color: oklch(0.68 0.12 200) !important;
+}
+
+body.vellum-theme-dark a:link:hover,
+body.vellum-theme-dark a:visited:hover {
+  color: oklch(0.86 0.1 88) !important;
+}
+
+body.vellum-theme-light h1 {
+  color: oklch(0.48 0.04 265) !important;
+  background: oklch(0.97 0.015 250) !important;
+  border-bottom-color: oklch(0.88 0.03 250) !important;
+}
+
+body.vellum-theme-light h2 {
+  color: oklch(0.28 0.05 265) !important;
+  background: oklch(0.94 0.05 88) !important;
+  border-bottom-color: oklch(0.42 0.14 265) !important;
+}
+
+body.vellum-theme-dark h1 {
+  color: oklch(0.68 0.03 250) !important;
+  background: oklch(0.21 0.045 265) !important;
+  border-bottom-color: oklch(0.32 0.04 265) !important;
+}
+
+body.vellum-theme-dark h2 {
+  color: oklch(0.95 0.015 250) !important;
+  background: oklch(0.26 0.04 265) !important;
+  border-bottom-color: oklch(0.68 0.12 200) !important;
+}
+
+body.vellum-theme-light th {
+  background: oklch(0.94 0.02 250) !important;
+}
+
+body.vellum-theme-light thead td,
+body.vellum-theme-light thead th {
+  background: oklch(0.94 0.05 88) !important;
+}
+
+body.vellum-theme-light td,
+body.vellum-theme-light th {
+  border-color: oklch(0.88 0.03 250) !important;
+}
+
+body.vellum-theme-light fieldset {
+  border-color: oklch(0.88 0.03 250) !important;
+}
+
+body.vellum-theme-light tbody tr:hover td,
+body.vellum-theme-light tbody tr:hover th {
+  background: oklch(0.94 0.05 88) !important;
+}
+
+body.vellum-theme-light .odd td {
+  background: oklch(0.97 0.015 250) !important;
+}
+
+body.vellum-theme-dark th {
+  background: oklch(0.26 0.04 265) !important;
+}
+
+body.vellum-theme-dark thead td,
+body.vellum-theme-dark thead th {
+  background: oklch(0.28 0.05 265) !important;
+}
+
+body.vellum-theme-dark td,
+body.vellum-theme-dark th {
+  border-color: oklch(0.32 0.04 265) !important;
+  color: oklch(0.95 0.015 250) !important;
+}
+
+body.vellum-theme-dark fieldset {
+  border-color: oklch(0.32 0.04 265) !important;
+}
+
+body.vellum-theme-dark tbody tr:hover td,
+body.vellum-theme-dark tbody tr:hover th {
+  background: oklch(0.28 0.05 265) !important;
+}
+
+body.vellum-theme-dark .odd td {
+  background: oklch(0.21 0.045 265) !important;
+}
+
+body.vellum-theme-light #menu p,
+body.vellum-theme-light #logins,
+body.vellum-theme-light #tables {
+  border-bottom-color: oklch(0.88 0.03 250) !important;
+}
+
+body.vellum-theme-light #logins a,
+body.vellum-theme-light #tables a,
+body.vellum-theme-light #tables span {
+  background: oklch(0.98 0.012 250) !important;
+}
+
+body.vellum-theme-light #breadcrumb {
+  background: oklch(0.94 0.02 250) !important;
+}
+
+body.vellum-theme-light .js .column {
+  background: oklch(0.94 0.05 88) !important;
+}
+
+body.vellum-theme-dark #menu p,
+body.vellum-theme-dark #logins,
+body.vellum-theme-dark #tables {
+  border-bottom-color: oklch(0.32 0.04 265) !important;
+}
+
+body.vellum-theme-dark #logins a,
+body.vellum-theme-dark #tables a,
+body.vellum-theme-dark #tables span {
+  background: oklch(0.17 0.04 265) !important;
+}
+
+body.vellum-theme-dark #breadcrumb {
+  background: oklch(0.26 0.04 265) !important;
+}
+
+body.vellum-theme-dark .js .column {
+  background: oklch(0.28 0.05 265) !important;
+}
+
+body.vellum-theme-light input[type="submit"],
+body.vellum-theme-light button {
+  background: oklch(0.42 0.14 265) !important;
+  color: oklch(0.99 0.005 250) !important;
+  border: 1px solid oklch(0.42 0.14 265) !important;
+  border-radius: 0.45rem;
+  padding: 0.35em 0.75em;
+  cursor: pointer;
+}
+
+body.vellum-theme-dark input[type="submit"],
+body.vellum-theme-dark button {
+  background: oklch(0.68 0.12 200) !important;
+  color: oklch(0.15 0.04 265) !important;
+  border: 1px solid oklch(0.68 0.12 200) !important;
+  border-radius: 0.45rem;
+  padding: 0.35em 0.75em;
+  cursor: pointer;
+}
+
+body.vellum-theme-light .error {
+  color: oklch(0.55 0.2 25) !important;
+  background: oklch(0.95 0.03 25) !important;
+}
+
+body.vellum-theme-light .message {
+  color: oklch(0.52 0.14 165) !important;
+  background: oklch(0.94 0.04 165) !important;
+}
+
+body.vellum-theme-dark .error {
+  color: oklch(0.75 0.12 25) !important;
+  background: oklch(0.28 0.06 25) !important;
+}
+
+body.vellum-theme-dark .message {
+  color: oklch(0.72 0.12 165) !important;
+  background: oklch(0.28 0.05 165) !important;
+}
+
+body.vellum-theme-light code {
+  background: oklch(0.94 0.02 250) !important;
+}
+
+body.vellum-theme-dark code {
+  background: oklch(0.26 0.04 265) !important;
+}
+
+body.vellum-theme-light input,
+body.vellum-theme-light select,
+body.vellum-theme-light textarea {
+  background: oklch(0.995 0.008 250) !important;
+  color: oklch(0.28 0.05 265) !important;
+  border: 1px solid oklch(0.88 0.03 250) !important;
+  border-radius: 0.35rem;
+  box-shadow: none !important;
+}
+
+body.vellum-theme-light table {
+  border-radius: 0.45rem;
+  overflow: hidden;
+}
+
+body.vellum-theme-dark table {
+  border-radius: 0.45rem;
+  overflow: hidden;
+}
+
+body.vellum-theme-dark input,
+body.vellum-theme-dark select,
+body.vellum-theme-dark textarea {
+  background: oklch(0.21 0.045 265) !important;
+  color: oklch(0.95 0.015 250) !important;
+  border: 1px solid oklch(0.32 0.04 265) !important;
+  border-radius: 0.35rem;
+}

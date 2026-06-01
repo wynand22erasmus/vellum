@@ -163,6 +163,7 @@ export function effectiveExtensionFromBasename(basename: string): string | null 
   return ext.length > 0 ? ext : null;
 }
 
+/** Result of validating and sanitizing an upload filename. */
 export type ResolveUploadFileNameResult =
   | { ok: true; safeFileName: string; effectiveExtension: string }
   | { ok: false; status: number; error: string };

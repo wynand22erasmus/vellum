@@ -53,7 +53,7 @@ ESLint JSDoc rules should be enabled now that the 80% gate is met (next maintena
 2. **Services** — auth, storage, email, clamav ✓
 3. **Jobs** — queues and workers ✓
 4. **HTTP** — middleware, routes, app entrypoints ✓
-5. **UI** — components and pages ✓
+5. **UI** — components and pages in `src/` (in progress: restore coverage after ui-v2 merge into main tree)
 6. **Infra** — Docker, scripts, Bruno
 
 See the project plan in chat history or your issue tracker for the full checklist.

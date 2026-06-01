@@ -6,10 +6,7 @@
 
 const DEV_EMAIL_KEY = 'vellum_dev_email';
 
-/**
- * Returns the dev-auth email stored in `localStorage`, if any.
- */
-export function getDevEmail(): string | null {
+function getDevEmail(): string | null {
   return localStorage.getItem(DEV_EMAIL_KEY);
 }
 

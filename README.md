@@ -5,7 +5,7 @@ Secure, API-first document transfer platform. Every download requires both an em
 ## Stack
 
 - **Frontend:** Vite + React + Tailwind
-- **API:** Express (via vite-plugin-node in dev)
+- **API:** Express (`dev:api` on :5173) + Vite dev UI (`dev` on :5174); nginx :8080 in compose
 - **Database:** PostgreSQL + Prisma
 - **Storage:** MinIO (dev) / S3 (prod)
 - **Jobs:** BullMQ + Redis
@@ -47,8 +47,9 @@ npm run up:logs
 
 | Service | URL |
 |---------|-----|
-| Web UI (via nginx) | `http://$VELLUM_HOST:8080` (default host: `localhost`) |
-| Web UI (direct) | `http://$VELLUM_HOST:5173` when using the app container port |
+| **Web UI (via nginx)** | `http://$VELLUM_HOST:8080` (default host: `localhost`) |
+| Web UI (direct) | `http://$VELLUM_HOST:5174` |
+| API (direct) | `http://$VELLUM_HOST:5173/api/…` |
 | API docs (admin) | `/docs/` after `npm run docs:api` — sign in as an admin first |
 | Data browser (admin) | `/admin` — read-only lists for documents, users, audit logs (session + `ADMIN` role) |
 | Prisma Studio | `http://$VELLUM_HOST:5555` (runs in **postgres** container) |
@@ -56,7 +57,7 @@ npm run up:logs
 | Mailpit | `http://$VELLUM_HOST:8025` |
 | MinIO console | `http://$VELLUM_HOST:9001` |
 
-In non-production, use the **Dev services** group in the left sidebar for quick links to Mailpit, MinIO, API docs, and Prisma Studio.
+In non-production, admins see a **Development** section in the left sidebar for Mailpit, MinIO, API docs, Prisma Studio, and related tools.
 
 ```bash
 npm run down    # stop all services
@@ -70,12 +71,14 @@ Run backing services in containers and the app on the host (requires Node.js 24 
 cp .env.example .env
 npm run infra:up
 npm install && npm run db:generate && npm run db:migrate:deploy
-npm run dev          # terminal 1
-npm run worker       # terminal 2
-# optional: npm run db:studio   # ensure Prisma Studio is up (also started by npm run up)
+npm run dev:stack   # terminal 1: API :5173 + Vite :5174
+npm run worker      # terminal 2
+# optional: npm run db:studio
 ```
 
 Compose helper detection order: `docker compose` → `podman compose` → `docker-compose` → `podman-compose`.
+
+The legacy ui-v1 React app lives under `backup/ui-v1/` for reference and is **not** built or served. The active UI is in `src/` (pages, components, hooks) alongside the API.
 
 ## API usage
 
@@ -99,7 +102,7 @@ Allowed file types come from `ALLOWED_UPLOAD_EXTENSIONS` (JSON array of extensio
 
 1. Open the link from email: `/verify/{token}`
 2. Enter the file password
-3. Browser redirects to a 30-second presigned MinIO URL
+3. Download starts; the tab shows a completion screen (`/verify/{token}/complete`)
 
 ### Dashboard sign-in
 
@@ -170,7 +173,7 @@ npm run docs:coverage     # coverage gate + docs/doc-inventory.json
 | Generate | Run `npm run docs:api` once (creates `docs/api/html/`) |
 | Role | `ADMIN` only (`DEFAULT_ADMIN_EMAILS` on first sign-in) |
 | URL | **`/docs/`** (admin-only; uses the same `vellum_session` cookie as the dashboard) |
-| Discover | Sidebar when signed in as admin; **Dev services** group in non-production |
+| Discover | Sidebar when signed in as admin; **Development** section in non-production |
 
 If you open `/docs/` without a session, you are redirected to sign in and then returned to `/docs/`. If HTML has not been generated, the server responds with `503` and instructions to run `docs:api`.
 

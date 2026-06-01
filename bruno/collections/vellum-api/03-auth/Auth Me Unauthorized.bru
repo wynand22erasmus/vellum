@@ -11,8 +11,10 @@ get {
 }
 
 tests {
-  test("requires authentication", function () {
-    expect(res.getStatus()).to.equal(401);
-    expect(res.getBody().error).to.contain("Not authenticated");
+  test("returns null user when not authenticated", function () {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(body.user).to.equal(null);
+    expect(body.provider).to.be.a("string");
   });
 }

@@ -6,31 +6,54 @@
 
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from '../../components/ui/button.tsx';
-import { Input } from '../../components/ui/input.tsx';
-import { Label } from '../../components/ui/label.tsx';
+import { DocumentStatusBadges } from '@/components/features/document-status-badges';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '../../components/ui/card.tsx';
-import { apiFetch } from '../../lib/api.ts';
+  AdminTableFilters,
+  setOptionalQueryParam,
+} from '@/components/layout/admin-table-filters';
+import { EmptyState } from '@/components/layout/empty-state';
+import { PageContainer } from '@/components/layout/page-container';
+import { TableLoadingSkeleton } from '@/components/layout/table-loading-skeleton';
+import { TablePagination } from '@/components/layout/table-pagination';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { emptyAdminFilterValues, optionalSelectValue } from '@/lib/admin-filter-options';
+import { apiFetch } from '@/lib/api';
 
 const PAGE_SIZE = 50;
+
+const FILTER_FIELDS = [
+  {
+    id: 'recipientEmail',
+    label: 'Recipient email',
+    type: 'email' as const,
+    placeholder: 'filter@example.com',
+  },
+  {
+    id: 'fileName',
+    label: 'File name',
+    type: 'text' as const,
+    placeholder: 'report.pdf',
+  },
+];
+
+const FILTER_IDS = FILTER_FIELDS.map((field) => field.id);
 
 type DocumentRow = {
   id: string;
   fileName: string;
   recipientEmail: string;
-  linkExpiresAt: string;
-  fileExpiresAt: string;
-  recordExpiresAt: string;
+  createdAt: string;
   isUsed: boolean;
   deletedAt: string | null;
-  createdAt: string;
-  storageAttached: boolean;
   linkActive: boolean;
   fileAvailable: boolean;
 };
@@ -38,21 +61,31 @@ type DocumentRow = {
 type ListResponse = {
   documents: DocumentRow[];
   total: number;
-  limit: number;
-  offset: number;
+};
+
+type AppliedFilters = {
+  recipientEmail?: string;
+  fileName?: string;
 };
 
 function formatTs(iso: string): string {
   return new Date(iso).toLocaleString();
 }
 
-/** Paginated document table (`/admin/documents`). */
+function parseAppliedFilters(values: Record<string, string>): AppliedFilters {
+  return {
+    recipientEmail: optionalSelectValue(values.recipientEmail ?? ''),
+    fileName: optionalSelectValue(values.fileName ?? ''),
+  };
+}
+
+/** Paginated document table with recipient and file name filters (`/admin/documents`). */
 export function AdminDocumentsPage() {
   const [rows, setRows] = useState<DocumentRow[]>([]);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
-  const [filterInput, setFilterInput] = useState('');
-  const [recipientEmail, setRecipientEmail] = useState<string | undefined>(undefined);
+  const [filterInputs, setFilterInputs] = useState(() => emptyAdminFilterValues(FILTER_IDS));
+  const [filters, setFilters] = useState<AppliedFilters>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -66,17 +99,11 @@ export function AdminDocumentsPage() {
         limit: String(PAGE_SIZE),
         offset: String(offset),
       });
-      if (recipientEmail) {
-        params.set('recipientEmail', recipientEmail);
-      }
+      setOptionalQueryParam(params, 'recipientEmail', filters.recipientEmail);
+      setOptionalQueryParam(params, 'fileName', filters.fileName);
+
       const res = await apiFetch(`/api/admin/documents?${params.toString()}`);
-      if (cancelled) {
-        return;
-      }
-      if (res.status === 401) {
-        window.location.href = `/login?returnTo=${encodeURIComponent('/admin/documents')}`;
-        return;
-      }
+      if (cancelled) return;
       if (res.status === 403) {
         setError('Admin access required.');
         setLoading(false);
@@ -97,159 +124,93 @@ export function AdminDocumentsPage() {
     return () => {
       cancelled = true;
     };
-  }, [offset, recipientEmail]);
+  }, [offset, filters]);
 
-  function applyFilter() {
-    const trimmed = filterInput.trim();
-    setOffset(0);
-    setRecipientEmail(trimmed.length > 0 ? trimmed : undefined);
+  function handleFilterChange(id: string, value: string) {
+    setFilterInputs((current) => ({ ...current, [id]: value }));
   }
 
-  const canPrev = offset > 0;
-  const canNext = offset + PAGE_SIZE < total;
+  function applyFilters() {
+    setOffset(0);
+    setFilters(parseAppliedFilters(filterInputs));
+  }
+
+  function clearFilters() {
+    const empty = emptyAdminFilterValues(FILTER_IDS);
+    setFilterInputs(empty);
+    setOffset(0);
+    setFilters({});
+  }
 
   return (
     <div className="space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>Documents</CardTitle>
-          <CardDescription>
-            {total} total{recipientEmail ? ` (filtered by recipient)` : ''}. Pagination:{' '}
-            {PAGE_SIZE} per page.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
-            <div className="flex-1 space-y-1">
-              <Label htmlFor="admin-doc-recipient">Recipient email (optional)</Label>
-              <Input
-                id="admin-doc-recipient"
-                type="email"
-                autoComplete="off"
-                value={filterInput}
-                onChange={(e) => setFilterInput(e.target.value)}
-                placeholder="filter@example.com"
-              />
-            </div>
-            <Button type="button" onClick={() => void applyFilter()}>
-              Apply filter
-            </Button>
-          </div>
+      <AdminTableFilters
+        fields={FILTER_FIELDS}
+        values={filterInputs}
+        onChange={handleFilterChange}
+        onApply={applyFilters}
+        onClear={clearFilters}
+      />
 
-          {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
-          {error && <p className="text-sm text-error">{error}</p>}
+      {error ? (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
 
-          {!loading && !error && rows.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No documents match.</p>
-          ) : null}
+      {loading ? (
+        <TableLoadingSkeleton rows={2} />
+      ) : rows.length === 0 ? (
+        <EmptyState title="No documents match" />
+      ) : (
+        <PageContainer.TableFrame>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>File</TableHead>
+                <TableHead>Recipient</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((doc) => (
+                <TableRow key={doc.id}>
+                  <TableCell>
+                    <span className="font-medium">{doc.fileName}</span>
+                    <p className="font-mono text-xs text-muted-foreground">{doc.id}</p>
+                  </TableCell>
+                  <TableCell>{doc.recipientEmail}</TableCell>
+                  <TableCell className="whitespace-nowrap">{formatTs(doc.createdAt)}</TableCell>
+                  <TableCell>
+                    <DocumentStatusBadges
+                      linkActive={doc.linkActive}
+                      fileAvailable={doc.fileAvailable}
+                      isUsed={doc.isUsed}
+                      deletedAt={doc.deletedAt}
+                    />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to={`/admin/documents/${doc.id}`}>Detail</Link>
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </PageContainer.TableFrame>
+      )}
 
-          {!loading && rows.length > 0 ? (
-            <div className="overflow-x-auto rounded-md border border-border">
-              <table className="w-full min-w-[56rem] border-collapse text-left text-sm">
-                <thead className="bg-muted">
-                  <tr>
-                    <th className="border-b border-border px-2 py-2 font-medium">
-                      File
-                    </th>
-                    <th className="border-b border-border px-2 py-2 font-medium">
-                      Recipient
-                    </th>
-                    <th className="border-b border-border px-2 py-2 font-medium">
-                      Created
-                    </th>
-                    <th className="border-b border-border px-2 py-2 font-medium">
-                      Status
-                    </th>
-                    <th className="border-b border-border px-2 py-2 font-medium" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((doc) => (
-                    <tr key={doc.id} className="odd:bg-background">
-                      <td className="border-b border-border px-2 py-2">
-                        <span className="font-medium">{doc.fileName}</span>
-                        <p className="font-mono text-xs text-muted-foreground">
-                          {doc.id}
-                        </p>
-                      </td>
-                      <td className="border-b border-border px-2 py-2">
-                        {doc.recipientEmail}
-                      </td>
-                      <td className="border-b border-border px-2 py-2 whitespace-nowrap">
-                        {formatTs(doc.createdAt)}
-                      </td>
-                      <td className="border-b border-border px-2 py-2 text-xs">
-                        <div className="flex flex-wrap gap-1">
-                          <span
-                            className={
-                              doc.linkActive
-                                ? 'rounded bg-badge-active px-1.5 py-0.5'
-                                : 'rounded bg-badge-inactive px-1.5 py-0.5'
-                            }
-                          >
-                            link {doc.linkActive ? 'on' : 'off'}
-                          </span>
-                          <span
-                            className={
-                              doc.fileAvailable
-                                ? 'rounded bg-badge-active px-1.5 py-0.5'
-                                : 'rounded bg-badge-inactive px-1.5 py-0.5'
-                            }
-                          >
-                            file {doc.fileAvailable ? 'on' : 'off'}
-                          </span>
-                          {doc.isUsed ? (
-                            <span className="rounded bg-muted px-1.5 py-0.5">
-                              downloaded
-                            </span>
-                          ) : null}
-                          {doc.deletedAt ? (
-                            <span className="rounded bg-muted px-1.5 py-0.5">
-                              deleted
-                            </span>
-                          ) : null}
-                        </div>
-                      </td>
-                      <td className="border-b border-border px-2 py-2 text-right">
-                        <Button variant="outline" size="sm" asChild>
-                          <Link to={`/admin/documents/${doc.id}`}>Detail</Link>
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : null}
-
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-xs text-muted-foreground">
-              Showing {total === 0 ? 0 : offset + 1}–{Math.min(offset + PAGE_SIZE, total)} of{' '}
-              {total}
-            </p>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={!canPrev || loading}
-                onClick={() => setOffset((o) => Math.max(0, o - PAGE_SIZE))}
-              >
-                Previous
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={!canNext || loading}
-                onClick={() => setOffset((o) => o + PAGE_SIZE)}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <TablePagination
+        offset={offset}
+        pageSize={PAGE_SIZE}
+        total={total}
+        loading={loading}
+        onPrevious={() => setOffset((o) => Math.max(0, o - PAGE_SIZE))}
+        onNext={() => setOffset((o) => o + PAGE_SIZE)}
+      />
     </div>
   );
 }
