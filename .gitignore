@@ -31,6 +31,7 @@ prisma/*.db-journal
 # Logs
 *.log
 npm-debug.log*
+logs/
 
 # Generated API reference (built via npm run docs:api)
 docs/api/

@@ -2,17 +2,11 @@
  * Dashboard authentication routes (WorkOS OAuth and dev session probe).
  *
  * @packageDocumentation
- * @remarks
- * - `GET /api/auth/login` — redirect to WorkOS AuthKit
- * - `GET /api/auth/callback` — OAuth callback; requires verified email before session
- * - `GET /api/auth/verify-email` — dev verification link from Mailpit
- * - `POST /api/auth/dev/request-login` — dev: email verification or immediate access if verified
- * - `POST /api/auth/resend-verification` — resend WorkOS or dev verification email
- * - `POST /api/auth/logout` — clears session cookie
- * - `GET /api/auth/me` — current user or `{ user: null }` (`vellum_session` cookie; dev also accepts `X-Dev-User-Email`)
  */
 
 import { Router } from 'express';
+import { asyncHandler } from '../middleware/asyncHandler.ts';
+import { AppError } from '../lib/errors/app-error.ts';
 import { logEvent } from '../queues/auditQueue.ts';
 import { getAuthorizationUrl, getWorkOS } from '../lib/auth/workos.ts';
 import { safeReturnTo } from '../lib/auth/returnTo.ts';
@@ -32,31 +26,33 @@ import { env } from '../lib/env.ts';
 /** Express router mounted at `/api/auth`. */
 export const authRouter = Router();
 
-authRouter.get('/login', (req, res) => {
-  if (env.authProvider !== 'workos') {
-    res.status(400).json({
-      error: 'WorkOS is not enabled. Use X-Dev-User-Email header for local development.',
-    });
-    return;
+authRouter.get('/login', (req, res, next) => {
+  try {
+    if (env.authProvider !== 'workos') {
+      throw AppError.badRequest(
+        'WorkOS is not enabled. Use X-Dev-User-Email header for local development.',
+      );
+    }
+    const returnTo =
+      typeof req.query.returnTo === 'string' ? safeReturnTo(req.query.returnTo) : undefined;
+    res.redirect(getAuthorizationUrl(returnTo));
+  } catch (err) {
+    next(err);
   }
-  const returnTo =
-    typeof req.query.returnTo === 'string' ? safeReturnTo(req.query.returnTo) : undefined;
-  res.redirect(getAuthorizationUrl(returnTo));
 });
 
-authRouter.get('/callback', async (req, res) => {
-  if (env.authProvider !== 'workos') {
-    res.status(400).json({ error: 'WorkOS is not enabled.' });
-    return;
-  }
+authRouter.get(
+  '/callback',
+  asyncHandler(async (req, res) => {
+    if (env.authProvider !== 'workos') {
+      throw AppError.badRequest('WorkOS is not enabled.');
+    }
 
-  const code = req.query.code;
-  if (typeof code !== 'string') {
-    res.status(400).json({ error: 'Missing authorization code.' });
-    return;
-  }
+    const code = req.query.code;
+    if (typeof code !== 'string') {
+      throw AppError.badRequest('Missing authorization code.');
+    }
 
-  try {
     const workos = getWorkOS();
     const { user: workosUser } = await workos.userManagement.authenticateWithCode({
       code,
@@ -87,49 +83,36 @@ authRouter.get('/callback', async (req, res) => {
     const returnTo =
       typeof req.query.state === 'string' ? safeReturnTo(req.query.state) : '/dashboard';
     res.redirect(returnTo);
-  } catch (err) {
-    console.error('[Auth callback]', err);
-    res.status(500).json({ error: 'Authentication failed.' });
-  }
-});
+  }),
+);
 
-/**
- * Dev-only verification link from Mailpit (`GET /api/auth/verify-email?token=…`).
- * WorkOS users verify through WorkOS email, then sign in again via OAuth.
- */
-authRouter.get('/verify-email', async (req, res) => {
-  const token = req.query.token;
-  if (typeof token !== 'string') {
-    res.status(400).type('text/plain').send('Missing verification token.');
-    return;
-  }
+authRouter.get(
+  '/verify-email',
+  asyncHandler(async (req, res) => {
+    const token = req.query.token;
+    if (typeof token !== 'string') {
+      res.status(400).type('text/plain').send('Missing verification token.');
+      return;
+    }
 
-  try {
     const { userId } = await verifyEmailVerificationToken(token);
     await markEmailVerified(userId);
     res.redirect('/login?verified=1');
-  } catch (err) {
-    console.error('[Auth verify-email]', err);
-    res.status(400).type('text/plain').send('Invalid or expired verification link.');
-  }
-});
+  }),
+);
 
-/**
- * Starts dev sign-in: sends a verification email when needed, or reports the user may proceed.
- */
-authRouter.post('/dev/request-login', async (req, res) => {
-  if (env.authProvider === 'workos') {
-    res.status(400).json({ error: 'Dev login is not available when AUTH_PROVIDER=workos.' });
-    return;
-  }
+authRouter.post(
+  '/dev/request-login',
+  asyncHandler(async (req, res) => {
+    if (env.authProvider === 'workos') {
+      throw AppError.badRequest('Dev login is not available when AUTH_PROVIDER=workos.');
+    }
 
-  const email = typeof req.body?.email === 'string' ? req.body.email.trim() : '';
-  if (!email.includes('@')) {
-    res.status(400).json({ error: 'A valid email address is required.' });
-    return;
-  }
+    const email = typeof req.body?.email === 'string' ? req.body.email.trim() : '';
+    if (!email.includes('@')) {
+      throw AppError.badRequest('A valid email address is required.');
+    }
 
-  try {
     const user = await upsertDevUser(email);
 
     if (isEmailVerificationSatisfied(user)) {
@@ -153,22 +136,20 @@ authRouter.post('/dev/request-login', async (req, res) => {
       pending,
       message: 'Verification email sent. Check your inbox before continuing.',
     });
-  } catch (err) {
-    console.error('[Auth dev/request-login]', err);
-    res.status(500).json({ error: 'Could not start sign-in.' });
-  }
-});
+  }),
+);
 
-/** Resends a verification email for the user identified by a `pending` handoff token. */
-authRouter.post('/resend-verification', async (req, res) => {
-  const pending = typeof req.body?.pending === 'string' ? req.body.pending : '';
-  if (!pending) {
-    res.status(400).json({ error: 'Missing pending verification token.' });
-    return;
-  }
+authRouter.post(
+  '/resend-verification',
+  asyncHandler(async (req, res) => {
+    const pending = typeof req.body?.pending === 'string' ? req.body.pending : '';
+    if (!pending) {
+      throw AppError.badRequest('Missing pending verification token.');
+    }
 
-  try {
-    const { userId, email } = await verifyPendingVerificationToken(pending);
+    const { userId, email } = await verifyPendingVerificationToken(pending).catch(() => {
+      throw AppError.badRequest('Invalid or expired verification request.');
+    });
 
     if (env.authProvider === 'workos') {
       await sendWorkOSVerificationEmail(userId);
@@ -177,22 +158,22 @@ authRouter.post('/resend-verification', async (req, res) => {
     }
 
     res.json({ message: 'Verification email sent.' });
-  } catch (err) {
-    console.error('[Auth resend-verification]', err);
-    res.status(400).json({ error: 'Invalid or expired verification request.' });
-  }
-});
+  }),
+);
 
 authRouter.post('/logout', (_req, res) => {
   res.clearCookie('vellum_session', { path: '/' });
   res.json({ message: 'Logged out.' });
 });
 
-authRouter.get('/me', async (req, res) => {
-  const user = await resolveRequestUser(req);
-  if (!user) {
-    res.json({ user: null, provider: env.authProvider });
-    return;
-  }
-  res.json({ user, provider: env.authProvider });
-});
+authRouter.get(
+  '/me',
+  asyncHandler(async (req, res) => {
+    const user = await resolveRequestUser(req);
+    if (!user) {
+      res.json({ user: null, provider: env.authProvider });
+      return;
+    }
+    res.json({ user, provider: env.authProvider });
+  }),
+);

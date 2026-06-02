@@ -9,6 +9,7 @@
  */
 
 import path from 'node:path';
+import { AppError } from './errors/app-error.ts';
 
 /**
  * Default allowed extensions when `ALLOWED_UPLOAD_EXTENSIONS` is unset (common document
@@ -163,51 +164,41 @@ export function effectiveExtensionFromBasename(basename: string): string | null 
   return ext.length > 0 ? ext : null;
 }
 
-/** Result of validating and sanitizing an upload filename. */
-export type ResolveUploadFileNameResult =
-  | { ok: true; safeFileName: string; effectiveExtension: string }
-  | { ok: false; status: number; error: string };
-
 /**
  * Produces a storage-safe filename and validates the effective extension.
  *
  * @param originalName - Multipart `originalname`
  * @param allowedExtensions - Lowercase extensions without leading dots; may include `*` to allow all
+ * @throws {@link AppError} When the filename is invalid or the extension is disallowed
  */
 export function resolveUploadFileName(
   originalName: string,
   allowedExtensions: readonly string[],
-): ResolveUploadFileNameResult {
+): { safeFileName: string; effectiveExtension: string } {
   const base = basenameSafe(originalName);
   if (!base) {
-    return { ok: false, status: 400, error: 'Invalid or unsafe filename.' };
+    throw AppError.uploadRejected('Invalid or unsafe filename.');
   }
 
   const stripped = stripDangerousTrailingExtensions(base);
   if (!stripped || stripped === '.' || stripped === '..') {
-    return { ok: false, status: 400, error: 'Invalid filename after removing misleading extensions.' };
+    throw AppError.uploadRejected('Invalid filename after removing misleading extensions.');
   }
 
   const effectiveExtension = effectiveExtensionFromBasename(stripped);
   if (!effectiveExtension) {
-    return {
-      ok: false,
-      status: 400,
-      error: 'Filename must include a file extension (e.g. .pdf).',
-    };
+    throw AppError.uploadRejected('Filename must include a file extension (e.g. .pdf).');
   }
 
   const allowAny = allowedExtensions.includes('*');
   if (!allowAny) {
     const allowed = new Set(allowedExtensions);
     if (!allowed.has(effectiveExtension)) {
-      return {
-        ok: false,
-        status: 400,
-        error: `File type ".${effectiveExtension}" is not allowed. Allowed: ${[...allowed].sort().join(', ')}.`,
-      };
+      throw AppError.uploadRejected(
+        `File type ".${effectiveExtension}" is not allowed. Allowed: ${[...allowed].sort().join(', ')}.`,
+      );
     }
   }
 
-  return { ok: true, safeFileName: stripped, effectiveExtension };
+  return { safeFileName: stripped, effectiveExtension };
 }

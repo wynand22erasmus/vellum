@@ -25,5 +25,8 @@ body:multipart-form {
 tests {
   test("rejects invalid metadata", function () {
     expect(res.getStatus()).to.equal(400);
+    expect(res.getHeader("content-type")).to.contain("application/problem+json");
+    expect(res.getBody().type).to.be.a("string");
+    expect(res.getBody().detail).to.contain("Validation failed");
   });
 }

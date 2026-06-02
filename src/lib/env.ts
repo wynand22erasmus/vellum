@@ -5,6 +5,7 @@
  * @see docs/CONFIG.md for the full variable reference
  */
 
+import { AppError } from './errors/app-error.ts';
 import { parseJsonStringArray } from './env-json.ts';
 import { parseAllowedUploadExtensionsFromEnv } from './uploadFilename.ts';
 import {
@@ -19,12 +20,12 @@ const DEFAULT_ADMIN_EMAILS_FALLBACK = ['wynand22erasmus@gmail.com'];
  * @internal
  * @param key - Environment variable name
  * @returns Raw string value
- * @throws {Error} When the variable is unset or empty
+ * @throws {@link AppError} When the variable is unset or empty
  */
 function requireEnv(key: string): string {
   const value = process.env[key];
   if (!value) {
-    throw new Error(`Missing required environment variable: ${key}`);
+    throw AppError.internal(`Missing required environment variable: ${key}`);
   }
   return value;
 }
@@ -87,4 +88,12 @@ export const env = {
     process.env.DEFAULT_ADMIN_EMAILS,
     DEFAULT_ADMIN_EMAILS_FALLBACK,
   ),
+  /** Directory for NDJSON process-error logs (`process-errors.ndjson`). */
+  logDir: optionalEnv('LOG_DIR', 'logs'),
+  /** Base URL for RFC 9457 Problem Details `type` URIs. */
+  problemTypeBaseUrl: optionalEnv('PROBLEM_TYPE_BASE_URL', 'https://vellum.dev/problems'),
+  /** Enable orphan reconciliation cron job (Phase 4.2). */
+  orphanReconcileEnabled: optionalEnv('ORPHAN_RECONCILE_ENABLED', 'false') === 'true',
+  /** Cron pattern for orphan reconciliation (default: daily 03:00). */
+  orphanReconcileCron: optionalEnv('ORPHAN_RECONCILE_CRON', '0 3 * * *'),
 };

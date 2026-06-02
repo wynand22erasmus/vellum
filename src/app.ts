@@ -11,9 +11,12 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import helmet from 'helmet';
 import { env } from './lib/env.ts';
+import { recordProcessError } from './lib/errors/record-process-error.ts';
 import { apiKeyAuth } from './middleware/apiKeyAuth.ts';
 import { adminAuth } from './middleware/adminAuth.ts';
 import { dashboardAuth } from './middleware/devAuth.ts';
+import { errorHandler } from './middleware/errorHandler.ts';
+import { notFoundHandler } from './middleware/notFoundHandler.ts';
 import { requestId } from './middleware/requestId.ts';
 import { ensureBucket } from './lib/storage/s3Client.ts';
 import { healthRouter } from './routes/health.ts';
@@ -61,8 +64,21 @@ export async function createApp(): Promise<express.Application> {
     });
   }
 
+  app.use(notFoundHandler);
+  app.use(errorHandler);
+
   void ensureBucket().catch((err) => {
-    console.warn('[Storage] Bucket bootstrap failed (will retry on upload):', err);
+    recordProcessError({
+      problemType: 'https://vellum.dev/problems/service-unavailable',
+      title: 'Service Unavailable',
+      status: 503,
+      detail: 'Storage bucket bootstrap failed.',
+      source: 'bootstrap',
+      internal: {
+        message: err instanceof Error ? err.message : String(err),
+        stack: err instanceof Error ? err.stack : undefined,
+      },
+    });
   });
 
   return app;

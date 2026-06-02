@@ -50,6 +50,16 @@ export const PAGE_LABELS = {
     description: 'Dead-letter payloads when audit enqueue fails.',
     href: '/admin/failed-audit-logs',
   },
+  adminProcessErrors: {
+    nav: 'Process errors',
+    description: 'RFC 9457 operational failures from HTTP, workers, and queues.',
+    href: '/admin/process-errors',
+  },
+  adminFailedProcessErrors: {
+    nav: 'Failed process errors',
+    description: 'Dead-letter payloads when process-error enqueue fails.',
+    href: '/admin/failed-process-errors',
+  },
   adminDocumentDetail: {
     nav: 'Document detail',
     description: 'Document metadata and audit trail for this upload.',
@@ -123,6 +133,18 @@ export const ADMIN_INDEX_TILES = [
     label: PAGE_LABELS.adminFailedAuditLogs.nav,
     description: PAGE_LABELS.adminFailedAuditLogs.description,
   },
+  {
+    id: 'admin-process-errors',
+    href: PAGE_LABELS.adminProcessErrors.href!,
+    label: PAGE_LABELS.adminProcessErrors.nav,
+    description: PAGE_LABELS.adminProcessErrors.description,
+  },
+  {
+    id: 'admin-failed-process-errors',
+    href: PAGE_LABELS.adminFailedProcessErrors.href!,
+    label: PAGE_LABELS.adminFailedProcessErrors.nav,
+    description: PAGE_LABELS.adminFailedProcessErrors.description,
+  },
 ] as const;
 
 const PAGE_LABEL_BY_PATH: Record<string, PageLabel> = {
@@ -133,6 +155,8 @@ const PAGE_LABEL_BY_PATH: Record<string, PageLabel> = {
   '/admin/users': PAGE_LABELS.adminUsers,
   '/admin/audit-logs': PAGE_LABELS.adminAuditLogs,
   '/admin/failed-audit-logs': PAGE_LABELS.adminFailedAuditLogs,
+  '/admin/process-errors': PAGE_LABELS.adminProcessErrors,
+  '/admin/failed-process-errors': PAGE_LABELS.adminFailedProcessErrors,
 };
 
 /**

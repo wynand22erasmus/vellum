@@ -5,6 +5,7 @@
  */
 
 import type { Request, Response, NextFunction } from 'express';
+import { AppError } from '../lib/errors/app-error.ts';
 import { resolveRequestUser } from '../lib/auth/resolveUser.ts';
 import { env } from '../lib/env.ts';
 
@@ -30,7 +31,7 @@ export async function adminAuth(
       }
       return;
     }
-    res.status(401).json({ error: 'Not authenticated.' });
+    next(AppError.unauthorized('Not authenticated.'));
     return;
   }
   if (user.kind !== 'ADMIN') {
@@ -38,7 +39,7 @@ export async function adminAuth(
       res.status(403).type('text/plain').send('Admin access required.');
       return;
     }
-    res.status(403).json({ error: 'Admin access required.' });
+    next(AppError.forbidden('Admin access required.'));
     return;
   }
   req.user = user;

@@ -3,10 +3,11 @@ import { beforeAll, describe, expect, it } from 'vitest';
 beforeAll(() => {
   process.env.SESSION_SECRET ??= 'test-session-secret-at-least-32-characters';
 });
+import { AppError } from '../errors/app-error.ts';
 import {
   assertEmailVerified,
   createEmailVerificationToken,
-  EmailNotVerifiedError,
+  EMAIL_NOT_VERIFIED_CODE,
   isEmailVerificationSatisfied,
   verifyEmailVerificationToken,
 } from './emailVerification.ts';
@@ -30,7 +31,14 @@ describe('assertEmailVerified', () => {
   });
 
   it('rejects unverified users when checks are enabled', () => {
-    expect(() => assertEmailVerified(baseUser)).toThrow(EmailNotVerifiedError);
+    expect(() => assertEmailVerified(baseUser)).toThrow(AppError);
+    try {
+      assertEmailVerified(baseUser);
+    } catch (err) {
+      expect(err).toBeInstanceOf(AppError);
+      expect((err as AppError).slug).toBe('forbidden');
+      expect((err as AppError).extensions.reason).toBe(EMAIL_NOT_VERIFIED_CODE);
+    }
   });
 
   it('reports unverified consumers as not satisfied', () => {

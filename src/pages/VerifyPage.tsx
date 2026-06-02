@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { parseProblem, problemMessage } from '@/lib/api';
 import { PAGE_LABELS, panelDescription } from '@/lib/page-labels';
 import { triggerFileDownload } from '@/lib/verify-routes';
 
@@ -39,19 +40,16 @@ export function VerifyPage() {
         body: JSON.stringify({ token, password }),
       });
 
-      const data = (await res.json()) as {
-        error?: string;
-        actionRequired?: string;
-        downloadUrl?: string;
-        fileName?: string;
-      };
-
       if (!res.ok) {
-        setError(data.error ?? 'Verification failed.');
-        if (data.actionRequired) setActionRequired(data.actionRequired);
+        const problem = await parseProblem(res);
+        setError(problemMessage(problem));
+        if (typeof problem.actionRequired === 'string') {
+          setActionRequired(problem.actionRequired);
+        }
         return;
       }
 
+      const data = (await res.json()) as { downloadUrl?: string; fileName?: string };
       if (data.downloadUrl) {
         triggerFileDownload(data.downloadUrl, data.fileName);
         navigate(`/verify/${token}/complete`, { replace: true });

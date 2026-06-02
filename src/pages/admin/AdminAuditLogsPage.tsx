@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/table';
 import { ADMIN_AUDIT_EVENT_TYPE_OPTIONS } from '@/lib/admin-audit-event-types';
 import { ADMIN_ISO_DATE_PLACEHOLDER, emptyAdminFilterValues, optionalSelectValue } from '@/lib/admin-filter-options';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, parseProblem, problemMessage } from '@/lib/api';
 
 const PAGE_SIZE = 50;
 
@@ -119,13 +119,9 @@ export function AdminAuditLogsPage() {
 
       const res = await apiFetch(`/api/admin/audit-logs?${params.toString()}`);
       if (cancelled) return;
-      if (res.status === 403) {
-        setError('Admin access required.');
-        setLoading(false);
-        return;
-      }
       if (!res.ok) {
-        setError('Failed to load audit logs.');
+        const problem = await parseProblem(res);
+        setError(problemMessage(problem));
         setLoading(false);
         return;
       }

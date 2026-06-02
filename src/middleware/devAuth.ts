@@ -5,6 +5,7 @@
  */
 
 import type { Request, Response, NextFunction } from 'express';
+import { AppError } from '../lib/errors/app-error.ts';
 import { resolveRequestUser } from '../lib/auth/resolveUser.ts';
 
 /**
@@ -17,15 +18,16 @@ import { resolveRequestUser } from '../lib/auth/resolveUser.ts';
  */
 export async function dashboardAuth(
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction,
 ): Promise<void> {
   const user = await resolveRequestUser(req);
   if (!user) {
-    res.status(401).json({
-      error:
+    next(
+      AppError.unauthorized(
         'Not authenticated. Sign in or set X-Dev-User-Email for local development.',
-    });
+      ),
+    );
     return;
   }
   req.user = user;

@@ -6,10 +6,14 @@
  */
 
 import { cleanupQueue } from '../queues/cleanupQueue.ts';
+import { env } from '../lib/env.ts';
+import { recordProcessError } from '../lib/errors/record-process-error.ts';
 import './emailWorker.ts';
 import './auditWorker.ts';
 import './fileScrubWorker.ts';
 import './recordScrubWorker.ts';
+import './processErrorWorker.ts';
+import './orphanReconciliationWorker.ts';
 
 /** @internal */
 async function registerSchedulers(): Promise<void> {
@@ -25,11 +29,29 @@ async function registerSchedulers(): Promise<void> {
     { name: 'scrub-records', data: {} },
   );
 
+  if (env.orphanReconcileEnabled) {
+    await cleanupQueue.upsertJobScheduler(
+      'reconcile-orphans-daily',
+      { pattern: env.orphanReconcileCron },
+      { name: 'reconcile-orphans', data: {} },
+    );
+  }
+
   console.log('[Workers] Schedulers registered');
 }
 
 registerSchedulers().catch((err) => {
-  console.error('[Workers] Failed to register schedulers:', err);
+  recordProcessError({
+    problemType: 'https://vellum.dev/problems/internal-error',
+    title: 'Internal Server Error',
+    status: 500,
+    detail: 'Failed to register worker schedulers.',
+    source: 'bootstrap',
+    internal: {
+      message: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack : undefined,
+    },
+  });
 });
 
 console.log('[Workers] BullMQ workers started');

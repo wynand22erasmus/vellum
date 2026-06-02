@@ -7,7 +7,10 @@
 import { Worker } from 'bullmq';
 import { prisma } from '../lib/prisma.ts';
 import { EmailService } from '../lib/email/EmailService.ts';
-import { auditQueue } from '../queues/auditQueue.ts';
+import { AppError } from '../lib/errors/app-error.ts';
+import { recordProcessError } from '../lib/errors/record-process-error.ts';
+import { problemFromError } from '../lib/errors/problem-from-error.ts';
+import { logEvent } from '../queues/auditQueue.ts';
 import { redisConnection } from '../lib/redis.ts';
 
 /** @internal */
@@ -15,8 +18,6 @@ const emailService = new EmailService();
 
 /**
  * Processes `email-queue` jobs: loads the document, sends mail, enqueues audit trail.
- *
- * @remarks Job data shape: `{ docId, type: 'INITIAL' | 'REGENERATE', requestedBy? }`
  */
 export const emailWorker = new Worker(
   'email-queue',
@@ -28,7 +29,9 @@ export const emailWorker = new Worker(
     };
 
     const doc = await prisma.document.findUnique({ where: { id: docId } });
-    if (!doc) throw new Error(`Document ${docId} not found`);
+    if (!doc) {
+      throw AppError.notFound(`Document ${docId} not found.`);
+    }
 
     await emailService.sendDownloadLink(
       doc.recipientEmail,
@@ -36,7 +39,7 @@ export const emailWorker = new Worker(
       doc.fileName,
     );
 
-    await auditQueue.add('log-event', {
+    logEvent({
       eventType:
         type === 'INITIAL' ? 'EMAIL_INITIAL_SENT' : 'EMAIL_REGENERATE_SENT',
       documentId: docId,
@@ -47,5 +50,16 @@ export const emailWorker = new Worker(
 );
 
 emailWorker.on('failed', (job, err) => {
-  console.error(`[emailWorker] Job ${job?.id} failed:`, err);
+  const { problem, internal } = problemFromError(err);
+  recordProcessError({
+    problemType: problem.type,
+    title: problem.title,
+    status: problem.status,
+    detail: problem.detail ?? problem.title,
+    source: 'worker',
+    documentId: (job?.data as { docId?: string })?.docId,
+    jobId: job?.id,
+    jobName: job?.name,
+    internal,
+  });
 });

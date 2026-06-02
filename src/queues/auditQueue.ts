@@ -6,6 +6,8 @@
 
 import { Queue } from 'bullmq';
 import type { AuditEventType } from '../../generated/client.ts';
+import { problemFromError } from '../lib/errors/problem-from-error.ts';
+import { recordProcessError } from '../lib/errors/record-process-error.ts';
 import { prisma } from '../lib/prisma.ts';
 import { redisConnection } from '../lib/redis.ts';
 
@@ -14,38 +16,46 @@ export const auditQueue = new Queue('audit-queue', { connection: redisConnection
 
 /** Payload for a single audit event job (`log-event`). */
 export interface LogEventData {
-  /** Event kind stored on {@link !AuditLog}. */
   eventType: AuditEventType;
-  /** Related document id, when applicable. */
   documentId?: string;
-  /** Dashboard user id, when applicable. */
   userId?: string;
-  /** Extra JSON metadata (request context, scrub details, etc.). */
   metadata?: Record<string, unknown>;
-  /** Client IP captured at request time. */
   ip?: string;
-  /** `User-Agent` header captured at request time. */
   userAgent?: string;
+  /** Shared incident UUID for linking to {@link ProcessError}. */
+  correlationId?: string;
 }
 
 /**
  * Enqueues an audit event for durable write via the audit worker.
- *
- * @param data - Event fields; failures are persisted to `FailedAuditLog`
- * @remarks Fire-and-forget; errors are logged and dead-lettered, not thrown to callers
  */
 export function logEvent(data: LogEventData): void {
   auditQueue.add('log-event', data).catch(async (err) => {
-    console.error('[AuditQueue] Failed to enqueue audit event:', err);
+    let failedAuditLogId: string | undefined;
     try {
-      await prisma.failedAuditLog.create({
+      const failedAuditLog = await prisma.failedAuditLog.create({
         data: {
           payload: data as object,
           error: err instanceof Error ? err.message : String(err),
         },
       });
-    } catch (fallbackErr) {
-      console.error('[AuditQueue] Failed to write FailedAuditLog:', fallbackErr);
+      failedAuditLogId = failedAuditLog.id;
+    } catch {
+      // Continue to unified observability pipeline
     }
+
+    const { problem, internal } = problemFromError(err);
+    recordProcessError({
+      problemType: problem.type,
+      title: problem.title,
+      status: problem.status,
+      detail: problem.detail ?? problem.title,
+      source: 'queue',
+      documentId: data.documentId,
+      userId: data.userId,
+      internal: { ...internal, auditPayload: data },
+      ...(data.correlationId ? { correlationId: data.correlationId } : {}),
+      ...(failedAuditLogId ? { failedAuditLogId } : {}),
+    });
   });
 }

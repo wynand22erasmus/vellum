@@ -24,6 +24,8 @@ body:json {
 tests {
   test("rejects unknown token", function () {
     expect(res.getStatus()).to.equal(404);
-    expect(res.getBody().error).to.contain("Invalid link");
+    expect(res.getHeader("content-type")).to.contain("application/problem+json");
+    expect(res.getBody().type).to.be.a("string");
+    expect(res.getBody().detail).to.contain("Invalid link");
   });
 }

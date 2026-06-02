@@ -25,10 +25,11 @@ body:multipart-form {
 tests {
   test("creates document with warning when scanner available", function () {
     if (res.getStatus() === 503) {
-      expect(res.getBody().error).to.match(/scanner|Virus/i);
+      expect(res.getBody().detail).to.match(/scanner|Virus/i);
       return;
     }
     expect(res.getStatus()).to.equal(201);
+    expect(res.getHeader("content-type")).to.contain("application/json");
     const body = res.getBody();
     expect(body.id).to.be.a("string").and.not.empty;
     expect(body.warning).to.contain("separate channel");

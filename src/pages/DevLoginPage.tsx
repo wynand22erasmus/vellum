@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuthMe } from '@/hooks/use-auth-me';
-import { setDevEmail } from '@/lib/api';
+import { setDevEmail, parseProblem, problemMessage } from '@/lib/api';
 import { PAGE_LABELS, panelDescription } from '@/lib/page-labels';
 import { safeReturnTo } from '@/lib/auth';
 
@@ -63,10 +63,11 @@ export function DevLoginPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim() }),
       });
-      const data = (await res.json()) as RequestLoginResponse & { error?: string };
       if (!res.ok) {
-        throw new Error(data.error ?? 'Sign-in failed.');
+        const problem = await parseProblem(res);
+        throw new Error(problemMessage(problem));
       }
+      const data = (await res.json()) as RequestLoginResponse;
 
       if (data.verified) {
         setDevEmail(data.email);
@@ -99,9 +100,9 @@ export function DevLoginPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pending: pendingToken }),
       });
-      const data = (await res.json()) as { error?: string };
       if (!res.ok) {
-        throw new Error(data.error ?? 'Could not resend verification email.');
+        const problem = await parseProblem(res);
+        throw new Error(problemMessage(problem));
       }
       toast.success('Verification email sent');
     } catch (err) {

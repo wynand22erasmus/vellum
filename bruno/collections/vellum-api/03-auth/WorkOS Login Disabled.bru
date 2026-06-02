@@ -13,6 +13,8 @@ get {
 tests {
   test("returns 400 when WorkOS is not enabled", function () {
     expect(res.getStatus()).to.equal(400);
-    expect(res.getBody().error).to.contain("WorkOS");
+    expect(res.getHeader("content-type")).to.contain("application/problem+json");
+    expect(res.getBody().type).to.be.a("string");
+    expect(res.getBody().detail).to.contain("WorkOS");
   });
 }

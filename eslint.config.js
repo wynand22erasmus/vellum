@@ -26,4 +26,23 @@ export default defineConfig([
       'react-hooks/set-state-in-effect': 'off',
     },
   },
+  {
+    files: ['src/routes/**/*.ts', 'src/middleware/**/*.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "CallExpression[callee.property.name='json'] > ObjectExpression > Property[key.name='error']",
+          message: 'Use throw AppError(...) — inline res.json({ error }) is forbidden.',
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/routes/**/*.ts', 'src/middleware/**/*.ts', 'src/workers/**/*.ts'],
+    rules: {
+      'no-console': ['error', { allow: ['log', 'info'] }],
+    },
+  },
 ])

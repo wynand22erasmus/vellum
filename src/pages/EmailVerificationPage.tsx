@@ -11,6 +11,7 @@ import { VellumLogo } from '@/components/vellum-logo';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { parseProblem, problemMessage } from '@/lib/api';
 import { PAGE_LABELS, panelDescription } from '@/lib/page-labels';
 
 /** Prompt for email verification and allow resending the confirmation link. */
@@ -32,8 +33,8 @@ export function EmailVerificationPage() {
         body: JSON.stringify({ pending }),
       });
       if (!res.ok) {
-        const data = (await res.json()) as { error?: string };
-        throw new Error(data.error ?? 'Failed to resend verification email.');
+        const problem = await parseProblem(res);
+        throw new Error(problemMessage(problem));
       }
       setStatus('sent');
       toast.success('Verification email sent');

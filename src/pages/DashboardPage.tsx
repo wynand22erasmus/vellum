@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, parseProblem, problemMessage } from '@/lib/api';
 
 interface DocumentRow {
   id: string;
@@ -45,7 +45,8 @@ function DashboardContent() {
     setError(null);
     const res = await apiFetch('/api/documents');
     if (!res.ok) {
-      setError('Failed to load documents.');
+      const problem = await parseProblem(res);
+      setError(problemMessage(problem));
       setLoading(false);
       return;
     }
@@ -60,11 +61,12 @@ function DashboardContent() {
 
   async function requestLink(id: string) {
     const res = await apiFetch(`/api/documents/${id}/request-link`, { method: 'POST' });
-    const data = (await res.json()) as { message?: string; error?: string };
     if (!res.ok) {
-      toast.error(data.error ?? 'Failed to request link.');
+      const problem = await parseProblem(res);
+      toast.error(problemMessage(problem));
       return;
     }
+    const data = (await res.json()) as { message?: string };
     toast.success(data.message ?? 'Link sent.');
     void loadDocuments();
   }
