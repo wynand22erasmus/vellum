@@ -11,9 +11,10 @@
 
 import { SignJWT, jwtVerify } from 'jose';
 import type { AuthUser } from './types.ts';
+import { AppError } from '../errors/app-error.ts';
 import { env } from '../env.ts';
 
-/** Error code returned when sign-in is blocked pending email verification. */
+/** Problem Details extension `reason` when sign-in is blocked pending email verification. */
 export const EMAIL_NOT_VERIFIED_CODE = 'EMAIL_NOT_VERIFIED';
 
 /** JWT `purpose` claim for account verification links. */
@@ -24,18 +25,6 @@ const PENDING_PURPOSE = 'email_verify_pending';
 
 /** @internal */
 const secret = new TextEncoder().encode(env.sessionSecret);
-
-/**
- * Thrown when a user attempts to access the dashboard before verifying email.
- */
-export class EmailNotVerifiedError extends Error {
-  readonly code = EMAIL_NOT_VERIFIED_CODE;
-
-  constructor(message = 'Email address must be verified before signing in.') {
-    super(message);
-    this.name = 'EmailNotVerifiedError';
-  }
-}
 
 /**
  * Returns whether the user may access protected dashboard routes.
@@ -57,11 +46,11 @@ export function isEmailVerificationSatisfied(user: AuthUser): boolean {
 /**
  * Ensures the user has verified their email, is an admin, or verification is skipped in dev/E2E.
  *
- * @throws {@link EmailNotVerifiedError} When verification is required but not satisfied
+ * @throws {@link AppError} With `forbidden` and `reason: EMAIL_NOT_VERIFIED` when verification is required
  */
 export function assertEmailVerified(user: AuthUser): void {
   if (!isEmailVerificationSatisfied(user)) {
-    throw new EmailNotVerifiedError();
+    throw AppError.emailNotVerified();
   }
 }
 
@@ -93,11 +82,11 @@ export async function verifyEmailVerificationToken(
 ): Promise<{ userId: string; email: string }> {
   const { payload } = await jwtVerify(token, secret);
   if (payload.purpose !== VERIFY_PURPOSE || typeof payload.sub !== 'string') {
-    throw new Error('Invalid verification token');
+    throw AppError.badRequest('Invalid verification token.');
   }
   const email = payload.email;
   if (typeof email !== 'string') {
-    throw new Error('Invalid verification token');
+    throw AppError.badRequest('Invalid verification token.');
   }
   return { userId: payload.sub, email };
 }
@@ -130,11 +119,11 @@ export async function verifyPendingVerificationToken(
 ): Promise<{ userId: string; email: string }> {
   const { payload } = await jwtVerify(token, secret);
   if (payload.purpose !== PENDING_PURPOSE || typeof payload.sub !== 'string') {
-    throw new Error('Invalid pending verification token');
+    throw AppError.badRequest('Invalid pending verification token.');
   }
   const email = payload.email;
   if (typeof email !== 'string') {
-    throw new Error('Invalid pending verification token');
+    throw AppError.badRequest('Invalid pending verification token.');
   }
   return { userId: payload.sub, email };
 }

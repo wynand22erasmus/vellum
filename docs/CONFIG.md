@@ -52,6 +52,12 @@ Built services (`app`, `worker`) publish images named `{VELLUM_PROJECT}-{service
 | `MAX_UPLOAD_BYTES` | No | `52428800` (50 MiB) | Upload size limit |
 | `ALLOWED_UPLOAD_EXTENSIONS` | No | built-in list (pdf, txt, docx, …) | JSON array of allowed extensions without dots (e.g. `["pdf","txt"]`). Use `["*"]` to allow any extension; misleading trailing types (e.g. `.pdf.exe`) are still stripped from stored filenames |
 | `SKIP_VIRUS_SCAN` | No | `false` | Skip ClamAV on upload in non-production (for E2E when scanner is slow) |
+| `LOG_DIR` | No | `logs` | Directory for NDJSON process-error logs |
+| `PROBLEM_TYPE_BASE_URL` | No | `https://vellum.dev/problems` | Base URL for RFC 9457 Problem Details `type` URIs |
+| `ORPHAN_RECONCILE_ENABLED` | No | `false` | Enable daily orphan reconciliation worker |
+| `ORPHAN_RECONCILE_CRON` | No | `0 3 * * *` | Cron pattern for orphan reconciliation |
+
+See [ERROR_HANDLING.md](./ERROR_HANDLING.md) for the full error-handling standard.
 
 ## E2E-only variables
 

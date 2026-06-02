@@ -7,6 +7,7 @@
 import type { Response } from 'express';
 import { SignJWT, jwtVerify } from 'jose';
 import type { AuthUser } from './types.ts';
+import { AppError } from '../errors/app-error.ts';
 import { env } from '../env.ts';
 
 /** Claims stored in the dashboard session JWT. */
@@ -33,13 +34,13 @@ export async function createSessionToken(user: SessionUser): Promise<string> {
  * Verifies a session JWT and returns the embedded user claims.
  *
  * @param token - Raw cookie value
- * @throws {Error} When the token is invalid or missing required claims
+ * @throws {@link AppError} When the token is invalid or missing required claims
  */
 export async function verifySessionToken(token: string): Promise<SessionUser> {
   const { payload } = await jwtVerify(token, secret);
   const email = payload.email;
   if (typeof email !== 'string' || typeof payload.sub !== 'string') {
-    throw new Error('Invalid session payload');
+    throw AppError.unauthorized('Invalid session payload.');
   }
   return { id: payload.sub, email };
 }

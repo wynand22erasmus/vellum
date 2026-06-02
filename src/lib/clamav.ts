@@ -5,6 +5,7 @@
  */
 
 import net from 'node:net';
+import { AppError } from './errors/app-error.ts';
 import { env } from './env.ts';
 
 /** @internal */
@@ -34,7 +35,7 @@ function readClamdResponse(socket: net.Socket): Promise<string> {
  *
  * @param buffer - Raw upload bytes
  * @returns `clean: true` or `clean: false` with a signature name in `reason`
- * @throws {Error} When ClamAV is unreachable or returns an unexpected response
+ * @throws {@link AppError} When ClamAV is unreachable or returns an unexpected response
  */
 export async function scanBuffer(buffer: Buffer): Promise<{ clean: boolean; reason?: string }> {
   return new Promise((resolve, reject) => {
@@ -42,12 +43,16 @@ export async function scanBuffer(buffer: Buffer): Promise<{ clean: boolean; reas
     socket.setTimeout(120_000);
 
     socket.on('error', (err) => {
-      reject(new Error(`ClamAV unavailable: ${err.message}`));
+      reject(
+        AppError.serviceUnavailable('ClamAV unavailable.', {
+          cause: err instanceof Error ? err.message : String(err),
+        }),
+      );
     });
 
     socket.on('timeout', () => {
       socket.destroy();
-      reject(new Error('ClamAV scan timed out'));
+      reject(AppError.serviceUnavailable('ClamAV scan timed out.'));
     });
 
     socket.on('connect', async () => {
@@ -77,7 +82,11 @@ export async function scanBuffer(buffer: Buffer): Promise<{ clean: boolean; reas
         } else if (response.includes('OK')) {
           resolve({ clean: true });
         } else {
-          reject(new Error(`Unexpected ClamAV response: ${response}`));
+          reject(
+            AppError.internal('Unexpected ClamAV response.', {
+              internal: { response },
+            }),
+          );
         }
       } catch (err) {
         socket.destroy();

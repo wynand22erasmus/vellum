@@ -96,6 +96,16 @@ export function buildSidebarNav(options: {
           label: PAGE_LABELS.adminFailedAuditLogs.nav,
           href: PAGE_LABELS.adminFailedAuditLogs.href!,
         },
+        {
+          id: 'admin-process-errors',
+          label: PAGE_LABELS.adminProcessErrors.nav,
+          href: PAGE_LABELS.adminProcessErrors.href!,
+        },
+        {
+          id: 'admin-failed-process-errors',
+          label: PAGE_LABELS.adminFailedProcessErrors.nav,
+          href: PAGE_LABELS.adminFailedProcessErrors.href!,
+        },
       ],
     });
 

@@ -2,11 +2,6 @@
  * Authenticated document upload API (virus scan, storage, email enqueue).
  *
  * @packageDocumentation
- * @remarks
- * - `POST /api/upload/` — multipart upload; requires {@link ../middleware/apiKeyAuth.ts}
- * - Fields: `file`, `recipientEmail`, `password`, `linkTtl`, `fileTtl` (seconds)
- * - Original filenames are sanitized (trailing spoof extensions like `.pdf.exe` removed) and the
- *   effective extension must be allowed by `ALLOWED_UPLOAD_EXTENSIONS` (see {@link ../lib/env.ts}).
  */
 
 import { randomBytes } from 'node:crypto';
@@ -15,6 +10,11 @@ import multer from 'multer';
 import argon2 from 'argon2';
 import { addSeconds, addYears } from 'date-fns';
 import { z } from 'zod';
+import { asyncHandler } from '../middleware/asyncHandler.ts';
+import { AppError } from '../lib/errors/app-error.ts';
+import { CompensationStack } from '../lib/compensation/compensation-stack.ts';
+import { deleteDocumentIfExists } from '../lib/compensation/document.ts';
+import { deleteObjectIfExists } from '../lib/compensation/storage.ts';
 import { scanBuffer } from '../lib/clamav.ts';
 import { env } from '../lib/env.ts';
 import { resolveUploadFileName } from '../lib/uploadFilename.ts';
@@ -43,27 +43,21 @@ const uploadFieldsSchema = z
 /** Express router mounted at `/api/upload`. */
 export const uploadRouter = Router();
 
-uploadRouter.post('/', upload.single('file'), async (req, res) => {
-  try {
+uploadRouter.post(
+  '/',
+  upload.single('file'),
+  asyncHandler(async (req, res) => {
     if (!req.file) {
-      res.status(400).json({ error: 'File is required.' });
-      return;
+      throw AppError.badRequest('File is required.');
     }
 
     const parsed = uploadFieldsSchema.safeParse(req.body);
     if (!parsed.success) {
-      res.status(400).json({ error: parsed.error.flatten() });
-      return;
+      throw AppError.badRequest('Validation failed.', { invalidParams: parsed.error.flatten() });
     }
 
     const { recipientEmail, password, linkTtl, fileTtl } = parsed.data;
-
-    const nameResult = resolveUploadFileName(req.file.originalname, env.allowedUploadExtensions);
-    if (!nameResult.ok) {
-      res.status(nameResult.status).json({ error: nameResult.error });
-      return;
-    }
-    const { safeFileName } = nameResult;
+    const { safeFileName } = resolveUploadFileName(req.file.originalname, env.allowedUploadExtensions);
 
     let scanResult: { clean: boolean; reason?: string };
     if (env.skipVirusScan) {
@@ -72,54 +66,74 @@ uploadRouter.post('/', upload.single('file'), async (req, res) => {
       try {
         scanResult = await scanBuffer(req.file.buffer);
       } catch (err) {
-        res.status(503).json({
-          error: 'Virus scanner unavailable. Upload rejected.',
-          detail: err instanceof Error ? err.message : 'Unknown error',
-        });
-        return;
+        if (err instanceof AppError) {
+          throw err;
+        }
+        throw AppError.serviceUnavailable('Virus scanner unavailable. Upload rejected.');
       }
     }
 
     if (!scanResult.clean) {
-      res.status(422).json({
-        error: 'File rejected by virus scanner.',
+      throw AppError.unprocessableContent('File rejected by virus scanner.', {
         reason: scanResult.reason,
       });
-      return;
     }
 
-    const s3Key = `documents/${randomBytes(16).toString('hex')}/${safeFileName}`;
-    await uploadObject(s3Key, req.file.buffer, req.file.mimetype);
-
+    const stack = new CompensationStack();
     const passwordHash = await argon2.hash(password);
     const now = new Date();
     const downloadToken = randomBytes(32).toString('hex');
+    const s3Key = `documents/${randomBytes(16).toString('hex')}/${safeFileName}`;
 
-    const doc = await prisma.document.create({
-      data: {
-        s3Key,
-        fileName: safeFileName,
-        recipientEmail,
-        passwordHash,
-        downloadToken,
-        linkExpiresAt: addSeconds(now, linkTtl),
-        fileExpiresAt: addSeconds(now, fileTtl),
-        recordExpiresAt: addYears(now, env.reportingLifetimeYears),
-      },
-    });
+    const docId = await stack.run(async () => {
+      const doc = await prisma.document.create({
+        data: {
+          s3Key: null,
+          fileName: safeFileName,
+          recipientEmail,
+          passwordHash,
+          downloadToken,
+          linkExpiresAt: addSeconds(now, linkTtl),
+          fileExpiresAt: addSeconds(now, fileTtl),
+          recordExpiresAt: addYears(now, env.reportingLifetimeYears),
+        },
+      });
 
-    await emailQueue.add('send-initial-link', {
-      docId: doc.id,
-      type: 'INITIAL',
+      stack.registerUndo(
+        'delete document row',
+        () => deleteDocumentIfExists(doc.id),
+        () => ({ kind: 'document', id: doc.id }),
+      );
+
+      await uploadObject(s3Key, req.file!.buffer, req.file!.mimetype);
+
+      stack.registerUndo(
+        'delete S3 object',
+        () => deleteObjectIfExists(s3Key),
+        () => ({ kind: 's3Object', s3Key }),
+      );
+
+      await prisma.document.update({
+        where: { id: doc.id },
+        data: { s3Key },
+      });
+
+      try {
+        await emailQueue.add('send-initial-link', {
+          docId: doc.id,
+          type: 'INITIAL',
+        });
+      } catch (err) {
+        throw AppError.internal('Upload failed.', { cause: err });
+      }
+
+      return doc.id;
     });
 
     res.status(201).json({
-      id: doc.id,
+      id: docId,
       warning:
         'The file password must be communicated to the recipient via a separate channel (e.g., SMS, phone call). Do not include it in the same email as the download link.',
     });
-  } catch (err) {
-    console.error('[Upload]', err);
-    res.status(500).json({ error: 'Upload failed.' });
-  }
-});
+  }),
+);

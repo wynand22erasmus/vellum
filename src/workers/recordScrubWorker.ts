@@ -5,13 +5,15 @@
  */
 
 import { Worker } from 'bullmq';
+import { subYears } from 'date-fns';
 import { prisma } from '../lib/prisma.ts';
+import { env } from '../lib/env.ts';
+import { recordProcessError } from '../lib/errors/record-process-error.ts';
+import { problemFromError } from '../lib/errors/problem-from-error.ts';
 import { redisConnection } from '../lib/redis.ts';
 
 /**
  * Handles `cleanup-queue` jobs named `scrub-records`.
- *
- * @remarks Deletes `AuditLog` rows past `expiresAt` and `Document` rows past `recordExpiresAt`.
  */
 export const recordScrubWorker = new Worker(
   'cleanup-queue',
@@ -19,6 +21,7 @@ export const recordScrubWorker = new Worker(
     if (job.name !== 'scrub-records') return;
 
     const now = new Date();
+    const retentionCutoff = subYears(now, env.reportingLifetimeYears);
 
     await prisma.auditLog.deleteMany({
       where: { expiresAt: { lt: now } },
@@ -27,10 +30,28 @@ export const recordScrubWorker = new Worker(
     await prisma.document.deleteMany({
       where: { recordExpiresAt: { lt: now } },
     });
+
+    await prisma.processError.deleteMany({
+      where: { createdAt: { lt: retentionCutoff } },
+    });
+
+    await prisma.failedProcessError.deleteMany({
+      where: { createdAt: { lt: retentionCutoff } },
+    });
   },
   { connection: redisConnection },
 );
 
 recordScrubWorker.on('failed', (job, err) => {
-  console.error(`[recordScrubWorker] Job ${job?.id} failed:`, err);
+  const { problem, internal } = problemFromError(err);
+  recordProcessError({
+    problemType: problem.type,
+    title: problem.title,
+    status: problem.status,
+    detail: problem.detail ?? problem.title,
+    source: 'worker',
+    jobId: job?.id,
+    jobName: job?.name,
+    internal,
+  });
 });

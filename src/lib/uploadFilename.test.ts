@@ -9,6 +9,7 @@ import {
   resolveUploadFileName,
   stripDangerousTrailingExtensions,
 } from './uploadFilename.ts';
+import { AppError } from './errors/app-error.ts';
 
 describe('basenameSafe', () => {
   it('rejects path traversal', () => {
@@ -53,25 +54,26 @@ describe('effectiveExtensionFromBasename', () => {
 describe('resolveUploadFileName', () => {
   it('accepts allowed type after stripping trick extension', () => {
     const r = resolveUploadFileName('report.pdf.exe', ['pdf']);
-    expect(r).toEqual({ ok: true, safeFileName: 'report.pdf', effectiveExtension: 'pdf' });
+    expect(r).toEqual({ safeFileName: 'report.pdf', effectiveExtension: 'pdf' });
   });
 
   it('rejects when effective type not allowed', () => {
-    const r = resolveUploadFileName('data.bin', ['pdf', 'txt']);
-    expect(r.ok).toBe(false);
-    if (!r.ok) {
-      expect(r.status).toBe(400);
-      expect(r.error).toMatch(/not allowed/i);
+    expect(() => resolveUploadFileName('data.bin', ['pdf', 'txt'])).toThrow(AppError);
+    try {
+      resolveUploadFileName('data.bin', ['pdf', 'txt']);
+    } catch (err) {
+      expect(err).toBeInstanceOf(AppError);
+      expect((err as AppError).detail).toMatch(/not allowed/i);
     }
   });
 
   it('allows any extension when * is configured', () => {
     const r = resolveUploadFileName('weird.xyz', ['*']);
-    expect(r).toEqual({ ok: true, safeFileName: 'weird.xyz', effectiveExtension: 'xyz' });
+    expect(r).toEqual({ safeFileName: 'weird.xyz', effectiveExtension: 'xyz' });
   });
 
   it('still strips dangerous trailing ext when * is configured', () => {
     const r = resolveUploadFileName('report.pdf.exe', ['*']);
-    expect(r).toEqual({ ok: true, safeFileName: 'report.pdf', effectiveExtension: 'pdf' });
+    expect(r).toEqual({ safeFileName: 'report.pdf', effectiveExtension: 'pdf' });
   });
 });

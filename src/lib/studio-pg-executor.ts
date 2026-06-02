@@ -9,6 +9,7 @@
 
 import type { Pool } from 'pg';
 import pg from 'pg';
+import { AppError } from './errors/app-error.ts';
 
 type StudioQuery = {
   sql: string;
@@ -27,7 +28,7 @@ function getPool(): Pool {
   if (!pool) {
     const url = process.env.DATABASE_URL?.trim();
     if (!url) {
-      throw new Error('DATABASE_URL is not configured.');
+      throw AppError.serviceUnavailable('DATABASE_URL is not configured.');
     }
     pool = new pg.Pool({ connectionString: url });
   }

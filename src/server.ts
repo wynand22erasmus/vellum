@@ -7,6 +7,32 @@
 
 import { createApp } from './app.ts';
 import { env } from './lib/env.ts';
+import { recordProcessError } from './lib/errors/record-process-error.ts';
+import { problemFromError } from './lib/errors/problem-from-error.ts';
+
+process.on('unhandledRejection', (reason) => {
+  const { problem, internal } = problemFromError(reason);
+  recordProcessError({
+    problemType: problem.type,
+    title: problem.title,
+    status: problem.status,
+    detail: problem.detail ?? problem.title,
+    source: 'bootstrap',
+    internal,
+  });
+});
+
+process.on('uncaughtException', (err) => {
+  const { problem, internal } = problemFromError(err);
+  recordProcessError({
+    problemType: problem.type,
+    title: problem.title,
+    status: problem.status,
+    detail: problem.detail ?? problem.title,
+    source: 'bootstrap',
+    internal,
+  });
+});
 
 const app = await createApp();
 

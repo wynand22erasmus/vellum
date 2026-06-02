@@ -15,7 +15,8 @@ export function parseJsonStringArray(raw: string | undefined, fallback: string[]
   try {
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed) || !parsed.every((entry) => typeof entry === 'string')) {
-      throw new Error('Expected JSON array of strings');
+      console.warn('[env] Expected JSON array of strings; using fallback.');
+      return [...fallback];
     }
     return parsed.map((entry) => entry.trim().toLowerCase());
   } catch {

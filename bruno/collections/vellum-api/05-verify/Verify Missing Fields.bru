@@ -21,6 +21,8 @@ body:json {
 tests {
   test("requires token and password", function () {
     expect(res.getStatus()).to.equal(400);
-    expect(res.getBody().error).to.contain("required");
+    expect(res.getHeader("content-type")).to.contain("application/problem+json");
+    expect(res.getBody().type).to.be.a("string");
+    expect(res.getBody().detail).to.contain("required");
   });
 }

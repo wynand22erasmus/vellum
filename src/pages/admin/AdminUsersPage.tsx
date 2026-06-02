@@ -30,7 +30,7 @@ import {
   optionalBooleanQueryValue,
   optionalSelectValue,
 } from '@/lib/admin-filter-options';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, parseProblem, problemMessage } from '@/lib/api';
 
 const PAGE_SIZE = 50;
 
@@ -117,13 +117,9 @@ export function AdminUsersPage() {
 
       const res = await apiFetch(`/api/admin/users?${params.toString()}`);
       if (cancelled) return;
-      if (res.status === 403) {
-        setError('Admin access required.');
-        setLoading(false);
-        return;
-      }
       if (!res.ok) {
-        setError('Failed to load users.');
+        const problem = await parseProblem(res);
+        setError(problemMessage(problem));
         setLoading(false);
         return;
       }

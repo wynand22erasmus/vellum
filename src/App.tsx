@@ -21,6 +21,8 @@ import { AdminAuditLogsPage } from '@/pages/admin/AdminAuditLogsPage';
 import { AdminDocumentDetailPage } from '@/pages/admin/AdminDocumentDetailPage';
 import { AdminDocumentsPage } from '@/pages/admin/AdminDocumentsPage';
 import { AdminFailedAuditLogsPage } from '@/pages/admin/AdminFailedAuditLogsPage';
+import { AdminFailedProcessErrorsPage } from '@/pages/admin/AdminFailedProcessErrorsPage';
+import { AdminProcessErrorsPage } from '@/pages/admin/AdminProcessErrorsPage';
 import { AdminIndexPage } from '@/pages/admin/AdminIndexPage';
 import { AdminLayout } from '@/pages/admin/AdminLayout';
 import { AdminUsersPage } from '@/pages/admin/AdminUsersPage';
@@ -50,6 +52,8 @@ export default function App() {
               <Route path="users" element={<AdminUsersPage />} />
               <Route path="audit-logs" element={<AdminAuditLogsPage />} />
               <Route path="failed-audit-logs" element={<AdminFailedAuditLogsPage />} />
+              <Route path="process-errors" element={<AdminProcessErrorsPage />} />
+              <Route path="failed-process-errors" element={<AdminFailedProcessErrorsPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>

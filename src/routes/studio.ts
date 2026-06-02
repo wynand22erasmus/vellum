@@ -6,6 +6,8 @@
 
 import { Router } from 'express';
 import { serializeError } from '@prisma/studio-core/data/bff';
+import { asyncHandler } from '../middleware/asyncHandler.ts';
+import { AppError } from '../lib/errors/app-error.ts';
 import { env } from '../lib/env.ts';
 import { createPgStudioExecutor } from '../lib/studio-pg-executor.ts';
 
@@ -15,13 +17,13 @@ export const studioRouter = Router();
 /**
  * Executes Studio SQL against `DATABASE_URL` (dev/admin only).
  */
-studioRouter.post('/', async (req, res) => {
-  if (env.isProduction) {
-    res.status(404).json({ error: 'Not found.' });
-    return;
-  }
+studioRouter.post(
+  '/',
+  asyncHandler(async (req, res) => {
+    if (env.isProduction) {
+      throw AppError.notFound('Not found.');
+    }
 
-  try {
     const body = req.body as { query?: { sql: string; parameters: unknown[] } };
     const query = body.query;
     if (!query?.sql) {
@@ -35,7 +37,5 @@ studioRouter.post('/', async (req, res) => {
       return;
     }
     res.json([null, results]);
-  } catch (err) {
-    res.json([serializeError(err)]);
-  }
-});
+  }),
+);

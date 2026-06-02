@@ -1,0 +1,135 @@
+# Error handling (RFC 9457)
+
+Vellum uses a single standard for every operational failure across HTTP routes, workers, and shared libraries.
+
+## Canonical error type
+
+**`AppError`** (`src/lib/errors/app-error.ts`) is the only operational error class. Routes, middleware, workers, and lib code must throw `AppError` (via static factories) — not ad-hoc `Error` subclasses or plain `Error` for user-facing failures.
+
+Import from `src/lib/errors/index.ts` or `app-error.ts`:
+
+| Factory | Slug | Typical use |
+|---------|------|-------------|
+| `AppError.badRequest` | `validation-error` | Invalid input, bad tokens |
+| `AppError.unauthorized` | `unauthorized` | Missing/invalid session or credentials |
+| `AppError.forbidden` | `forbidden` | Access denied |
+| `AppError.emailNotVerified` | `forbidden` (+ `reason: EMAIL_NOT_VERIFIED`) | Dashboard sign-in before email verify |
+| `AppError.notFound` | `not-found` | Missing resources |
+| `AppError.gone` | `gone` | Expired links |
+| `AppError.unprocessableContent` | `unprocessable-content` | Virus scan rejection |
+| `AppError.tooManyRequests` | `too-many-requests` | Rate limits |
+| `AppError.uploadRejected` | `upload-rejected` | Filename / extension policy |
+| `AppError.partialFailure` | `partial-failure` | Compensation undo failed (`compensationFailedError`) |
+| `AppError.internal` | `internal-error` | Unexpected failures, misconfiguration |
+| `AppError.serviceUnavailable` | `service-unavailable` | ClamAV, WorkOS, DB URL missing |
+
+`problemFromError(unknown)` maps **foreign** errors only at boundaries (never thrown from routes as plain `Error`):
+
+| Foreign type | Mapped to |
+|--------------|-----------|
+| `AppError` | Direct Problem Details (+ orphan extensions) |
+| `ZodError` | `validation-error` + `invalidParams` |
+| `MulterError` | `validation-error` (size / upload) |
+| `Prisma.PrismaClientKnownRequestError` | `internal-error` (code in internal log only) |
+| Anything else | `internal-error` (generic detail; message not leaked) |
+
+## Required patterns
+
+| Layer | Approach |
+|-------|----------|
+| HTTP routes & middleware | `throw AppError…` or `next(err)` — never `res.status().json({ error })` |
+| Global handling | `errorHandler` → `recordProcessError()` → `sendProblem()` |
+| Async routes | Wrap with `asyncHandler()` |
+| Workers | `recordProcessError({ source: 'worker', ... })` on `failed` hooks |
+| Frontend | `parseProblem(res)` / `problemMessage(problem)` |
+| Multi-step mutations | `CompensationStack` with LIFO undo |
+
+## Intentional exceptions (not `AppError`)
+
+These are programmer errors or client-side control flow, not operational API failures:
+
+| Location | Pattern | Why |
+|----------|---------|-----|
+| React context hooks (`useTheme`, `useAuthContext`, `useSidebar`, `useRouteChrome`) | `throw new Error('…must be used within…')` | Dev-time invariant; never hits `problemFromError` |
+| Frontend pages (`DevLoginPage`, `EmailVerificationPage`) | `throw new Error(problemMessage(problem))` | UI error state after `parseProblem` |
+| `studio-pg-executor` `abortError()` | Plain `Error` with `name: 'AbortError'` | Prisma Studio query cancellation tuple |
+| `compensation-stack.test.ts` | Plain `Error` in test doubles | Simulates failed undo steps |
+
+Lib modules that previously threw plain `Error` now throw `AppError` (env, clamav, session, email verification tokens, workos, studio pool, email worker, reconcile skip uses early `return` instead of throw).
+
+## Problem Details
+
+All API errors return `Content-Type: application/problem+json` with stable `type` URIs under `PROBLEM_TYPE_BASE_URL` (default `https://vellum.dev/problems`).
+
+Catalog: `src/lib/errors/problem-types.ts`
+
+## Triple-write pipeline
+
+Every handled error is:
+
+1. Appended to `{LOG_DIR}/process-errors.ndjson` (pino NDJSON)
+2. Enqueued on `process-errors-queue` → persisted to `ProcessError`
+3. Returned as Problem Details on HTTP JSON paths
+
+Enqueue failures go to `FailedProcessError`.
+
+## Audit ↔ process-error linking
+
+Cross-table fields tie audit pipeline failures and HTTP/process errors to the same incident:
+
+| Table | Field | Set when |
+|-------|-------|----------|
+| `ProcessError` | `failedAuditLogId` | Audit enqueue or worker failed after `FailedAuditLog` was written |
+| `ProcessError` | `auditLogId` | Successful audit write linked to this error (via `correlationId` or direct id) |
+| `ProcessError` | `correlationId` | Same HTTP request triggered audit + process error (e.g. verify wrong password) |
+| `FailedAuditLog` | `processErrorId` | Back-filled when the linked `ProcessError` row is persisted |
+| `AuditLog` | `processErrorId` | Back-filled when audit worker or process-error worker resolves the pair |
+
+### Verify wrong password
+
+1. Route generates `correlationId` (UUID).
+2. `logEvent({ correlationId, metadata: { correlationId, reason } })` enqueues audit.
+3. `req.errorCorrelationId` / `req.errorDocumentId` are set; `AppError` is thrown.
+4. `errorHandler` → `recordProcessError({ correlationId, documentId })`.
+5. Whichever worker runs second links rows: audit worker looks up `ProcessError` by `correlationId`; process-error worker looks up `AuditLog` by `metadata.correlationId`.
+
+### Audit pipeline failure
+
+1. `FailedAuditLog` is created synchronously.
+2. `recordProcessError({ failedAuditLogId })` enqueues the process error.
+3. `processErrorWorker` sets `FailedAuditLog.processErrorId` after insert.
+
+## Compensation flows
+
+| Flow | Order | Undo on failure |
+|------|-------|-----------------|
+| Upload | validate → `create(s3Key:null)` → S3 put → `update(s3Key)` → email | delete doc + S3 |
+| Request link | snapshot → update token → email | revert link state |
+| Verify | presign → update `isUsed` | N/A (short-lived URL) |
+| File scrub worker | DB null `s3Key` first → S3 delete | restore DB row |
+
+When undo fails, responses include `orphanedResources`, `compensationAttempted`, and `compensationFailed` extensions via `AppError.partialFailure` / `compensationFailedError`.
+
+## Frontend snippet
+
+```ts
+import { parseProblem, problemMessage } from '@/lib/api';
+
+const res = await fetch('/api/verify', { method: 'POST', ... });
+if (!res.ok) {
+  const problem = await parseProblem(res);
+  setError(problemMessage(problem));
+}
+```
+
+## Orphan reconciliation (optional)
+
+Set `ORPHAN_RECONCILE_ENABLED=true` to schedule daily `reconcile-orphans` jobs on `cleanup-queue`. See `ORPHAN_RECONCILE_CRON`.
+
+## Enforcement
+
+- ESLint `no-restricted-syntax` on inline error JSON in routes/middleware
+- `npm run check:error-patterns` (CI grep gate)
+- Completion: `rg 'json\(\s*\{\s*error'` on `src/` returns no matches
+
+See also [CONFIG.md](./CONFIG.md) for `LOG_DIR`, `PROBLEM_TYPE_BASE_URL`, and orphan reconciliation env vars.

@@ -23,7 +23,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, parseProblem, problemMessage } from '@/lib/api';
 
 type AuditRow = {
   id: string;
@@ -81,18 +81,9 @@ export function AdminDocumentDetailPage() {
       setError(null);
       const res = await apiFetch(`/api/admin/documents/${encodeURIComponent(docId)}`);
       if (cancelled) return;
-      if (res.status === 403) {
-        setError('Admin access required.');
-        setLoading(false);
-        return;
-      }
-      if (res.status === 404) {
-        setError('Document not found.');
-        setLoading(false);
-        return;
-      }
       if (!res.ok) {
-        setError('Failed to load document.');
+        const problem = await parseProblem(res);
+        setError(problemMessage(problem));
         setLoading(false);
         return;
       }

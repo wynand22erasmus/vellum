@@ -30,7 +30,7 @@ import {
   optionalBooleanQueryValue,
   optionalSelectValue,
 } from '@/lib/admin-filter-options';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, parseProblem, problemMessage } from '@/lib/api';
 
 const PAGE_SIZE = 50;
 
@@ -69,6 +69,7 @@ type Row = {
   error: string;
   createdAt: string;
   retried: boolean;
+  processErrorId: string | null;
 };
 
 type ListResponse = {
@@ -123,13 +124,9 @@ export function AdminFailedAuditLogsPage() {
 
       const res = await apiFetch(`/api/admin/failed-audit-logs?${params.toString()}`);
       if (cancelled) return;
-      if (res.status === 403) {
-        setError('Admin access required.');
-        setLoading(false);
-        return;
-      }
       if (!res.ok) {
-        setError('Failed to load failed audit logs.');
+        const problem = await parseProblem(res);
+        setError(problemMessage(problem));
         setLoading(false);
         return;
       }
@@ -189,6 +186,7 @@ export function AdminFailedAuditLogsPage() {
                 <TableRow>
                   <TableHead>Created</TableHead>
                   <TableHead>Error</TableHead>
+                  <TableHead>Process error</TableHead>
                   <TableHead>Payload</TableHead>
                   <TableHead>Retried</TableHead>
                 </TableRow>
@@ -198,6 +196,7 @@ export function AdminFailedAuditLogsPage() {
                   <TableRow key={row.id}>
                     <TableCell className="whitespace-nowrap">{formatTs(row.createdAt)}</TableCell>
                     <TableCell className="max-w-xs truncate text-xs">{row.error}</TableCell>
+                    <TableCell className="font-mono text-xs">{row.processErrorId ?? '—'}</TableCell>
                     <TableCell>
                       <pre className="max-h-24 max-w-md overflow-auto rounded bg-muted p-2 text-xs">
                         {JSON.stringify(row.payload, null, 2)}

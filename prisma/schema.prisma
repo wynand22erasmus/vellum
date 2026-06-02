@@ -91,12 +91,61 @@ model AuditLog {
   userAgent   String?
   metadata    Json?
 
+  /// Linked {@link ProcessError} when audit and error pipelines share an incident.
+  processErrorId String?
+
   /// Retention horizon for compliance (see `REPORTING_LIFETIME_YEARS`).
   expiresAt   DateTime
+
+  @@index([processErrorId])
 }
 
 /// Dead-letter store when audit queue processing fails.
 model FailedAuditLog {
+  id        String   @id @default(uuid())
+  payload   Json
+  error     String
+  createdAt DateTime @default(now())
+  retried   Boolean  @default(false)
+
+  /// Linked {@link ProcessError} recorded for the same audit failure.
+  processErrorId String?
+
+  @@index([processErrorId])
+}
+
+/// Operational failures recorded via the RFC 9457 error pipeline.
+model ProcessError {
+  id          String    @id @default(uuid())
+  problemType String
+  title       String
+  status      Int
+  detail      String
+  instance    String?
+  requestId   String?
+  source      String
+  userId      String?
+  documentId  String?
+  extensions  Json?
+  internal    Json?
+  reconciledAt DateTime?
+  reconcileAttempts Int @default(0)
+  createdAt   DateTime  @default(now())
+
+  /// When this error was recorded alongside a {@link FailedAuditLog}.
+  failedAuditLogId String?
+  /// When correlated to a successful {@link AuditLog} write.
+  auditLogId       String?
+  /// Shared UUID when HTTP path triggers audit + process error in one request.
+  correlationId    String?
+
+  @@index([failedAuditLogId])
+  @@index([auditLogId])
+  @@index([correlationId])
+}
+
+/// Dead-letter store when process-error queue processing fails.
+model FailedProcessError {
   id        String   @id @default(uuid())
   payload   Json
   error     String

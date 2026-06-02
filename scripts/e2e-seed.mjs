@@ -126,6 +126,11 @@ async function seedViaUpload() {
       await new Promise((r) => setTimeout(r, 15_000));
       continue;
     }
+    const contentType = uploadRes.headers.get('content-type') ?? '';
+    if (contentType.includes('application/problem+json')) {
+      const detail = uploadBody.detail ?? uploadBody.title ?? 'unknown';
+      console.warn(`[e2e-seed] Upload failed (${uploadRes.status}): ${detail}`);
+    }
     throw new Error(`Upload failed: ${uploadRes.status} ${JSON.stringify(uploadBody)}`);
   }
   throw new Error('Upload failed after retries');
