@@ -45,24 +45,24 @@ function parseBooleanQuery(value: unknown): boolean | undefined {
   return undefined;
 }
 
-function parseEnumListQuery(
+function parseEnumListQuery<T extends string>(
   value: unknown,
-  allowed: readonly string[],
+  allowed: readonly T[],
   paramName: string,
   maxLen = 500,
-): string[] | undefined {
+): T[] | undefined {
   const raw = trimQueryString(value, maxLen);
   if (!raw) {
     return undefined;
   }
   const parts = raw.split(',').map((part) => part.trim()).filter(Boolean);
-  const invalid = parts.filter((part) => !allowed.includes(part));
+  const invalid = parts.filter((part) => !allowed.includes(part as T));
   if (invalid.length > 0) {
     throw AppError.badRequest(
       `Query parameter "${paramName}" has invalid value(s): ${invalid.join(', ')}.`,
     );
   }
-  return parts.length > 0 ? parts : undefined;
+  return parts.length > 0 ? (parts as T[]) : undefined;
 }
 
 function parseDateRangeQuery(query: Record<string, unknown>) {
@@ -247,7 +247,7 @@ adminRouter.get(
     const email = trimQueryString(req.query.email, 320);
     const kinds = parseEnumListQuery(
       req.query.kind,
-      [UserKind.ADMIN, UserKind.CONSUMER],
+      [UserKind.ADMIN, UserKind.CONSUMER] as const,
       'kind',
       64,
     );
@@ -316,7 +316,7 @@ adminRouter.get(
         AuditEventType.FILE_DOWNLOAD_SUCCESS,
         AuditEventType.FILE_DOWNLOAD_FAILED,
         AuditEventType.FILE_SCRUBBED,
-      ],
+      ] as const,
       'eventType',
       256,
     );

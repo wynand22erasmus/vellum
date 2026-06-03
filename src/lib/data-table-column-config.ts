@@ -61,7 +61,7 @@ export function resolveDataTableColumnFilter<T>(
     return null;
   }
 
-  if (column.filter && column.filter !== false) {
+  if (column.filter) {
     return column.filter;
   }
 
