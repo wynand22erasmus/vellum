@@ -279,17 +279,22 @@ export function DataTable<T>({
   const sort = controlledSort !== undefined ? controlledSort : uncontrolledSort;
   const setSort = onSortChange ?? setUncontrolledSort;
 
-  const columnFilters = mergeFilters(
-    columns,
-    controlledColumnFilters !== undefined ? controlledColumnFilters : uncontrolledFilters,
+  const columnFilters = React.useMemo(
+    () =>
+      mergeFilters(
+        columns,
+        controlledColumnFilters !== undefined ? controlledColumnFilters : uncontrolledFilters,
+      ),
+    [columns, controlledColumnFilters, uncontrolledFilters],
   );
 
   function setColumnFilters(next: Record<string, string>) {
+    const merged = mergeFilters(columns, next);
     if (onColumnFiltersChange) {
-      onColumnFiltersChange(mergeFilters(columns, next));
+      onColumnFiltersChange(merged);
       return;
     }
-    setUncontrolledFilters(mergeFilters(columns, next));
+    setUncontrolledFilters(merged);
   }
 
   function handleFilterChange(columnId: string, value: string) {
@@ -315,6 +320,7 @@ export function DataTable<T>({
 
   const processedRows = React.useMemo(() => {
     let rows = [...data];
+    const filters = mergeFilters(columns, filterSource);
 
     const filterColumns = columns.filter((column) =>
       shouldApplyClientFilter(column, manualFiltering, clientFilterColumnIds),
@@ -328,7 +334,7 @@ export function DataTable<T>({
           getFilterValue: (row) => column.accessorFn(row),
           filterFn: column.filterFn ?? getDefaultFilterFnForColumn(column),
         })),
-        columnFilters,
+        filters,
       );
     }
 
@@ -348,9 +354,9 @@ export function DataTable<T>({
   }, [
     clientFilterColumnIds,
     clientSortColumnIds,
-    columnFilters,
     columns,
     data,
+    filterSource,
     getSortValue,
     manualFiltering,
     manualSorting,
