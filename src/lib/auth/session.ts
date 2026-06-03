@@ -40,7 +40,9 @@ export async function verifySessionToken(token: string): Promise<SessionUser> {
   const { payload } = await jwtVerify(token, secret);
   const email = payload.email;
   if (typeof email !== 'string' || typeof payload.sub !== 'string') {
-    throw AppError.unauthorized('Invalid session payload.');
+    throw AppError.unauthorized(
+      'The session token is invalid or missing required user claims. Sign in again at /login.',
+    );
   }
   return { id: payload.sub, email };
 }

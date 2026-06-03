@@ -10,3 +10,5 @@ export { PROBLEM_TYPE_BASE_URL, PROBLEM_TITLES, PROBLEM_STATUS, problemTypeUri, 
 export { problemFromError, type ProblemDetails } from './problem-from-error.ts';
 export { sendProblem } from './send-problem.ts';
 export { recordProcessError, type RecordProcessErrorInput, type ProcessErrorSource } from './record-process-error.ts';
+export { formatInvalidParamsSummary, validationErrorFromZod } from './validation-detail.ts';
+export { appErrorFromJwtVerify } from './jwt-errors.ts';

@@ -39,6 +39,13 @@ healthRouter.get(
       return;
     }
 
-    throw AppError.serviceUnavailable('One or more dependencies are unavailable.', { checks });
+    const failed = Object.entries(checks)
+      .filter(([, ok]) => !ok)
+      .map(([name]) => name);
+
+    throw AppError.serviceUnavailable(
+      `Health check failed: ${failed.join(', ')} unavailable.`,
+      { checks },
+    );
   }),
 );

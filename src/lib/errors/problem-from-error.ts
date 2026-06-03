@@ -8,8 +8,10 @@ import { ZodError } from 'zod';
 import type { MulterError } from 'multer';
 import { Prisma } from '../../../generated/client.ts';
 import { AppError } from './app-error.ts';
+import { validationErrorFromZod } from './validation-detail.ts';
 import { toOrphanExtension } from '../compensation/orphan.ts';
 import type { OrphanedResource } from '../compensation/orphan.ts';
+import { env } from '../env.ts';
 
 /** RFC 9457 Problem Details body (with extension members). */
 export interface ProblemDetails {
@@ -55,9 +57,7 @@ export function problemFromError(
   }
 
   if (err instanceof ZodError) {
-    const appErr = AppError.badRequest('Validation failed.', {
-      invalidParams: err.flatten(),
-    });
+    const appErr = validationErrorFromZod(err);
     return {
       problem: {
         type: appErr.type,
@@ -65,18 +65,16 @@ export function problemFromError(
         status: appErr.status,
         detail: appErr.detail,
         instance: ctx.instance,
-        invalidParams: err.flatten(),
+        ...(appErr.extensions.invalidParams
+          ? { invalidParams: appErr.extensions.invalidParams }
+          : {}),
       },
       internal: buildInternal(err, ctx),
     };
   }
 
   if (isMulterError(err)) {
-    const detail =
-      err.code === 'LIMIT_FILE_SIZE'
-        ? 'File exceeds the maximum upload size.'
-        : `Upload error: ${err.message}`;
-    const appErr = AppError.badRequest(detail);
+    const appErr = multerToAppError(err);
     return {
       problem: {
         type: appErr.type,
@@ -84,13 +82,14 @@ export function problemFromError(
         status: appErr.status,
         detail: appErr.detail,
         instance: ctx.instance,
+        ...appErr.extensions,
       },
       internal: buildInternal(err, ctx),
     };
   }
 
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    const appErr = AppError.internal('A database error occurred.');
+    const appErr = prismaToAppError(err);
     return {
       problem: {
         type: appErr.type,
@@ -114,6 +113,43 @@ export function problemFromError(
     },
     internal: buildInternal(err, ctx),
   };
+}
+
+function multerToAppError(err: MulterError): AppError {
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    const maxMb = Math.round(env.maxUploadBytes / (1024 * 1024));
+    return AppError.uploadRejected(
+      `Uploaded file exceeds the maximum allowed size of ${maxMb} MB (${env.maxUploadBytes} bytes).`,
+      { multerCode: err.code, maxUploadBytes: env.maxUploadBytes },
+    );
+  }
+  if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+    return AppError.badRequest(
+      `Unexpected upload field "${err.field ?? 'unknown'}". Use the multipart field name "file".`,
+      { multerCode: err.code },
+    );
+  }
+  return AppError.badRequest(`Multipart upload error (${err.code}): ${err.message}.`, {
+    multerCode: err.code,
+  });
+}
+
+function prismaToAppError(err: Prisma.PrismaClientKnownRequestError): AppError {
+  if (err.code === 'P2025') {
+    const model = typeof err.meta?.modelName === 'string' ? err.meta.modelName : 'record';
+    return AppError.notFound(`The requested ${model} was not found or has already been deleted.`);
+  }
+  if (err.code === 'P2002') {
+    const target = err.meta?.target;
+    const fields =
+      Array.isArray(target) && target.length > 0
+        ? target.join(', ')
+        : 'unique field';
+    return AppError.badRequest(
+      `A record with the same value already exists for: ${fields}.`,
+    );
+  }
+  return AppError.internal('A database error occurred while processing the request.');
 }
 
 function buildInternal(

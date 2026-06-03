@@ -177,12 +177,16 @@ export function resolveUploadFileName(
 ): { safeFileName: string; effectiveExtension: string } {
   const base = basenameSafe(originalName);
   if (!base) {
-    throw AppError.uploadRejected('Invalid or unsafe filename.');
+    throw AppError.uploadRejected(
+      `Filename "${originalName}" is empty or contains only path separators after sanitization.`,
+    );
   }
 
   const stripped = stripDangerousTrailingExtensions(base);
   if (!stripped || stripped === '.' || stripped === '..') {
-    throw AppError.uploadRejected('Invalid filename after removing misleading extensions.');
+    throw AppError.uploadRejected(
+      `Filename "${originalName}" is invalid after removing misleading trailing extensions.`,
+    );
   }
 
   const effectiveExtension = effectiveExtensionFromBasename(stripped);

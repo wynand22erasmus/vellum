@@ -31,7 +31,7 @@ export async function adminAuth(
       }
       return;
     }
-    next(AppError.unauthorized('Not authenticated.'));
+    next(AppError.unauthorized('Sign in is required to access this resource.'));
     return;
   }
   if (user.kind !== 'ADMIN') {
@@ -39,7 +39,11 @@ export async function adminAuth(
       res.status(403).type('text/plain').send('Admin access required.');
       return;
     }
-    next(AppError.forbidden('Admin access required.'));
+    next(
+      AppError.forbidden(
+        'Administrator privileges (UserKind ADMIN) are required to access this resource.',
+      ),
+    );
     return;
   }
   req.user = user;
