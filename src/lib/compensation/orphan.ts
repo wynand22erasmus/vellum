@@ -41,7 +41,7 @@ export function toOrphanExtension(
 export function compensationFailedError(
   cause: unknown,
   orphans: OrphanedResource[],
-  detail = 'The operation failed and cleanup could not complete.',
+  detail = 'The operation failed and automatic cleanup could not complete. Support has been notified.',
 ): AppError {
   return AppError.partialFailure(detail, {
     cause,

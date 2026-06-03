@@ -8,6 +8,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { asyncHandler } from '../middleware/asyncHandler.ts';
 import { AppError } from '../lib/errors/app-error.ts';
+import { validationErrorFromZod } from '../lib/errors/validation-detail.ts';
 import { prisma } from '../lib/prisma.ts';
 import { AuditEventType, UserKind } from '../../generated/enums.ts';
 
@@ -22,15 +23,6 @@ const paginationQuery = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(50),
   offset: z.coerce.number().int().min(0).max(50_000).default(0),
 });
-
-const auditEventTypeSchema = z.enum([
-  AuditEventType.USER_LOGIN,
-  AuditEventType.EMAIL_INITIAL_SENT,
-  AuditEventType.EMAIL_REGENERATE_SENT,
-  AuditEventType.FILE_DOWNLOAD_SUCCESS,
-  AuditEventType.FILE_DOWNLOAD_FAILED,
-  AuditEventType.FILE_SCRUBBED,
-]);
 
 function trimQueryString(value: unknown, maxLen: number): string | undefined {
   if (typeof value !== 'string') {
@@ -53,6 +45,26 @@ function parseBooleanQuery(value: unknown): boolean | undefined {
   return undefined;
 }
 
+function parseEnumListQuery(
+  value: unknown,
+  allowed: readonly string[],
+  paramName: string,
+  maxLen = 500,
+): string[] | undefined {
+  const raw = trimQueryString(value, maxLen);
+  if (!raw) {
+    return undefined;
+  }
+  const parts = raw.split(',').map((part) => part.trim()).filter(Boolean);
+  const invalid = parts.filter((part) => !allowed.includes(part));
+  if (invalid.length > 0) {
+    throw AppError.badRequest(
+      `Query parameter "${paramName}" has invalid value(s): ${invalid.join(', ')}.`,
+    );
+  }
+  return parts.length > 0 ? parts : undefined;
+}
+
 function parseDateRangeQuery(query: Record<string, unknown>) {
   const fromRaw = trimQueryString(query.from, 64);
   const toRaw = trimQueryString(query.to, 64);
@@ -60,13 +72,28 @@ function parseDateRangeQuery(query: Record<string, unknown>) {
   const to = toRaw ? new Date(toRaw) : undefined;
 
   if (from && Number.isNaN(from.getTime())) {
-    return { error: 'Invalid from date.' as const };
+    return {
+      error: `Query parameter "from" must be a valid ISO 8601 date; received "${fromRaw}".`,
+    };
   }
   if (to && Number.isNaN(to.getTime())) {
-    return { error: 'Invalid to date.' as const };
+    return {
+      error: `Query parameter "to" must be a valid ISO 8601 date; received "${toRaw}".`,
+    };
   }
 
   return { from, to };
+}
+
+function parsePaginationQuery(query: Record<string, unknown>) {
+  const parsed = paginationQuery.safeParse(query);
+  if (!parsed.success) {
+    throw validationErrorFromZod(
+      parsed.error,
+      'Admin list query pagination is invalid (expected limit 1–100, offset 0–50000).',
+    );
+  }
+  return parsed.data;
 }
 
 function mapDocumentRow(
@@ -103,11 +130,8 @@ function mapDocumentRow(
 adminRouter.get(
   '/documents',
   asyncHandler(async (req, res) => {
-    const parsed = paginationQuery.safeParse(req.query);
-    if (!parsed.success) {
-      throw AppError.badRequest('Invalid query parameters.');
-    }
-    const { limit, offset } = parsed.data;
+    const parsed = parsePaginationQuery(req.query as Record<string, unknown>);
+    const { limit, offset } = parsed;
     const recipientEmail = trimQueryString(req.query.recipientEmail, 320);
     const fileName = trimQueryString(req.query.fileName, 255);
 
@@ -191,7 +215,7 @@ adminRouter.get(
     });
 
     if (!doc) {
-      throw AppError.notFound('Document not found.');
+      throw AppError.notFound(`Document with id "${routeParam(req.params.id)}" was not found.`);
     }
 
     const now = new Date();
@@ -218,20 +242,16 @@ adminRouter.get(
 adminRouter.get(
   '/users',
   asyncHandler(async (req, res) => {
-    const parsed = paginationQuery.safeParse(req.query);
-    if (!parsed.success) {
-      throw AppError.badRequest('Invalid query parameters.');
-    }
-    const { limit, offset } = parsed.data;
+    const parsed = parsePaginationQuery(req.query as Record<string, unknown>);
+    const { limit, offset } = parsed;
     const email = trimQueryString(req.query.email, 320);
-    const kindRaw = trimQueryString(req.query.kind, 32);
-    const kind =
-      kindRaw === UserKind.ADMIN || kindRaw === UserKind.CONSUMER ? kindRaw : undefined;
+    const kinds = parseEnumListQuery(
+      req.query.kind,
+      [UserKind.ADMIN, UserKind.CONSUMER],
+      'kind',
+      64,
+    );
     const emailVerified = parseBooleanQuery(req.query.emailVerified);
-
-    if (kindRaw && !kind) {
-      throw AppError.badRequest('Invalid kind filter.');
-    }
 
     const where = {
       ...(email
@@ -242,7 +262,7 @@ adminRouter.get(
             },
           }
         : {}),
-      ...(kind ? { kind } : {}),
+      ...(kinds?.length ? { kind: { in: kinds } } : {}),
       ...(emailVerified !== undefined ? { emailVerified } : {}),
     };
 
@@ -284,21 +304,22 @@ adminRouter.get(
 adminRouter.get(
   '/audit-logs',
   asyncHandler(async (req, res) => {
-    const parsed = paginationQuery.safeParse(req.query);
-    if (!parsed.success) {
-      throw AppError.badRequest('Invalid query parameters.');
-    }
-    const { limit, offset } = parsed.data;
+    const parsed = parsePaginationQuery(req.query as Record<string, unknown>);
+    const { limit, offset } = parsed;
 
-    const eventTypeRaw = req.query.eventType;
-    const eventTypeParsed =
-      typeof eventTypeRaw === 'string' && eventTypeRaw.length > 0
-        ? auditEventTypeSchema.safeParse(eventTypeRaw)
-        : { success: true as const, data: undefined };
-
-    if (!eventTypeParsed.success) {
-      throw AppError.badRequest('Invalid eventType filter.');
-    }
+    const eventTypes = parseEnumListQuery(
+      req.query.eventType,
+      [
+        AuditEventType.USER_LOGIN,
+        AuditEventType.EMAIL_INITIAL_SENT,
+        AuditEventType.EMAIL_REGENERATE_SENT,
+        AuditEventType.FILE_DOWNLOAD_SUCCESS,
+        AuditEventType.FILE_DOWNLOAD_FAILED,
+        AuditEventType.FILE_SCRUBBED,
+      ],
+      'eventType',
+      256,
+    );
 
     const documentId = trimQueryString(req.query.documentId, 64);
 
@@ -309,7 +330,7 @@ adminRouter.get(
     const { from, to } = dateRange;
 
     const where = {
-      ...(eventTypeParsed.data ? { eventType: eventTypeParsed.data } : {}),
+      ...(eventTypes?.length ? { eventType: { in: eventTypes } } : {}),
       ...(documentId ? { documentId } : {}),
       ...((from || to) && {
         timestamp: {
@@ -364,11 +385,8 @@ adminRouter.get(
 adminRouter.get(
   '/failed-audit-logs',
   asyncHandler(async (req, res) => {
-    const parsed = paginationQuery.safeParse(req.query);
-    if (!parsed.success) {
-      throw AppError.badRequest('Invalid query parameters.');
-    }
-    const { limit, offset } = parsed.data;
+    const parsed = parsePaginationQuery(req.query as Record<string, unknown>);
+    const { limit, offset } = parsed;
     const errorFilter = trimQueryString(req.query.error, 500);
     const retried = parseBooleanQuery(req.query.retried);
     const dateRange = parseDateRangeQuery(req.query);
@@ -432,11 +450,8 @@ adminRouter.get(
 adminRouter.get(
   '/process-errors',
   asyncHandler(async (req, res) => {
-    const parsed = paginationQuery.safeParse(req.query);
-    if (!parsed.success) {
-      throw AppError.badRequest('Invalid query parameters.');
-    }
-    const { limit, offset } = parsed.data;
+    const parsed = parsePaginationQuery(req.query as Record<string, unknown>);
+    const { limit, offset } = parsed;
     const source = trimQueryString(req.query.source, 32);
     const statusRaw = trimQueryString(req.query.status, 8);
     const status = statusRaw ? Number(statusRaw) : undefined;
@@ -511,11 +526,8 @@ adminRouter.get(
 adminRouter.get(
   '/failed-process-errors',
   asyncHandler(async (req, res) => {
-    const parsed = paginationQuery.safeParse(req.query);
-    if (!parsed.success) {
-      throw AppError.badRequest('Invalid query parameters.');
-    }
-    const { limit, offset } = parsed.data;
+    const parsed = parsePaginationQuery(req.query as Record<string, unknown>);
+    const { limit, offset } = parsed;
     const errorFilter = trimQueryString(req.query.error, 500);
     const retried = parseBooleanQuery(req.query.retried);
     const dateRange = parseDateRangeQuery(req.query);

@@ -30,7 +30,9 @@ export const emailWorker = new Worker(
 
     const doc = await prisma.document.findUnique({ where: { id: docId } });
     if (!doc) {
-      throw AppError.notFound(`Document ${docId} not found.`);
+      throw AppError.notFound(
+        `Document ${docId} was not found while processing the email queue job.`,
+      );
     }
 
     await emailService.sendDownloadLink(

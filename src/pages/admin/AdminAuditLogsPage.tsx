@@ -1,62 +1,33 @@
 /**
- * Admin audit log browser with event and date range filters.
+ * Admin audit log browser with column-header filters and sorting.
  *
  * @packageDocumentation
  */
 
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  AdminTableFilters,
-  setOptionalQueryParam,
-} from '@/components/layout/admin-table-filters';
+import { setOptionalQueryParam } from '@/components/layout/admin-table-filters';
 import { EmptyState } from '@/components/layout/empty-state';
 import { PageContainer } from '@/components/layout/page-container';
 import { TableLoadingSkeleton } from '@/components/layout/table-loading-skeleton';
 import { TablePagination } from '@/components/layout/table-pagination';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { ADMIN_AUDIT_EVENT_TYPE_OPTIONS } from '@/lib/admin-audit-event-types';
-import { ADMIN_ISO_DATE_PLACEHOLDER, emptyAdminFilterValues, optionalSelectValue } from '@/lib/admin-filter-options';
+import { optionalSelectValue } from '@/lib/admin-filter-options';
 import { apiFetch, parseProblem, problemMessage } from '@/lib/api';
+import {
+  multiSelectToQueryParam,
+  parseMultiSelectFilterValue,
+} from '@/lib/data-table-filter-value';
 
 const PAGE_SIZE = 50;
+const FILTER_DEBOUNCE_MS = 400;
 
-const FILTER_FIELDS = [
-  {
-    id: 'eventType',
-    label: 'Event type',
-    type: 'select' as const,
-    options: ADMIN_AUDIT_EVENT_TYPE_OPTIONS,
-  },
-  {
-    id: 'documentId',
-    label: 'Document ID',
-    type: 'text' as const,
-    placeholder: 'uuid',
-  },
-  {
-    id: 'from',
-    label: 'From (ISO)',
-    type: 'text' as const,
-    placeholder: ADMIN_ISO_DATE_PLACEHOLDER,
-  },
-  {
-    id: 'to',
-    label: 'To (ISO)',
-    type: 'text' as const,
-    placeholder: ADMIN_ISO_DATE_PLACEHOLDER,
-  },
-];
-
-const FILTER_IDS = FILTER_FIELDS.map((field) => field.id);
+const AUDIT_EVENT_FILTER_OPTIONS = ADMIN_AUDIT_EVENT_TYPE_OPTIONS.filter(
+  (option) => option.value !== '',
+);
 
 type AuditRow = {
   id: string;
@@ -79,28 +50,103 @@ type AppliedFilters = {
   to?: string;
 };
 
+const AUDIT_COLUMNS: DataTableColumn<AuditRow>[] = [
+  {
+    id: 'timestamp',
+    header: 'Time',
+    dataType: 'datetime',
+    accessorFn: (row) => row.timestamp,
+    className: 'whitespace-nowrap',
+    cell: ({ value }) => formatTs(String(value)),
+  },
+  {
+    id: 'from',
+    header: 'From',
+    dataType: 'datetime',
+    filterOnly: true,
+    accessorFn: () => '',
+    enableSorting: false,
+  },
+  {
+    id: 'to',
+    header: 'To',
+    dataType: 'datetime',
+    filterOnly: true,
+    accessorFn: () => '',
+    enableSorting: false,
+  },
+  {
+    id: 'eventType',
+    header: 'Event',
+    dataType: 'enum',
+    enumOptions: AUDIT_EVENT_FILTER_OPTIONS,
+    accessorFn: (row) => row.eventType,
+  },
+  {
+    id: 'documentId',
+    header: 'Document',
+    dataType: 'text',
+    accessorFn: (row) => row.documentId ?? '',
+    cell: ({ row }) =>
+      row.documentId ? (
+        <Link
+          to={`/admin/documents/${row.documentId}`}
+          className="font-mono text-xs text-primary underline-offset-2 hover:underline"
+        >
+          {row.documentId.slice(0, 8)}…
+        </Link>
+      ) : (
+        '—'
+      ),
+  },
+  {
+    id: 'userId',
+    header: 'User',
+    dataType: 'text',
+    accessorFn: (row) => row.userId ?? '',
+    className: 'font-mono text-xs',
+    cell: ({ value }) => String(value) || '—',
+  },
+  {
+    id: 'ipAddress',
+    header: 'IP',
+    dataType: 'text',
+    accessorFn: (row) => row.ipAddress ?? '',
+    className: 'text-xs',
+    cell: ({ value }) => String(value) || '—',
+  },
+];
+
 function formatTs(iso: string): string {
   return new Date(iso).toLocaleString();
 }
 
 function parseAppliedFilters(values: Record<string, string>): AppliedFilters {
+  const eventTypes = parseMultiSelectFilterValue(values.eventType ?? '');
+
   return {
-    eventType: optionalSelectValue(values.eventType ?? ''),
+    eventType: multiSelectToQueryParam(eventTypes),
     documentId: optionalSelectValue(values.documentId ?? ''),
     from: optionalSelectValue(values.from ?? ''),
     to: optionalSelectValue(values.to ?? ''),
   };
 }
 
-/** Paginated audit log table with event type and date filters (`/admin/audit-logs`). */
+/** Paginated audit log table with column filters (`/admin/audit-logs`). */
 export function AdminAuditLogsPage() {
   const [rows, setRows] = useState<AuditRow[]>([]);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
-  const [filterInputs, setFilterInputs] = useState(() => emptyAdminFilterValues(FILTER_IDS));
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+  const debouncedColumnFilters = useDebouncedValue(columnFilters, FILTER_DEBOUNCE_MS);
   const [filters, setFilters] = useState<AppliedFilters>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setOffset(0);
+    setFilters(parseAppliedFilters(debouncedColumnFilters));
+  }, [debouncedColumnFilters]);
 
   useEffect(() => {
     let cancelled = false;
@@ -137,32 +183,12 @@ export function AdminAuditLogsPage() {
     };
   }, [offset, filters]);
 
-  function handleFilterChange(id: string, value: string) {
-    setFilterInputs((current) => ({ ...current, [id]: value }));
-  }
-
-  function applyFilters() {
-    setOffset(0);
-    setFilters(parseAppliedFilters(filterInputs));
-  }
-
-  function clearFilters() {
-    const empty = emptyAdminFilterValues(FILTER_IDS);
-    setFilterInputs(empty);
-    setOffset(0);
-    setFilters({});
-  }
+  const hasFilters = Boolean(
+    filters.eventType || filters.documentId || filters.from || filters.to,
+  );
 
   return (
     <div className="space-y-4">
-      <AdminTableFilters
-        fields={FILTER_FIELDS}
-        values={filterInputs}
-        onChange={handleFilterChange}
-        onApply={applyFilters}
-        onClear={clearFilters}
-      />
-
       {error ? (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
@@ -171,43 +197,20 @@ export function AdminAuditLogsPage() {
 
       {loading ? (
         <TableLoadingSkeleton rows={2} />
-      ) : rows.length === 0 ? (
-        <EmptyState title="No audit events match" />
+      ) : rows.length === 0 && !hasFilters ? (
+        <EmptyState title="No audit events" />
       ) : (
         <PageContainer.TableFrame>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Time</TableHead>
-                <TableHead>Event</TableHead>
-                <TableHead>Document</TableHead>
-                <TableHead>User</TableHead>
-                <TableHead>IP</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell className="whitespace-nowrap">{formatTs(row.timestamp)}</TableCell>
-                  <TableCell>{row.eventType}</TableCell>
-                  <TableCell>
-                    {row.documentId ? (
-                      <Link
-                        to={`/admin/documents/${row.documentId}`}
-                        className="font-mono text-xs text-primary underline-offset-2 hover:underline"
-                      >
-                        {row.documentId.slice(0, 8)}…
-                      </Link>
-                    ) : (
-                      '—'
-                    )}
-                  </TableCell>
-                  <TableCell className="font-mono text-xs">{row.userId ?? '—'}</TableCell>
-                  <TableCell className="text-xs">{row.ipAddress ?? '—'}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            data={rows}
+            columns={AUDIT_COLUMNS}
+            getRowKey={(row) => row.id}
+            columnFilters={columnFilters}
+            onColumnFiltersChange={setColumnFilters}
+            manualFiltering
+            manualSorting
+            emptyMessage="No audit events match"
+          />
         </PageContainer.TableFrame>
       )}
 

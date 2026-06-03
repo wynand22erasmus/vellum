@@ -1,61 +1,34 @@
 /**
- * Admin user list with role and verification filters.
+ * Admin user list with column-header filters and sorting.
  *
  * @packageDocumentation
  */
 
 import { useEffect, useState } from 'react';
-import {
-  AdminTableFilters,
-  setOptionalQueryParam,
-} from '@/components/layout/admin-table-filters';
+import { setOptionalQueryParam } from '@/components/layout/admin-table-filters';
 import { EmptyState } from '@/components/layout/empty-state';
 import { PageContainer } from '@/components/layout/page-container';
 import { TableLoadingSkeleton } from '@/components/layout/table-loading-skeleton';
 import { TablePagination } from '@/components/layout/table-pagination';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  ADMIN_BOOLEAN_FILTER_OPTIONS,
   ADMIN_USER_KIND_OPTIONS,
-  emptyAdminFilterValues,
-  optionalBooleanQueryValue,
   optionalSelectValue,
 } from '@/lib/admin-filter-options';
 import { apiFetch, parseProblem, problemMessage } from '@/lib/api';
+import {
+  booleanMultiSelectForQuery,
+  multiSelectToQueryParam,
+  parseMultiSelectFilterValue,
+} from '@/lib/data-table-filter-value';
 
 const PAGE_SIZE = 50;
+const FILTER_DEBOUNCE_MS = 400;
 
-const FILTER_FIELDS = [
-  {
-    id: 'email',
-    label: 'Email',
-    type: 'text' as const,
-    placeholder: 'user@example.com',
-  },
-  {
-    id: 'kind',
-    label: 'Role',
-    type: 'select' as const,
-    options: ADMIN_USER_KIND_OPTIONS,
-  },
-  {
-    id: 'emailVerified',
-    label: 'Verified',
-    type: 'select' as const,
-    options: ADMIN_BOOLEAN_FILTER_OPTIONS,
-  },
-];
-
-const FILTER_IDS = FILTER_FIELDS.map((field) => field.id);
+const USER_KIND_FILTER_OPTIONS = ADMIN_USER_KIND_OPTIONS.filter((option) => option.value !== '');
 
 type UserRow = {
   id: string;
@@ -79,27 +52,93 @@ type AppliedFilters = {
   emailVerified?: string;
 };
 
+const USER_COLUMNS: DataTableColumn<UserRow>[] = [
+  {
+    id: 'email',
+    header: 'Email',
+    dataType: 'email',
+    accessorFn: (user) => user.email,
+    cell: ({ value }) => <span className="font-medium">{String(value)}</span>,
+  },
+  {
+    id: 'kind',
+    header: 'Role',
+    dataType: 'enum',
+    enumOptions: USER_KIND_FILTER_OPTIONS,
+    accessorFn: (user) => user.kind,
+    cell: ({ value }) => <Badge variant="outline">{String(value)}</Badge>,
+  },
+  {
+    id: 'emailVerified',
+    header: 'Verified',
+    dataType: 'boolean',
+    accessorFn: (user) => String(user.emailVerified),
+    cell: ({ row }) => (row.emailVerified ? 'Yes' : 'No'),
+  },
+  {
+    id: 'firstName',
+    header: 'First name',
+    dataType: 'text',
+    accessorFn: (user) => user.firstName ?? '',
+    cell: ({ value }) => String(value) || '—',
+  },
+  {
+    id: 'lastName',
+    header: 'Last name',
+    dataType: 'text',
+    accessorFn: (user) => user.lastName ?? '',
+    cell: ({ value }) => String(value) || '—',
+  },
+  {
+    id: 'lastSignInAt',
+    header: 'Last sign-in',
+    dataType: 'datetime',
+    accessorFn: (user) => user.lastSignInAt ?? '',
+    className: 'whitespace-nowrap',
+    cell: ({ value }) => (value ? formatTs(String(value)) : '—'),
+  },
+  {
+    id: 'createdAt',
+    header: 'Created',
+    dataType: 'datetime',
+    accessorFn: (user) => user.createdAt,
+    className: 'whitespace-nowrap',
+    cell: ({ value }) => formatTs(String(value)),
+  },
+];
+
 function formatTs(iso: string): string {
   return new Date(iso).toLocaleString();
 }
 
 function parseAppliedFilters(values: Record<string, string>): AppliedFilters {
+  const kindSelected = parseMultiSelectFilterValue(values.kind ?? '');
+  const verified = booleanMultiSelectForQuery(
+    parseMultiSelectFilterValue(values.emailVerified ?? ''),
+  );
+
   return {
     email: optionalSelectValue(values.email ?? ''),
-    kind: optionalSelectValue(values.kind ?? ''),
-    emailVerified: optionalBooleanQueryValue(values.emailVerified ?? ''),
+    kind: multiSelectToQueryParam(kindSelected),
+    emailVerified: verified === undefined ? undefined : String(verified),
   };
 }
 
-/** Paginated user table with email, role, and verification filters (`/admin/users`). */
+/** Paginated user table with column filters (`/admin/users`). */
 export function AdminUsersPage() {
   const [rows, setRows] = useState<UserRow[]>([]);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
-  const [filterInputs, setFilterInputs] = useState(() => emptyAdminFilterValues(FILTER_IDS));
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+  const debouncedColumnFilters = useDebouncedValue(columnFilters, FILTER_DEBOUNCE_MS);
   const [filters, setFilters] = useState<AppliedFilters>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setOffset(0);
+    setFilters(parseAppliedFilters(debouncedColumnFilters));
+  }, [debouncedColumnFilters]);
 
   useEffect(() => {
     let cancelled = false;
@@ -135,32 +174,8 @@ export function AdminUsersPage() {
     };
   }, [offset, filters]);
 
-  function handleFilterChange(id: string, value: string) {
-    setFilterInputs((current) => ({ ...current, [id]: value }));
-  }
-
-  function applyFilters() {
-    setOffset(0);
-    setFilters(parseAppliedFilters(filterInputs));
-  }
-
-  function clearFilters() {
-    const empty = emptyAdminFilterValues(FILTER_IDS);
-    setFilterInputs(empty);
-    setOffset(0);
-    setFilters({});
-  }
-
   return (
     <div className="space-y-4">
-      <AdminTableFilters
-        fields={FILTER_FIELDS}
-        values={filterInputs}
-        onChange={handleFilterChange}
-        onApply={applyFilters}
-        onClear={clearFilters}
-      />
-
       {error ? (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
@@ -169,36 +184,23 @@ export function AdminUsersPage() {
 
       {loading ? (
         <TableLoadingSkeleton rows={2} />
-      ) : rows.length === 0 ? (
-        <EmptyState title="No users match" />
+      ) : rows.length === 0 &&
+        !filters.email &&
+        !filters.kind &&
+        !filters.emailVerified ? (
+        <EmptyState title="No users" />
       ) : (
         <PageContainer.TableFrame>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Verified</TableHead>
-                <TableHead>Last sign-in</TableHead>
-                <TableHead>Created</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.email}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{user.kind}</Badge>
-                  </TableCell>
-                  <TableCell>{user.emailVerified ? 'Yes' : 'No'}</TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {user.lastSignInAt ? formatTs(user.lastSignInAt) : '—'}
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">{formatTs(user.createdAt)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            data={rows}
+            columns={USER_COLUMNS}
+            getRowKey={(user) => user.id}
+            columnFilters={columnFilters}
+            onColumnFiltersChange={setColumnFilters}
+            manualFiltering
+            manualSorting
+            emptyMessage="No users match"
+          />
         </PageContainer.TableFrame>
       )}
 

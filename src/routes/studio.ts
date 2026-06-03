@@ -21,7 +21,9 @@ studioRouter.post(
   '/',
   asyncHandler(async (req, res) => {
     if (env.isProduction) {
-      throw AppError.notFound('Not found.');
+      throw AppError.notFound(
+        'Prisma Studio API is not available in production builds.',
+      );
     }
 
     const body = req.body as { query?: { sql: string; parameters: unknown[] } };

@@ -66,7 +66,7 @@ export class AppError extends Error {
 
   /** Sign-in blocked until the user verifies their email (`reason: EMAIL_NOT_VERIFIED`). */
   static emailNotVerified(
-    detail = 'Email address must be verified before signing in.',
+    detail = 'Email address must be verified before signing in. Check your inbox for a verification link or request a new one from the sign-in page.',
   ): AppError {
     return AppError.forbidden(detail, { reason: 'EMAIL_NOT_VERIFIED' });
   }
@@ -87,7 +87,7 @@ export class AppError extends Error {
     return new AppError('too-many-requests', detail);
   }
 
-  static internal(detail = 'An unexpected error occurred.', options: AppErrorOptions = {}): AppError {
+  static internal(detail = 'An unexpected server error occurred. Please try again later.', options: AppErrorOptions = {}): AppError {
     return new AppError('internal-error', detail, options);
   }
 

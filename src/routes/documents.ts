@@ -64,7 +64,9 @@ documentsRouter.post(
     });
 
     if (!doc) {
-      throw AppError.notFound('Document not found.');
+      throw AppError.notFound(
+        'Document not found. No document with this id exists for your account.',
+      );
     }
 
     if (!doc.s3Key || new Date() > doc.fileExpiresAt) {
@@ -106,7 +108,10 @@ documentsRouter.post(
           requestedBy: user.id,
         });
       } catch (err) {
-        throw AppError.internal('Failed to send link email.', { cause: err });
+        throw AppError.serviceUnavailable(
+          'A new download link was prepared but the notification email could not be queued. Please try again in a few minutes.',
+          { cause: err },
+        );
       }
     });
 

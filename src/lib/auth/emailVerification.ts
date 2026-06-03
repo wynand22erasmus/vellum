@@ -12,6 +12,7 @@
 import { SignJWT, jwtVerify } from 'jose';
 import type { AuthUser } from './types.ts';
 import { AppError } from '../errors/app-error.ts';
+import { appErrorFromJwtVerify } from '../errors/jwt-errors.ts';
 import { env } from '../env.ts';
 
 /** Problem Details extension `reason` when sign-in is blocked pending email verification. */
@@ -80,13 +81,23 @@ export async function createEmailVerificationToken(
 export async function verifyEmailVerificationToken(
   token: string,
 ): Promise<{ userId: string; email: string }> {
-  const { payload } = await jwtVerify(token, secret);
+  let payload;
+  try {
+    ({ payload } = await jwtVerify(token, secret));
+  } catch (err) {
+    throw appErrorFromJwtVerify(err, 'email-verification');
+  }
+
   if (payload.purpose !== VERIFY_PURPOSE || typeof payload.sub !== 'string') {
-    throw AppError.badRequest('Invalid verification token.');
+    throw AppError.badRequest(
+      'The email verification link is missing required claims or was issued for a different purpose.',
+    );
   }
   const email = payload.email;
   if (typeof email !== 'string') {
-    throw AppError.badRequest('Invalid verification token.');
+    throw AppError.badRequest(
+      'The email verification link is missing the recipient email claim.',
+    );
   }
   return { userId: payload.sub, email };
 }
@@ -117,13 +128,23 @@ export async function createPendingVerificationToken(
 export async function verifyPendingVerificationToken(
   token: string,
 ): Promise<{ userId: string; email: string }> {
-  const { payload } = await jwtVerify(token, secret);
+  let payload;
+  try {
+    ({ payload } = await jwtVerify(token, secret));
+  } catch (err) {
+    throw appErrorFromJwtVerify(err, 'pending-verification');
+  }
+
   if (payload.purpose !== PENDING_PURPOSE || typeof payload.sub !== 'string') {
-    throw AppError.badRequest('Invalid pending verification token.');
+    throw AppError.badRequest(
+      'The pending verification token is missing required claims or was issued for a different purpose.',
+    );
   }
   const email = payload.email;
   if (typeof email !== 'string') {
-    throw AppError.badRequest('Invalid pending verification token.');
+    throw AppError.badRequest(
+      'The pending verification token is missing the recipient email claim.',
+    );
   }
   return { userId: payload.sub, email };
 }

@@ -30,7 +30,7 @@ authRouter.get('/login', (req, res, next) => {
   try {
     if (env.authProvider !== 'workos') {
       throw AppError.badRequest(
-        'WorkOS is not enabled. Use X-Dev-User-Email header for local development.',
+        'WorkOS sign-in is not enabled in this environment. Set AUTH_PROVIDER=workos or use dev login with X-Dev-User-Email for local development.',
       );
     }
     const returnTo =
@@ -45,12 +45,16 @@ authRouter.get(
   '/callback',
   asyncHandler(async (req, res) => {
     if (env.authProvider !== 'workos') {
-      throw AppError.badRequest('WorkOS is not enabled.');
+      throw AppError.badRequest(
+        'WorkOS OAuth callback is not available when AUTH_PROVIDER is not set to workos.',
+      );
     }
 
     const code = req.query.code;
     if (typeof code !== 'string') {
-      throw AppError.badRequest('Missing authorization code.');
+      throw AppError.badRequest(
+        'WorkOS OAuth callback is missing the authorization code query parameter.',
+      );
     }
 
     const workos = getWorkOS();
@@ -105,12 +109,16 @@ authRouter.post(
   '/dev/request-login',
   asyncHandler(async (req, res) => {
     if (env.authProvider === 'workos') {
-      throw AppError.badRequest('Dev login is not available when AUTH_PROVIDER=workos.');
+      throw AppError.badRequest(
+        'Dev email login is disabled when AUTH_PROVIDER=workos. Use WorkOS sign-in instead.',
+      );
     }
 
     const email = typeof req.body?.email === 'string' ? req.body.email.trim() : '';
     if (!email.includes('@')) {
-      throw AppError.badRequest('A valid email address is required.');
+      throw AppError.badRequest(
+        'Request body must include a valid email address (field "email").',
+      );
     }
 
     const user = await upsertDevUser(email);
@@ -144,11 +152,18 @@ authRouter.post(
   asyncHandler(async (req, res) => {
     const pending = typeof req.body?.pending === 'string' ? req.body.pending : '';
     if (!pending) {
-      throw AppError.badRequest('Missing pending verification token.');
+      throw AppError.badRequest(
+        'Request body must include the pending verification token from the email verification page (field "pending").',
+      );
     }
 
-    const { userId, email } = await verifyPendingVerificationToken(pending).catch(() => {
-      throw AppError.badRequest('Invalid or expired verification request.');
+    const { userId, email } = await verifyPendingVerificationToken(pending).catch((err) => {
+      if (err instanceof AppError) {
+        throw err;
+      }
+      throw AppError.badRequest(
+        'The pending verification token is invalid or has expired. Sign in again to request a new verification email.',
+      );
     });
 
     if (env.authProvider === 'workos') {

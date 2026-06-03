@@ -12,6 +12,7 @@ import { addSeconds, addYears } from 'date-fns';
 import { z } from 'zod';
 import { asyncHandler } from '../middleware/asyncHandler.ts';
 import { AppError } from '../lib/errors/app-error.ts';
+import { validationErrorFromZod } from '../lib/errors/validation-detail.ts';
 import { CompensationStack } from '../lib/compensation/compensation-stack.ts';
 import { deleteDocumentIfExists } from '../lib/compensation/document.ts';
 import { deleteObjectIfExists } from '../lib/compensation/storage.ts';
@@ -48,12 +49,14 @@ uploadRouter.post(
   upload.single('file'),
   asyncHandler(async (req, res) => {
     if (!req.file) {
-      throw AppError.badRequest('File is required.');
+      throw AppError.badRequest(
+        'Multipart upload must include a file field named "file".',
+      );
     }
 
     const parsed = uploadFieldsSchema.safeParse(req.body);
     if (!parsed.success) {
-      throw AppError.badRequest('Validation failed.', { invalidParams: parsed.error.flatten() });
+      throw validationErrorFromZod(parsed.error, 'Validation failed for upload metadata.');
     }
 
     const { recipientEmail, password, linkTtl, fileTtl } = parsed.data;
@@ -69,14 +72,18 @@ uploadRouter.post(
         if (err instanceof AppError) {
           throw err;
         }
-        throw AppError.serviceUnavailable('Virus scanner unavailable. Upload rejected.');
+        throw AppError.serviceUnavailable(
+          'Virus scanner is unavailable; the upload was rejected and no file was stored.',
+        );
       }
     }
 
     if (!scanResult.clean) {
-      throw AppError.unprocessableContent('File rejected by virus scanner.', {
-        reason: scanResult.reason,
-      });
+      const reason = scanResult.reason ?? 'Malware detected';
+      throw AppError.unprocessableContent(
+        `File rejected by virus scanner: ${reason}.`,
+        { reason },
+      );
     }
 
     const stack = new CompensationStack();
@@ -124,7 +131,10 @@ uploadRouter.post(
           type: 'INITIAL',
         });
       } catch (err) {
-        throw AppError.internal('Upload failed.', { cause: err });
+        throw AppError.serviceUnavailable(
+          'The file was saved but the download-link email could not be queued. Retry the upload or contact support.',
+          { cause: err },
+        );
       }
 
       return doc.id;

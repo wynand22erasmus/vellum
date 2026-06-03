@@ -16,13 +16,21 @@ import { env } from '../lib/env.ts';
 export function apiKeyAuth(req: Request, _res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith('Bearer ')) {
-    next(AppError.unauthorized('Missing or invalid Authorization header.'));
+    next(
+      AppError.unauthorized(
+        'Upload API requires Authorization: Bearer <API_KEY> header.',
+      ),
+    );
     return;
   }
 
   const token = authHeader.slice(7);
   if (token !== env.apiKey) {
-    next(AppError.unauthorized('Invalid API key.'));
+    next(
+      AppError.unauthorized(
+        'Invalid API key. Check the API_KEY configured for this environment.',
+      ),
+    );
     return;
   }
 

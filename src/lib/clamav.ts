@@ -44,15 +44,22 @@ export async function scanBuffer(buffer: Buffer): Promise<{ clean: boolean; reas
 
     socket.on('error', (err) => {
       reject(
-        AppError.serviceUnavailable('ClamAV unavailable.', {
-          cause: err instanceof Error ? err.message : String(err),
-        }),
+        AppError.serviceUnavailable(
+          `ClamAV virus scanner at ${env.clamavHost}:${env.clamavPort} is unreachable.`,
+          {
+            cause: err instanceof Error ? err.message : String(err),
+          },
+        ),
       );
     });
 
     socket.on('timeout', () => {
       socket.destroy();
-      reject(AppError.serviceUnavailable('ClamAV scan timed out.'));
+      reject(
+        AppError.serviceUnavailable(
+          'ClamAV virus scan timed out after 120 seconds; the upload was rejected.',
+        ),
+      );
     });
 
     socket.on('connect', async () => {
@@ -83,9 +90,12 @@ export async function scanBuffer(buffer: Buffer): Promise<{ clean: boolean; reas
           resolve({ clean: true });
         } else {
           reject(
-            AppError.internal('Unexpected ClamAV response.', {
-              internal: { response },
-            }),
+            AppError.serviceUnavailable(
+              'ClamAV returned an unexpected scan response; the upload was rejected.',
+              {
+                internal: { response },
+              },
+            ),
           );
         }
       } catch (err) {

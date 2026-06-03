@@ -11,14 +11,15 @@ import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { asyncHandler } from '../middleware/asyncHandler.ts';
 import { AppError } from '../lib/errors/app-error.ts';
+import { validationErrorFromZod } from '../lib/errors/validation-detail.ts';
 import { prisma } from '../lib/prisma.ts';
 import { generatePresignedUrl } from '../lib/storage/s3Client.ts';
 import { logEvent } from '../queues/auditQueue.ts';
 
 /** @internal */
 const verifySchema = z.object({
-  token: z.string().min(1),
-  password: z.string().min(1),
+  token: z.string().min(1, 'Download link token is required.'),
+  password: z.string().min(1, 'File password is required.'),
 });
 
 /** @internal */
@@ -31,7 +32,11 @@ const verifyLimiter = rateLimit({
     return ipKeyGenerator(req.ip ?? '127.0.0.1');
   },
   handler: (_req, _res, next) => {
-    next(AppError.tooManyRequests('Too many attempts. Please try again later.'));
+    next(
+      AppError.tooManyRequests(
+        'Too many download verification attempts for this link or IP address. Please wait 15 minutes and try again.',
+      ),
+    );
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -46,7 +51,10 @@ verifyRouter.post(
   asyncHandler(async (req, res) => {
     const parsed = verifySchema.safeParse(req.body);
     if (!parsed.success) {
-      throw AppError.badRequest('token and password are required.');
+      throw validationErrorFromZod(
+        parsed.error,
+        'Download verification requires both token and password.',
+      );
     }
 
     const { token, password } = parsed.data;
@@ -56,7 +64,9 @@ verifyRouter.post(
     });
 
     if (!doc) {
-      throw AppError.notFound('Invalid link.');
+      throw AppError.notFound(
+        'Invalid download link. No document matches this token; the link may have been replaced.',
+      );
     }
 
     if (!doc.s3Key) {
@@ -84,7 +94,9 @@ verifyRouter.post(
       });
       req.errorCorrelationId = correlationId;
       req.errorDocumentId = doc.id;
-      throw AppError.unauthorized('Invalid file password.');
+      throw AppError.unauthorized(
+        'The file password does not match. Use the password provided separately by the sender.',
+      );
     }
 
     const downloadUrl = await generatePresignedUrl(doc.s3Key, doc.fileName);

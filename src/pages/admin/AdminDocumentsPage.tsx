@@ -1,5 +1,5 @@
 /**
- * Admin document list with pagination and optional recipient filter.
+ * Admin document list with pagination and column-header filters.
  *
  * @packageDocumentation
  */
@@ -7,45 +7,36 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DocumentStatusBadges } from '@/components/features/document-status-badges';
-import {
-  AdminTableFilters,
-  setOptionalQueryParam,
-} from '@/components/layout/admin-table-filters';
+import { setOptionalQueryParam } from '@/components/layout/admin-table-filters';
 import { EmptyState } from '@/components/layout/empty-state';
 import { PageContainer } from '@/components/layout/page-container';
 import { TableLoadingSkeleton } from '@/components/layout/table-loading-skeleton';
 import { TablePagination } from '@/components/layout/table-pagination';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { emptyAdminFilterValues, optionalSelectValue } from '@/lib/admin-filter-options';
+import { DataTable, type DataTableColumn } from '@/components/ui/data-table';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { optionalSelectValue } from '@/lib/admin-filter-options';
 import { apiFetch, parseProblem, problemMessage } from '@/lib/api';
+import {
+  DOCUMENT_STATUS_FILTER_OPTIONS,
+  documentStatusFilterTags,
+} from '@/lib/document-status-filter-options';
 
 const PAGE_SIZE = 50;
+const FILTER_DEBOUNCE_MS = 400;
 
-const FILTER_FIELDS = [
-  {
-    id: 'recipientEmail',
-    label: 'Recipient email',
-    type: 'email' as const,
-    placeholder: 'filter@example.com',
-  },
-  {
-    id: 'fileName',
-    label: 'File name',
-    type: 'text' as const,
-    placeholder: 'report.pdf',
-  },
-];
-
-const FILTER_IDS = FILTER_FIELDS.map((field) => field.id);
+const CLIENT_FILTER_COLUMN_IDS = ['createdAt', 'status'] as const;
+const CLIENT_SORT_COLUMN_IDS = [
+  'fileName',
+  'recipientEmail',
+  'createdAt',
+  'status',
+  'linkActive',
+  'fileAvailable',
+  'isUsed',
+  'deleted',
+] as const;
 
 type DocumentRow = {
   id: string;
@@ -68,6 +59,96 @@ type AppliedFilters = {
   fileName?: string;
 };
 
+const DOCUMENT_COLUMNS: DataTableColumn<DocumentRow>[] = [
+  {
+    id: 'fileName',
+    header: 'File',
+    dataType: 'text',
+    accessorFn: (doc) => doc.fileName,
+    filter: { type: 'text', placeholder: 'report.pdf' },
+    cell: ({ row }) => <span className="font-medium">{row.fileName}</span>,
+  },
+  {
+    id: 'id',
+    header: 'ID',
+    dataType: 'text',
+    accessorFn: (doc) => doc.id,
+    className: 'font-mono text-xs text-muted-foreground',
+  },
+  {
+    id: 'recipientEmail',
+    header: 'Recipient',
+    dataType: 'email',
+    accessorFn: (doc) => doc.recipientEmail,
+  },
+  {
+    id: 'createdAt',
+    header: 'Created',
+    dataType: 'datetime',
+    accessorFn: (doc) => doc.createdAt,
+    className: 'whitespace-nowrap',
+    cell: ({ value }) => formatTs(String(value)),
+  },
+  {
+    id: 'linkActive',
+    header: 'Link',
+    dataType: 'boolean',
+    accessorFn: (doc) => String(doc.linkActive),
+    cell: ({ row }) => (row.linkActive ? 'Active' : 'Expired'),
+  },
+  {
+    id: 'fileAvailable',
+    header: 'File state',
+    dataType: 'boolean',
+    accessorFn: (doc) => String(doc.fileAvailable),
+    cell: ({ row }) => (row.fileAvailable ? 'Available' : 'Scrubbed'),
+  },
+  {
+    id: 'isUsed',
+    header: 'Downloaded',
+    dataType: 'boolean',
+    accessorFn: (doc) => String(doc.isUsed),
+    cell: ({ row }) => (row.isUsed ? 'Yes' : 'No'),
+  },
+  {
+    id: 'deleted',
+    header: 'Deleted',
+    dataType: 'boolean',
+    accessorFn: (doc) => String(Boolean(doc.deletedAt)),
+    cell: ({ row }) => (row.deletedAt ? 'Yes' : 'No'),
+  },
+  {
+    id: 'status',
+    header: 'Status',
+    dataType: 'enum',
+    enumOptions: DOCUMENT_STATUS_FILTER_OPTIONS,
+    accessorFn: (doc) => documentStatusFilterTags(doc),
+    sortable: false,
+    cell: ({ row }) => (
+      <DocumentStatusBadges
+        linkActive={row.linkActive}
+        fileAvailable={row.fileAvailable}
+        isUsed={row.isUsed}
+        deletedAt={row.deletedAt}
+      />
+    ),
+  },
+  {
+    id: 'actions',
+    header: '',
+    accessorFn: (doc) => doc.id,
+    enableSorting: false,
+    enableFiltering: false,
+    className: 'text-right',
+    headerClassName: 'text-right',
+    cell: ({ row }) => (
+      <Button variant="outline" size="sm" asChild>
+        <Link to={`/admin/documents/${row.id}`}>Detail</Link>
+      </Button>
+    ),
+  },
+];
+
 function formatTs(iso: string): string {
   return new Date(iso).toLocaleString();
 }
@@ -84,10 +165,16 @@ export function AdminDocumentsPage() {
   const [rows, setRows] = useState<DocumentRow[]>([]);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
-  const [filterInputs, setFilterInputs] = useState(() => emptyAdminFilterValues(FILTER_IDS));
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+  const debouncedColumnFilters = useDebouncedValue(columnFilters, FILTER_DEBOUNCE_MS);
   const [filters, setFilters] = useState<AppliedFilters>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setOffset(0);
+    setFilters(parseAppliedFilters(debouncedColumnFilters));
+  }, [debouncedColumnFilters]);
 
   useEffect(() => {
     let cancelled = false;
@@ -122,32 +209,10 @@ export function AdminDocumentsPage() {
     };
   }, [offset, filters]);
 
-  function handleFilterChange(id: string, value: string) {
-    setFilterInputs((current) => ({ ...current, [id]: value }));
-  }
-
-  function applyFilters() {
-    setOffset(0);
-    setFilters(parseAppliedFilters(filterInputs));
-  }
-
-  function clearFilters() {
-    const empty = emptyAdminFilterValues(FILTER_IDS);
-    setFilterInputs(empty);
-    setOffset(0);
-    setFilters({});
-  }
+  const hasServerFilters = Boolean(filters.recipientEmail || filters.fileName);
 
   return (
     <div className="space-y-4">
-      <AdminTableFilters
-        fields={FILTER_FIELDS}
-        values={filterInputs}
-        onChange={handleFilterChange}
-        onApply={applyFilters}
-        onClear={clearFilters}
-      />
-
       {error ? (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
@@ -156,46 +221,22 @@ export function AdminDocumentsPage() {
 
       {loading ? (
         <TableLoadingSkeleton rows={2} />
-      ) : rows.length === 0 ? (
-        <EmptyState title="No documents match" />
+      ) : rows.length === 0 && !hasServerFilters ? (
+        <EmptyState title="No documents" />
       ) : (
         <PageContainer.TableFrame>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>File</TableHead>
-                <TableHead>Recipient</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right" />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map((doc) => (
-                <TableRow key={doc.id}>
-                  <TableCell>
-                    <span className="font-medium">{doc.fileName}</span>
-                    <p className="font-mono text-xs text-muted-foreground">{doc.id}</p>
-                  </TableCell>
-                  <TableCell>{doc.recipientEmail}</TableCell>
-                  <TableCell className="whitespace-nowrap">{formatTs(doc.createdAt)}</TableCell>
-                  <TableCell>
-                    <DocumentStatusBadges
-                      linkActive={doc.linkActive}
-                      fileAvailable={doc.fileAvailable}
-                      isUsed={doc.isUsed}
-                      deletedAt={doc.deletedAt}
-                    />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="outline" size="sm" asChild>
-                      <Link to={`/admin/documents/${doc.id}`}>Detail</Link>
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            data={rows}
+            columns={DOCUMENT_COLUMNS}
+            getRowKey={(doc) => doc.id}
+            columnFilters={columnFilters}
+            onColumnFiltersChange={setColumnFilters}
+            manualFiltering
+            manualSorting
+            clientFilterColumnIds={CLIENT_FILTER_COLUMN_IDS}
+            clientSortColumnIds={CLIENT_SORT_COLUMN_IDS}
+            emptyMessage="No documents match"
+          />
         </PageContainer.TableFrame>
       )}
 
