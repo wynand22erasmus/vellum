@@ -5,6 +5,10 @@
  */
 
 import { prisma } from '../prisma.ts';
+
+/**
+ * Sets bidirectional {@link AuditLog} ↔ {@link ProcessError} links after both rows exist.
+ */
 export async function linkAuditLogToProcessError(
   auditLogId: string,
   processErrorId: string,

@@ -12,6 +12,7 @@ import {
   type ProblemTypeSlug,
 } from './problem-types.ts';
 
+/** Constructor options for {@link AppError}. */
 export interface AppErrorOptions {
   detail?: string;
   extensions?: Record<string, unknown>;

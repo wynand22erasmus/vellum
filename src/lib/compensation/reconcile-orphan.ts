@@ -12,6 +12,7 @@ import type { OrphanedResource } from './orphan.ts';
 
 const MAX_RECONCILE_ATTEMPTS = 5;
 
+/** Summary counts from a reconciliation batch run. */
 export interface ReconcileResult {
   processed: number;
   reconciled: number;

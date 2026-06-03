@@ -6,6 +6,7 @@
 
 import { prisma } from '../prisma.ts';
 
+/** Prior download-link fields captured before compensation rollback. */
 export interface DocumentLinkSnapshot {
   downloadToken: string;
   linkExpiresAt: Date;

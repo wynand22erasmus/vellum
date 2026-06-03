@@ -20,7 +20,7 @@ export function formatInvalidParamsSummary(
     parts.push(formError);
   }
   for (const [field, errors] of Object.entries(flattened.fieldErrors)) {
-    if (errors?.length) {
+    if (Array.isArray(errors) && errors.length > 0) {
       parts.push(`${field}: ${errors.join(', ')}`);
     }
   }

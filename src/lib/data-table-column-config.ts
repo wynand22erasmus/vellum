@@ -17,6 +17,7 @@ import type {
   DataTableFilterOption,
 } from '@/lib/data-table-types';
 
+/** Re-export of {@link DataTableFilterOption} from column types. */
 export type { DataTableFilterOption };
 
 /** Yes / no options for boolean column filters. */
@@ -25,8 +26,10 @@ export const DATA_TABLE_BOOLEAN_FILTER_OPTIONS: readonly DataTableFilterOption[]
   { value: 'false', label: 'No' },
 ] as const;
 
+/** Filter UI config after resolving column `dataType` and overrides. */
 export type ResolvedDataTableColumnFilter = DataTableColumnFilter;
 
+/** Returns whether the column header should expose a sort control. */
 export function isDataTableColumnSortable<T>(
   column: DataTableColumn<T>,
 ): boolean {
@@ -39,6 +42,7 @@ export function isDataTableColumnSortable<T>(
   return column.dataType !== undefined || column.filter !== false;
 }
 
+/** Returns whether the column header should expose a filter control. */
 export function isDataTableColumnFilterable<T>(
   column: DataTableColumn<T>,
 ): boolean {
@@ -61,7 +65,7 @@ export function resolveDataTableColumnFilter<T>(
     return null;
   }
 
-  if (column.filter && column.filter !== false) {
+  if (column.filter) {
     return column.filter;
   }
 

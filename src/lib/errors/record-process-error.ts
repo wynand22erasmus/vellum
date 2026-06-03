@@ -8,6 +8,7 @@ import { appendProcessErrorLog } from './process-error-logger.ts';
 import { processErrorQueue, type ProcessErrorJobData } from '../../queues/processErrorQueue.ts';
 import { prisma } from '../prisma.ts';
 
+/** Origin of a persisted {@link ProcessError} row. */
 export type ProcessErrorSource = 'http' | 'worker' | 'bootstrap' | 'queue';
 
 /** Payload for {@link recordProcessError} — same shape across HTTP and workers. */
