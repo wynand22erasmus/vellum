@@ -279,16 +279,15 @@ export function DataTable<T>({
   const sort = controlledSort !== undefined ? controlledSort : uncontrolledSort;
   const setSort = onSortChange ?? setUncontrolledSort;
 
+  const filterSource =
+    controlledColumnFilters !== undefined ? controlledColumnFilters : uncontrolledFilters;
+
   const columnFilters = React.useMemo(
-    () =>
-      mergeFilters(
-        columns,
-        controlledColumnFilters !== undefined ? controlledColumnFilters : uncontrolledFilters,
-      ),
-    [columns, controlledColumnFilters, uncontrolledFilters],
+    () => mergeFilters(columns, filterSource),
+    [columns, filterSource],
   );
 
-  function setColumnFilters(next: Record<string, string>) {
+  function applyColumnFilters(next: Record<string, string>) {
     const merged = mergeFilters(columns, next);
     if (onColumnFiltersChange) {
       onColumnFiltersChange(merged);
@@ -298,11 +297,11 @@ export function DataTable<T>({
   }
 
   function handleFilterChange(columnId: string, value: string) {
-    setColumnFilters({ ...columnFilters, [columnId]: value });
+    applyColumnFilters({ ...filterSource, [columnId]: value });
   }
 
   function handleFilterClear(columnId: string) {
-    setColumnFilters({ ...columnFilters, [columnId]: '' });
+    applyColumnFilters({ ...filterSource, [columnId]: '' });
   }
 
   const getSortValue = React.useCallback(
