@@ -23,6 +23,7 @@ export const PROBLEM_TITLES = {
   'partial-failure': 'Partial Failure',
 } as const;
 
+/** Union of RFC 9457 problem type slugs defined in {@link PROBLEM_TITLES}. */
 export type ProblemTypeSlug = keyof typeof PROBLEM_TITLES;
 
 /** Default HTTP status for each problem type slug. */

@@ -46,14 +46,18 @@ import {
 import type { DataTableColumn, DataTableProps } from '@/lib/data-table-types';
 import { cn } from '@/lib/utils';
 
-export type {
-  DataTableColumn,
-  DataTableColumnDataType,
-  DataTableColumnFilter,
-  DataTableFilterOption,
-  DataTableProps,
-  DataTableSort,
-} from '@/lib/data-table-types';
+/** Re-exported from {@link DataTableColumn}. */
+export type { DataTableColumn } from '@/lib/data-table-types';
+/** Re-exported column data type union. */
+export type { DataTableColumnDataType } from '@/lib/data-table-types';
+/** Re-exported column filter configuration. */
+export type { DataTableColumnFilter } from '@/lib/data-table-types';
+/** Re-exported multiselect option shape. */
+export type { DataTableFilterOption } from '@/lib/data-table-types';
+/** Re-exported {@link DataTable} props. */
+export type { DataTableProps } from '@/lib/data-table-types';
+/** Re-exported active sort state. */
+export type { DataTableSort } from '@/lib/data-table-utils';
 
 function emptyFiltersForColumns<T>(columns: readonly DataTableColumn<T>[]): Record<string, string> {
   return Object.fromEntries(

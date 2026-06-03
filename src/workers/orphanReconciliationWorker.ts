@@ -10,6 +10,7 @@ import { recordProcessError } from '../lib/errors/record-process-error.ts';
 import { problemFromError } from '../lib/errors/problem-from-error.ts';
 import { redisConnection } from '../lib/redis.ts';
 
+/** BullMQ worker that reconciles orphaned resources from {@link ProcessError} rows. */
 export const orphanReconciliationWorker = new Worker(
   'cleanup-queue',
   async (job) => {

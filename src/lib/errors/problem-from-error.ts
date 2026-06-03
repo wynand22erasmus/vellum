@@ -23,6 +23,7 @@ export interface ProblemDetails {
   [key: string]: unknown;
 }
 
+/** Request-scoped values passed when mapping errors to Problem Details. */
 export interface ProblemFromErrorContext {
   instance?: string;
   requestId?: string;

@@ -6,11 +6,13 @@
 
 import { parseMultiSelectFilterValue } from './data-table-filter-value.ts';
 
+/** Active sort column and direction for {@link DataTable}. */
 export type DataTableSort = {
   id: string;
   desc: boolean;
 };
 
+/** Normalized cell values used by default sort comparators. */
 export type CompareValues = string | number | boolean | Date | null | undefined;
 
 /**
@@ -134,8 +136,10 @@ export function defaultDateColumnFilter(cellValue: unknown, filterValue: string)
     .includes(query);
 }
 
+/** Reads a cell value from a row for sorting or filtering. */
 export type DataTableRowAccessor<T> = (row: T) => unknown;
 
+/** Per-column filter wiring passed to {@link filterDataTableRows}. */
 export type DataTableColumnFilterConfig<T> = {
   id: string;
   getFilterValue: (row: T) => unknown;
