@@ -1,0 +1,104 @@
+/* Vellum — palette derived from logo (royal blue → teal, gold/coral complements) */
+:root[data-brand="vellum"] {
+  --logo-blue: oklch(0.445 0.117 224.5);
+  --logo-blue-bright: oklch(0.609 0.208 222);
+  --logo-blue-deep: oklch(0.282 0.135 218);
+  --logo-teal: oklch(0.593 0.13 209);
+  --logo-gold: oklch(0.78 0.14 55);
+  --logo-coral: oklch(0.672 0.16 15);
+
+  --background: oklch(0.985 0.014 224);
+  --foreground: var(--logo-blue-deep);
+  --card: oklch(1 0.006 224);
+  --card-foreground: var(--logo-blue-deep);
+  --popover: oklch(1 0.006 224);
+  --popover-foreground: var(--logo-blue-deep);
+  --primary: var(--logo-blue);
+  --primary-foreground: oklch(0.99 0.005 224);
+  --secondary: var(--logo-teal);
+  --secondary-foreground: oklch(0.99 0.005 224);
+  --muted: oklch(0.955 0.018 224);
+  --muted-foreground: oklch(0.48 0.06 224);
+  --accent: oklch(0.94 0.045 55);
+  --accent-foreground: oklch(0.32 0.1 218);
+  --border: oklch(0.88 0.028 224);
+  --input: oklch(0.88 0.028 224);
+  --ring: var(--logo-teal);
+  --chart-1: var(--logo-blue);
+  --chart-2: var(--logo-teal);
+  --chart-3: var(--logo-blue-bright);
+  --chart-4: var(--logo-gold);
+  --chart-5: var(--logo-coral);
+  --sidebar: oklch(0.975 0.016 224);
+  --sidebar-foreground: var(--logo-blue-deep);
+  --sidebar-primary: var(--logo-blue);
+  --sidebar-primary-foreground: oklch(0.99 0.005 224);
+  --sidebar-accent: oklch(0.94 0.045 55);
+  --sidebar-accent-foreground: var(--logo-blue-deep);
+  --sidebar-border: oklch(0.88 0.028 224);
+  --sidebar-ring: var(--logo-teal);
+  --color-brand-accent: var(--logo-gold);
+  --color-brand-accent-foreground: var(--logo-blue-deep);
+  --color-logo-surface: oklch(0.96 0.028 224);
+}
+
+:root[data-brand="vellum"].dark {
+  --background: oklch(0.17 0.045 218);
+  --foreground: oklch(0.95 0.015 224);
+  --card: oklch(0.2 0.05 218);
+  --card-foreground: oklch(0.95 0.015 224);
+  --popover: oklch(0.2 0.05 218);
+  --popover-foreground: oklch(0.95 0.015 224);
+  --primary: var(--logo-blue-bright);
+  --primary-foreground: oklch(0.15 0.04 218);
+  --secondary: oklch(0.55 0.11 209);
+  --secondary-foreground: oklch(0.95 0.015 224);
+  --muted: oklch(0.24 0.04 218);
+  --muted-foreground: oklch(0.68 0.03 224);
+  --accent: oklch(0.28 0.055 55);
+  --accent-foreground: oklch(0.95 0.015 224);
+  --border: oklch(0.3 0.045 218);
+  --input: oklch(0.3 0.045 218);
+  --ring: var(--logo-blue-bright);
+  --sidebar: oklch(0.18 0.048 218);
+  --sidebar-foreground: oklch(0.95 0.015 224);
+  --sidebar-primary: var(--logo-blue-bright);
+  --sidebar-primary-foreground: oklch(0.15 0.04 218);
+  --sidebar-accent: oklch(0.24 0.05 218);
+  --sidebar-accent-foreground: oklch(0.95 0.015 224);
+  --sidebar-border: oklch(0.3 0.045 218);
+  --sidebar-ring: var(--logo-blue-bright);
+  --color-brand-accent: oklch(0.82 0.12 55);
+  --color-brand-accent-foreground: oklch(0.15 0.04 218);
+  --color-logo-surface: oklch(0.22 0.05 218);
+}
+
+/* Demo alternate client — warm amber accent (unchanged) */
+:root[data-brand="client-example"] {
+  --background: oklch(0.99 0.008 85);
+  --foreground: oklch(0.25 0.04 45);
+  --primary: oklch(0.45 0.14 45);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.55 0.1 55);
+  --secondary-foreground: oklch(0.99 0 0);
+  --accent: oklch(0.94 0.06 85);
+  --accent-foreground: oklch(0.3 0.06 45);
+  --ring: oklch(0.55 0.1 55);
+  --sidebar-primary: oklch(0.45 0.14 45);
+  --sidebar-accent: oklch(0.94 0.06 85);
+  --color-brand-accent: oklch(0.78 0.14 75);
+  --color-logo-surface: oklch(0.96 0.03 85);
+}
+
+:root[data-brand="client-example"].dark {
+  --background: oklch(0.16 0.03 45);
+  --foreground: oklch(0.95 0.02 85);
+  --primary: oklch(0.72 0.12 65);
+  --primary-foreground: oklch(0.15 0.04 45);
+  --secondary: oklch(0.5 0.08 55);
+  --accent: oklch(0.28 0.05 55);
+  --ring: oklch(0.72 0.12 65);
+  --sidebar-primary: oklch(0.72 0.12 65);
+  --color-brand-accent: oklch(0.8 0.12 75);
+  --color-logo-surface: oklch(0.22 0.04 45);
+}

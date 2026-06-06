@@ -1,5 +1,5 @@
 /**
- * React hook for theme state from {@link ../components/theme-provider.tsx}.
+ * React hook for theme state from `ThemeProvider`.
  *
  * @packageDocumentation
  */

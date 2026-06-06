@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 
-import { createApp } from './app.ts';
+import { createApp } from './server/create-app.ts';
 import { recordProcessError } from './lib/errors/record-process-error.ts';
 import { problemFromError } from './lib/errors/problem-from-error.ts';
 

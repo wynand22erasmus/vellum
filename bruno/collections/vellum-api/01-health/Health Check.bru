@@ -13,10 +13,12 @@ get {
 tests {
   test("returns 200 when dependencies are healthy", function () {
     expect(res.getStatus()).to.equal(200);
+    expect(res.getHeader("content-type")).to.contain("application/vnd.vellum.result+json");
     const body = res.getBody();
-    expect(body.status).to.equal("ok");
-    expect(body.checks.database).to.equal(true);
-    expect(body.checks.redis).to.equal(true);
-    expect(body.checks.clamav).to.equal(true);
+    expect(body.type).to.contain("/results/ok");
+    expect(body.data.status).to.equal("ok");
+    expect(body.data.checks.database).to.equal(true);
+    expect(body.data.checks.redis).to.equal(true);
+    expect(body.data.checks.clamav).to.equal(true);
   });
 }

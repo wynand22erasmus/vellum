@@ -29,10 +29,10 @@ tests {
       return;
     }
     expect(res.getStatus()).to.equal(201);
-    expect(res.getHeader("content-type")).to.contain("application/json");
+    expect(res.getHeader("content-type")).to.contain("application/vnd.vellum.result+json");
     const body = res.getBody();
-    expect(body.id).to.be.a("string").and.not.empty;
-    expect(body.warning).to.contain("separate channel");
-    bru.setVar("documentId", body.id);
+    expect(body.data.id).to.be.a("string").and.not.empty;
+    expect(body.data.warning).to.contain("separate channel");
+    bru.setVar("documentId", body.data.id);
   });
 }

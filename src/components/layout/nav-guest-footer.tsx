@@ -5,7 +5,7 @@
  */
 
 import { LogIn, Monitor, Moon, Sun } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from '@tanstack/react-router';
 import {
   DropdownMenu,
   DropdownMenuContent,

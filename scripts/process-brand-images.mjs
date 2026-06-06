@@ -1,10 +1,12 @@
 import sharp from 'sharp';
+import { mkdir } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const publicDir = join(__dirname, '..', 'public');
-const assetsDir = join(__dirname, '..', '..', '..', 'home', 'devman', '.cursor', 'projects', 'apps-vellum', 'assets');
+const brandId = process.env.BRAND_ID?.trim();
+const brandDir = brandId ? join(publicDir, 'brands', brandId) : publicDir;
 
 /** Remove near-white pixels; soften edges for anti-aliasing. */
 function removeWhiteBackground(buffer) {
@@ -51,16 +53,21 @@ async function processImage(inputPath, outputPath, resize) {
   console.log(`Wrote ${outputPath} (${info.width}x${info.height})`);
 }
 
-const logoSrc =
-  process.env.LOGO_SRC ??
-  join(publicDir, 'logo.png');
-const markSrc =
-  process.env.MARK_SRC ??
-  join(publicDir, 'favicon.png');
+const logoSrc = process.env.LOGO_SRC ?? join(publicDir, 'logo.png');
+const markSrc = process.env.MARK_SRC ?? join(publicDir, 'favicon.png');
 
-await processImage(logoSrc, join(publicDir, 'logo.png'), 640);
-await processImage(markSrc, join(publicDir, 'favicon.png'), 512);
-await processImage(markSrc, join(publicDir, 'favicon-32.png'), 32);
-await processImage(markSrc, join(publicDir, 'apple-touch-icon.png'), 180);
+await mkdir(brandDir, { recursive: true });
+
+if (brandId) {
+  await processImage(logoSrc, join(brandDir, 'full.png'), 640);
+  await processImage(markSrc, join(brandDir, 'mark.png'), 512);
+  await processImage(markSrc, join(brandDir, 'favicon.png'), 512);
+  await processImage(markSrc, join(brandDir, 'apple-touch-icon.png'), 180);
+} else {
+  await processImage(logoSrc, join(publicDir, 'logo.png'), 640);
+  await processImage(markSrc, join(publicDir, 'favicon.png'), 512);
+  await processImage(markSrc, join(publicDir, 'favicon-32.png'), 32);
+  await processImage(markSrc, join(publicDir, 'apple-touch-icon.png'), 180);
+}
 
 console.log('Done.');

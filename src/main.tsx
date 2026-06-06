@@ -1,18 +1,12 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Toaster } from '@/components/ui/sonner';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { ThemeProvider } from '@/components/theme-provider';
-import App from './App';
-import './index.css';
+import { AuthProvider } from '@/providers/auth-provider';
+import { App } from '@/app';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider>
-      <TooltipProvider>
-        <App />
-        <Toaster richColors closeButton position="top-right" />
-      </TooltipProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   </StrictMode>,
 );

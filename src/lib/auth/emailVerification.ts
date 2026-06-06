@@ -3,9 +3,9 @@
  *
  * @packageDocumentation
  * @remarks
- * Production users verify through WorkOS ({@link sendWorkOSVerificationEmail}).
- * Development users receive a Mailpit link via {@link sendDevVerificationEmail}.
- * {@link UserKind.ADMIN | Admin} users skip verification. Set `SKIP_EMAIL_VERIFICATION=true`
+ * Production users verify through WorkOS verification email.
+ * Development users receive a Mailpit link via {@link createEmailVerificationToken}.
+ * `UserKind` `ADMIN` users skip verification. Set `SKIP_EMAIL_VERIFICATION=true`
  * only for local E2E (never in production).
  */
 
@@ -47,7 +47,7 @@ export function isEmailVerificationSatisfied(user: AuthUser): boolean {
 /**
  * Ensures the user has verified their email, is an admin, or verification is skipped in dev/E2E.
  *
- * @throws {@link AppError} With `forbidden` and `reason: EMAIL_NOT_VERIFIED` when verification is required
+ * @throws `AppError` With `forbidden` and `reason: EMAIL_NOT_VERIFIED` when verification is required
  */
 export function assertEmailVerified(user: AuthUser): void {
   if (!isEmailVerificationSatisfied(user)) {

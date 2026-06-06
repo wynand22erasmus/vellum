@@ -74,11 +74,13 @@ describe('Dev login and dashboard', () => {
   it('signs out and returns to login (positive)', async () => {
     const page = await newPage(browser);
     await devLogin(page, state.recipientEmail);
+    await page.click('[data-sidebar="footer"] [data-sidebar="menu-button"]');
+    await page.waitForSelector('[role="menuitem"]', { timeout: 5000 });
     await page.evaluate(() => {
-      const btn = [...document.querySelectorAll('button')].find((b) =>
-        b.textContent?.includes('Sign out'),
+      const item = [...document.querySelectorAll('[role="menuitem"]')].find((el) =>
+        el.textContent?.includes('Sign out'),
       );
-      btn?.click();
+      (item as HTMLElement | undefined)?.click();
     });
     await page.waitForFunction(
       () => window.location.pathname === '/login',

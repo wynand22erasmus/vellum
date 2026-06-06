@@ -13,6 +13,8 @@ post {
 tests {
   test("logout succeeds", function () {
     expect(res.getStatus()).to.equal(200);
-    expect(res.getBody().message).to.contain("Logged out");
+    expect(res.getHeader("content-type")).to.contain("application/vnd.vellum.result+json");
+    const body = res.getBody();
+    expect(body.detail).to.contain("Logged out");
   });
 }

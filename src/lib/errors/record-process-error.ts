@@ -5,13 +5,14 @@
  */
 
 import { appendProcessErrorLog } from './process-error-logger.ts';
-import { processErrorQueue, type ProcessErrorJobData } from '../../queues/processErrorQueue.ts';
+import { processErrorQueue, type ProcessErrorJobData } from '../../server/queues/processErrorQueue.ts';
 import { prisma } from '../prisma.ts';
+import type { ProblemDetails } from '../http/problem-details.ts';
 
-/** Origin of a persisted {@link ProcessError} row. */
+/** Origin of a persisted `ProcessError` row. */
 export type ProcessErrorSource = 'http' | 'worker' | 'bootstrap' | 'queue';
 
-/** Payload for {@link recordProcessError} — same shape across HTTP and workers. */
+/** Payload for `recordProcessError` — same shape across HTTP and workers. */
 export interface RecordProcessErrorInput {
   problemType: string;
   title: string;
@@ -26,11 +27,11 @@ export interface RecordProcessErrorInput {
   internal?: Record<string, unknown>;
   jobId?: string;
   jobName?: string;
-  /** Linked {@link FailedAuditLog} when audit enqueue/worker failed. */
+  /** Linked `FailedAuditLog` when audit enqueue/worker failed. */
   failedAuditLogId?: string;
   /** Alias for {@link failedAuditLogId}. */
   relatedFailedAuditLogId?: string;
-  /** Linked {@link AuditLog} when correlation is known at record time. */
+  /** Linked `AuditLog` when correlation is known at record time. */
   auditLogId?: string;
   /** Shared incident UUID across audit and process-error pipelines. */
   correlationId?: string;
@@ -84,5 +85,59 @@ export function recordProcessError(input: RecordProcessErrorInput): void {
     } catch {
       // Last-resort — nothing more we can do synchronously
     }
+  });
+}
+
+const PROBLEM_RESERVED_KEYS = new Set(['type', 'title', 'status', 'detail', 'instance']);
+
+function extractProblemExtensions(problem: ProblemDetails): Record<string, unknown> {
+  const extensions: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(problem)) {
+    if (!PROBLEM_RESERVED_KEYS.has(key)) {
+      extensions[key] = value;
+    }
+  }
+  return extensions;
+}
+
+/** Persists a normalized Problem Details envelope. */
+export function recordProcessErrorFromProblem(
+  problem: ProblemDetails,
+  ctx: {
+    source: ProcessErrorSource;
+    instance?: string;
+    requestId?: string;
+    userId?: string;
+    documentId?: string;
+    internal?: Record<string, unknown>;
+    correlationId?: string;
+    failedAuditLogId?: string;
+    auditLogId?: string;
+    jobId?: string;
+    jobName?: string;
+  },
+): void {
+  const extensions = extractProblemExtensions(problem);
+  const correlationId =
+    ctx.correlationId ??
+    (typeof extensions.correlationId === 'string' ? extensions.correlationId : undefined);
+
+  recordProcessError({
+    problemType: problem.type,
+    title: problem.title,
+    status: problem.status,
+    detail: problem.detail ?? problem.title,
+    instance: ctx.instance ?? problem.instance,
+    requestId: ctx.requestId,
+    source: ctx.source,
+    userId: ctx.userId,
+    documentId: ctx.documentId,
+    extensions,
+    internal: ctx.internal,
+    correlationId,
+    failedAuditLogId: ctx.failedAuditLogId,
+    auditLogId: ctx.auditLogId,
+    jobId: ctx.jobId,
+    jobName: ctx.jobName,
   });
 }

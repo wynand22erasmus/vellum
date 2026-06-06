@@ -54,6 +54,7 @@ Built services (`app`, `worker`) publish images named `{VELLUM_PROJECT}-{service
 | `SKIP_VIRUS_SCAN` | No | `false` | Skip ClamAV on upload in non-production (for E2E when scanner is slow) |
 | `LOG_DIR` | No | `logs` | Directory for NDJSON process-error logs |
 | `PROBLEM_TYPE_BASE_URL` | No | `https://vellum.dev/problems` | Base URL for RFC 9457 Problem Details `type` URIs |
+| `RESULT_TYPE_BASE_URL` | No | `https://vellum.dev/results` | Base URL for VellumResult success envelope `type` URIs |
 | `ORPHAN_RECONCILE_ENABLED` | No | `false` | Enable daily orphan reconciliation worker |
 | `ORPHAN_RECONCILE_CRON` | No | `0 3 * * *` | Cron pattern for orphan reconciliation |
 
@@ -95,7 +96,7 @@ After successful sign-in (WorkOS callback or dev `POST /api/auth/dev/request-log
 
 ### Data browser (`/admin`)
 
-Read-only UI for operators with `kind: ADMIN`: documents, users, audit logs, and failed audit rows. Requires the same session as `/docs/`. API: `GET /api/admin/*` (see server `src/routes/admin.ts`).
+Read-only UI for operators with `kind: ADMIN`: documents, users, audit logs, and failed audit rows. Requires the same session as `/docs/`. API: `GET /api/admin/*` (see `src/server/routes/admin.ts`).
 
 ### API documentation (`/docs/`)
 
@@ -115,3 +116,38 @@ Unauthenticated browser requests to `/docs/` redirect to sign-in with `returnTo=
 - **E2E:** Set `SKIP_EMAIL_VERIFICATION=true` in non-production only (same intent as `SKIP_VIRUS_SCAN`).
 
 See [README.md](../README.md) for WorkOS and Docker-specific setup.
+
+## White-label branding
+
+Build-time brand presets drive the SPA shell, favicons, and transactional email copy. Presets live in [`src/lib/brand/presets.ts`](../src/lib/brand/presets.ts); static assets under `public/brands/{preset-id}/`.
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `VITE_BRAND_PRESET` | No | `vellum` | SPA brand preset id (Vite build / dev) |
+| `BRAND_PRESET` | No | `vellum` | Server brand preset id (email sender, subjects, body templates) |
+
+### Per-client env files
+
+| File | Purpose |
+|------|---------|
+| `.env.brand.vellum` | Default Vellum branding |
+| `.env.brand.client-example` | Sample alternate client preset |
+
+### npm scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run dev:brand` | Dev server with Vellum preset |
+| `npm run dev:brand:client-example` | Dev server with `client-example` preset |
+| `npm run build:brand:vellum` | Production build, Vellum preset |
+| `npm run build:brand:client-example` | Production build, client-example preset |
+| `npm run brand:images` | Process logo/mark PNGs (see script for `BRAND_ID`) |
+
+### Adding a new client preset
+
+1. Add a `BrandPreset` entry in `src/lib/brand/presets.ts` (display name, tagline, logos, email templates).
+2. Add CSS overrides in `src/styles/brand-presets.css` under `[data-brand="{id}"]`.
+3. Place assets in `public/brands/{id}/` (`mark.png`, `full.png`, `favicon.png`, `apple-touch-icon.png`).
+4. Create `.env.brand.{id}` with `VITE_BRAND_PRESET={id}` and `BRAND_PRESET={id}`.
+5. Add npm scripts mirroring `dev:brand` / `build:brand:*` if needed.
+6. Run `BRAND_ID={id} npm run brand:images` after updating source artwork.

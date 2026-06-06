@@ -1,5 +1,5 @@
 /**
- * Type definitions for {@link DataTable}.
+ * Type definitions for `DataTable`.
  *
  * @packageDocumentation
  */
@@ -7,7 +7,7 @@
 import type * as React from 'react';
 import type { DataTableSort } from '@/lib/data-table-utils';
 
-/** Active sort column and direction for {@link DataTable}. */
+/** Active sort column and direction for `DataTable`. */
 export type { DataTableSort };
 
 /** Inferred or explicit column value type for filter UI defaults. */
@@ -23,12 +23,13 @@ export type DataTableColumnDataType =
 /** Label/value pair for enum and boolean multiselect filters. */
 export type DataTableFilterOption = { value: string; label: string };
 
-/** Per-column filter control configuration (text input or multiselect). */
+/** Per-column filter control configuration (text input, datetime picker, or multiselect). */
 export type DataTableColumnFilter =
   | { type: 'text'; placeholder?: string; inputMode?: 'text' | 'email' | 'numeric' }
+  | { type: 'datetime'; granularity: 'date' | 'datetime' }
   | { type: 'multiselect'; options: readonly DataTableFilterOption[] };
 
-/** Column metadata for {@link DataTable} headers, sorting, and filtering. */
+/** Column metadata for `DataTable` headers, sorting, and filtering. */
 export type DataTableColumn<T> = {
   id: string;
   header: React.ReactNode;
@@ -50,7 +51,7 @@ export type DataTableColumn<T> = {
   filterOnly?: boolean;
 };
 
-/** Props for {@link DataTable}. */
+/** Props for `DataTable`. */
 export type DataTableProps<T> = {
   data: readonly T[];
   columns: readonly DataTableColumn<T>[];

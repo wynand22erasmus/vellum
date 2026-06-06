@@ -1,12 +1,13 @@
 /**
- * Column filter inference from {@link DataTable} column data types.
+ * Column filter inference from `DataTable` column data types.
  *
  * @packageDocumentation
  */
 
-import { ADMIN_ISO_DATE_PLACEHOLDER } from '@/lib/admin-filter-options';
+
 import {
-  defaultDateColumnFilter,
+  defaultDateOnlyColumnFilter,
+  defaultDateTimeColumnFilter,
   defaultMultiSelectColumnFilter,
   defaultNumberColumnFilter,
   defaultTextColumnFilter,
@@ -75,12 +76,9 @@ export function resolveDataTableColumnFilter<T>(
     case 'number':
       return { type: 'text', placeholder: '0', inputMode: 'numeric' };
     case 'date':
+      return { type: 'datetime', granularity: 'date' };
     case 'datetime':
-      return {
-        type: 'text',
-        placeholder: ADMIN_ISO_DATE_PLACEHOLDER,
-        inputMode: 'text',
-      };
+      return { type: 'datetime', granularity: 'datetime' };
     case 'boolean':
       return { type: 'multiselect', options: DATA_TABLE_BOOLEAN_FILTER_OPTIONS };
     case 'enum':
@@ -102,8 +100,11 @@ export function getDefaultFilterFnForColumn<T>(column: DataTableColumn<T>) {
   if (filter?.type === 'multiselect') {
     return defaultMultiSelectColumnFilter;
   }
-  if (column.dataType === 'date' || column.dataType === 'datetime') {
-    return defaultDateColumnFilter;
+  if (column.dataType === 'date') {
+    return defaultDateOnlyColumnFilter;
+  }
+  if (column.dataType === 'datetime') {
+    return defaultDateTimeColumnFilter;
   }
   if (column.dataType === 'number') {
     return defaultNumberColumnFilter;

@@ -1,25 +1,20 @@
 {
-  "generatedAt": "2026-06-03T20:03:30.457Z",
+  "generatedAt": "2026-06-05T21:01:43.250Z",
   "minCoveragePercent": 95,
   "files": [
     {
-      "path": "src/app.ts",
+      "path": "src/app.tsx",
       "exports": [
         {
-          "name": "createApp",
+          "name": "App",
           "kind": "function",
-          "line": 37,
+          "line": 53,
           "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/App.tsx",
-      "exports": [
+        },
         {
-          "name": "default",
-          "kind": "function",
-          "line": 31,
+          "name": "router",
+          "kind": "variable",
+          "line": 37,
           "status": "complete"
         }
       ]
@@ -42,19 +37,19 @@
         {
           "name": "newPage",
           "kind": "function",
-          "line": 67,
+          "line": 72,
           "status": "complete"
         },
         {
           "name": "devLogin",
           "kind": "function",
-          "line": 79,
+          "line": 84,
           "status": "complete"
         },
         {
           "name": "clearDevSession",
           "kind": "function",
-          "line": 94,
+          "line": 101,
           "status": "complete"
         },
         {
@@ -78,46 +73,18 @@
       ]
     },
     {
-      "path": "src/components/theme-provider.tsx",
+      "path": "src/hooks/use-admin-list-state.ts",
       "exports": [
         {
-          "name": "ThemeProvider",
+          "name": "useAdminListState",
           "kind": "function",
-          "line": 22,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/components/vellum-logo.tsx",
-      "exports": [
-        {
-          "name": "VellumLogo",
-          "kind": "function",
-          "line": 38,
+          "line": 16,
           "status": "complete"
         },
         {
-          "name": "VellumLogoProps",
-          "kind": "type",
-          "line": 12,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/hooks/use-auth-me.ts",
-      "exports": [
-        {
-          "name": "useAuthMe",
+          "name": "useAdminPaginationState",
           "kind": "function",
-          "line": 13,
-          "status": "complete"
-        },
-        {
-          "name": "UseAuthMeResult",
-          "kind": "type",
-          "line": 10,
+          "line": 57,
           "status": "complete"
         }
       ]
@@ -145,12 +112,12 @@
       ]
     },
     {
-      "path": "src/hooks/use-sidebar-nav-groups.ts",
+      "path": "src/hooks/use-sidebar-nav.ts",
       "exports": [
         {
-          "name": "useSidebarNavGroups",
+          "name": "useSidebarNav",
           "kind": "function",
-          "line": 23,
+          "line": 20,
           "status": "complete"
         }
       ]
@@ -179,6 +146,29 @@
           "name": "ADMIN_AUDIT_EVENT_TYPE_OPTIONS",
           "kind": "variable",
           "line": 19,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/admin-column-filter-query.ts",
+      "exports": [
+        {
+          "name": "splitAdminColumnFilters",
+          "kind": "function",
+          "line": 14,
+          "status": "complete"
+        },
+        {
+          "name": "columnFiltersToAdminQueryParams",
+          "kind": "function",
+          "line": 25,
+          "status": "complete"
+        },
+        {
+          "name": "CLIENT_ONLY_COLUMN_FILTER_IDS",
+          "kind": "variable",
+          "line": 11,
           "status": "complete"
         }
       ]
@@ -225,18 +215,53 @@
       ]
     },
     {
+      "path": "src/lib/api-client.ts",
+      "exports": [
+        {
+          "name": "apiGet",
+          "kind": "function",
+          "line": 21,
+          "status": "complete"
+        },
+        {
+          "name": "apiPost",
+          "kind": "function",
+          "line": 31,
+          "status": "complete"
+        },
+        {
+          "name": "apiPostOrThrow",
+          "kind": "function",
+          "line": 53,
+          "status": "complete"
+        },
+        {
+          "name": "fetchJson",
+          "kind": "function",
+          "line": 65,
+          "status": "complete"
+        },
+        {
+          "name": "ApiQueryError",
+          "kind": "class",
+          "line": 10,
+          "status": "complete"
+        }
+      ]
+    },
+    {
       "path": "src/lib/api.ts",
       "exports": [
         {
           "name": "setDevEmail",
           "kind": "function",
-          "line": 29,
+          "line": 35,
           "status": "complete"
         },
         {
           "name": "clearDevEmail",
           "kind": "function",
-          "line": 34,
+          "line": 40,
           "status": "complete"
         },
         {
@@ -246,27 +271,98 @@
           "status": "complete"
         },
         {
+          "name": "ApiEnvelope",
+          "kind": "type",
+          "line": 13,
+          "status": "complete"
+        },
+        {
+          "name": "InvalidParam",
+          "kind": "type",
+          "line": 15,
+          "status": "complete"
+        },
+        {
+          "name": "ParsedApiResponse",
+          "kind": "type",
+          "line": 16,
+          "status": "complete"
+        },
+        {
+          "name": "ProblemDetails",
+          "kind": "interface",
+          "line": 10,
+          "status": "complete"
+        },
+        {
+          "name": "Rfc9457Document",
+          "kind": "interface",
+          "line": 8,
+          "status": "complete"
+        },
+        {
+          "name": "VellumResult",
+          "kind": "interface",
+          "line": 10,
+          "status": "complete"
+        },
+        {
+          "name": "parseApiEnvelope",
+          "kind": "function",
+          "line": 69,
+          "status": "complete"
+        },
+        {
           "name": "parseProblem",
           "kind": "function",
-          "line": 72,
+          "line": 103,
+          "status": "complete"
+        },
+        {
+          "name": "parseResult",
+          "kind": "function",
+          "line": 117,
+          "status": "complete"
+        },
+        {
+          "name": "problemActionRequired",
+          "kind": "function",
+          "line": 37,
+          "status": "complete"
+        },
+        {
+          "name": "problemInvalidParams",
+          "kind": "function",
+          "line": 43,
           "status": "complete"
         },
         {
           "name": "problemMessage",
           "kind": "function",
-          "line": 100,
+          "line": 32,
           "status": "complete"
         },
         {
-          "name": "apiFetchProblem",
+          "name": "unwrapResult",
           "kind": "function",
-          "line": 110,
+          "line": 26,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/auth-guards.ts",
+      "exports": [
+        {
+          "name": "requireAuth",
+          "kind": "function",
+          "line": 16,
           "status": "complete"
         },
         {
-          "name": "ProblemDetails",
-          "kind": "type",
-          "line": 8,
+          "name": "requireAdmin",
+          "kind": "function",
+          "line": 28,
           "status": "complete"
         }
       ]
@@ -328,25 +424,25 @@
         {
           "name": "isDataTableColumnSortable",
           "kind": "function",
-          "line": 33,
+          "line": 34,
           "status": "complete"
         },
         {
           "name": "isDataTableColumnFilterable",
           "kind": "function",
-          "line": 46,
+          "line": 47,
           "status": "complete"
         },
         {
           "name": "resolveDataTableColumnFilter",
           "kind": "function",
-          "line": 61,
+          "line": 62,
           "status": "complete"
         },
         {
           "name": "getDefaultFilterFnForColumn",
           "kind": "function",
-          "line": 100,
+          "line": 98,
           "status": "complete"
         },
         {
@@ -358,13 +454,201 @@
         {
           "name": "DATA_TABLE_BOOLEAN_FILTER_OPTIONS",
           "kind": "variable",
-          "line": 24,
+          "line": 25,
           "status": "complete"
         },
         {
           "name": "ResolvedDataTableColumnFilter",
           "kind": "type",
-          "line": 30,
+          "line": 31,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/data-table-datetime-filter-value.ts",
+      "exports": [
+        {
+          "name": "parseDateFilterDraft",
+          "kind": "function",
+          "line": 23,
+          "status": "complete"
+        },
+        {
+          "name": "buildDateFilterDraft",
+          "kind": "function",
+          "line": 71,
+          "status": "complete"
+        },
+        {
+          "name": "datetimeLocalToFilterValue",
+          "kind": "function",
+          "line": 91,
+          "status": "complete"
+        },
+        {
+          "name": "filterValueToDatetimeLocal",
+          "kind": "function",
+          "line": 112,
+          "status": "complete"
+        },
+        {
+          "name": "formatDateFilterDisplayValue",
+          "kind": "function",
+          "line": 140,
+          "status": "complete"
+        },
+        {
+          "name": "dateFilterInputType",
+          "kind": "function",
+          "line": 158,
+          "status": "complete"
+        },
+        {
+          "name": "DateFilterGranularity",
+          "kind": "type",
+          "line": 13,
+          "status": "complete"
+        },
+        {
+          "name": "DateFilterDraftParts",
+          "kind": "type",
+          "line": 16,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/data-table-db-column-registry.ts",
+      "exports": [
+        {
+          "name": "getDbColumnDescriptor",
+          "kind": "function",
+          "line": 20,
+          "status": "complete"
+        },
+        {
+          "name": "getDerivedColumnDescriptor",
+          "kind": "function",
+          "line": 28,
+          "status": "complete"
+        },
+        {
+          "name": "listDbColumnsForModel",
+          "kind": "function",
+          "line": 33,
+          "status": "complete"
+        },
+        {
+          "name": "dbModelForRowKind",
+          "kind": "function",
+          "line": 38,
+          "status": "complete"
+        },
+        {
+          "name": "dbDescriptorToColumnMeta",
+          "kind": "function",
+          "line": 53,
+          "status": "complete"
+        },
+        {
+          "name": "resolveDbColumnMeta",
+          "kind": "function",
+          "line": 67,
+          "status": "complete"
+        },
+        {
+          "name": "mergeColumnMetaWithDb",
+          "kind": "function",
+          "line": 109,
+          "status": "complete"
+        },
+        {
+          "name": "ResolvedDbColumnMeta",
+          "kind": "type",
+          "line": 43,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/data-table-db-schema.ts",
+      "exports": [
+        {
+          "name": "DB_MODEL_NAMES",
+          "kind": "variable",
+          "line": 18,
+          "status": "complete"
+        },
+        {
+          "name": "DbModelName",
+          "kind": "type",
+          "line": 28,
+          "status": "complete"
+        },
+        {
+          "name": "DbScalarKind",
+          "kind": "type",
+          "line": 31,
+          "status": "complete"
+        },
+        {
+          "name": "DbColumnFilterAs",
+          "kind": "type",
+          "line": 34,
+          "status": "complete"
+        },
+        {
+          "name": "DbColumnDescriptor",
+          "kind": "type",
+          "line": 37,
+          "status": "complete"
+        },
+        {
+          "name": "DB_COLUMN_DESCRIPTORS",
+          "kind": "variable",
+          "line": 62,
+          "status": "complete"
+        },
+        {
+          "name": "DerivedColumnDescriptor",
+          "kind": "type",
+          "line": 153,
+          "status": "complete"
+        },
+        {
+          "name": "DERIVED_COLUMN_DESCRIPTORS",
+          "kind": "variable",
+          "line": 158,
+          "status": "complete"
+        },
+        {
+          "name": "TABLE_ROW_DB_MODEL",
+          "kind": "variable",
+          "line": 192,
+          "status": "complete"
+        },
+        {
+          "name": "TableRowKind",
+          "kind": "type",
+          "line": 204,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/data-table-enum-options.ts",
+      "exports": [
+        {
+          "name": "USER_KIND_FILTER_OPTIONS",
+          "kind": "variable",
+          "line": 10,
+          "status": "complete"
+        },
+        {
+          "name": "AUDIT_EVENT_TYPE_FILTER_OPTIONS",
+          "kind": "variable",
+          "line": 16,
           "status": "complete"
         }
       ]
@@ -416,7 +700,7 @@
         {
           "name": "DataTableSort",
           "kind": "type",
-          "line": 10,
+          "line": 11,
           "status": "complete"
         },
         {
@@ -440,13 +724,13 @@
         {
           "name": "DataTableColumn",
           "kind": "type",
-          "line": 32,
+          "line": 33,
           "status": "complete"
         },
         {
           "name": "DataTableProps",
           "kind": "type",
-          "line": 54,
+          "line": 55,
           "status": "complete"
         }
       ]
@@ -457,79 +741,91 @@
         {
           "name": "normalizeSortValue",
           "kind": "function",
-          "line": 21,
+          "line": 22,
           "status": "complete"
         },
         {
           "name": "compareSortValues",
           "kind": "function",
-          "line": 44,
+          "line": 45,
           "status": "complete"
         },
         {
           "name": "cycleSortState",
           "kind": "function",
-          "line": 69,
+          "line": 70,
           "status": "complete"
         },
         {
           "name": "defaultTextColumnFilter",
           "kind": "function",
-          "line": 85,
+          "line": 86,
           "status": "complete"
         },
         {
           "name": "defaultMultiSelectColumnFilter",
           "kind": "function",
-          "line": 98,
+          "line": 99,
           "status": "complete"
         },
         {
           "name": "defaultNumberColumnFilter",
           "kind": "function",
-          "line": 114,
+          "line": 115,
+          "status": "complete"
+        },
+        {
+          "name": "defaultDateOnlyColumnFilter",
+          "kind": "function",
+          "line": 163,
+          "status": "complete"
+        },
+        {
+          "name": "defaultDateTimeColumnFilter",
+          "kind": "function",
+          "line": 181,
           "status": "complete"
         },
         {
           "name": "defaultDateColumnFilter",
           "kind": "function",
-          "line": 129,
+          "line": 199,
           "status": "complete"
         },
         {
           "name": "filterDataTableRows",
           "kind": "function",
-          "line": 152,
+          "line": 216,
           "status": "complete"
         },
         {
           "name": "sortDataTableRows",
           "kind": "function",
-          "line": 178,
+          "line": 242,
           "status": "complete"
         },
         {
           "name": "DataTableSort",
           "kind": "type",
-          "line": 10,
+          "line": 11,
           "status": "complete"
         },
         {
           "name": "CompareValues",
           "kind": "type",
-          "line": 16,
+          "line": 17,
           "status": "complete"
         },
         {
           "name": "DataTableRowAccessor",
           "kind": "type",
-          "line": 140,
+          "line": 204,
           "status": "complete"
         },
         {
           "name": "DataTableColumnFilterConfig",
           "kind": "type",
-          "line": 143,
+          "line": 207,
           "status": "complete"
         }
       ]
@@ -604,13 +900,19 @@
         {
           "name": "documentStatusFilterTags",
           "kind": "function",
-          "line": 27,
+          "line": 28,
           "status": "complete"
         },
         {
           "name": "DOCUMENT_STATUS_FILTER_OPTIONS",
           "kind": "variable",
           "line": 10,
+          "status": "complete"
+        },
+        {
+          "name": "DocumentStatusSource",
+          "kind": "type",
+          "line": 20,
           "status": "complete"
         }
       ]
@@ -753,16 +1055,10 @@
       ]
     },
     {
-      "path": "src/lib/route-meta.ts",
+      "path": "src/lib/router-context.ts",
       "exports": [
         {
-          "name": "resolveRouteHeader",
-          "kind": "function",
-          "line": 34,
-          "status": "complete"
-        },
-        {
-          "name": "PageSubheader",
+          "name": "RouterContext",
           "kind": "type",
           "line": 12,
           "status": "complete"
@@ -784,15 +1080,21 @@
       "path": "src/lib/sidebar-nav.ts",
       "exports": [
         {
+          "name": "normalizeAppPath",
+          "kind": "function",
+          "line": 43,
+          "status": "complete"
+        },
+        {
           "name": "buildSidebarNav",
           "kind": "function",
-          "line": 51,
+          "line": 57,
           "status": "complete"
         },
         {
           "name": "displayUserName",
           "kind": "function",
-          "line": 131,
+          "line": 140,
           "status": "complete"
         },
         {
@@ -960,117 +1262,18 @@
       ]
     },
     {
-      "path": "src/middleware/adminAuth.ts",
-      "exports": [
-        {
-          "name": "adminAuth",
-          "kind": "function",
-          "line": 16,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/middleware/apiKeyAuth.ts",
-      "exports": [
-        {
-          "name": "apiKeyAuth",
-          "kind": "function",
-          "line": 16,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/middleware/asyncHandler.ts",
-      "exports": [
-        {
-          "name": "asyncHandler",
-          "kind": "function",
-          "line": 20,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/middleware/devAuth.ts",
-      "exports": [
-        {
-          "name": "dashboardAuth",
-          "kind": "function",
-          "line": 19,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/middleware/errorHandler.ts",
-      "exports": [
-        {
-          "name": "errorHandler",
-          "kind": "variable",
-          "line": 15,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/middleware/notFoundHandler.ts",
-      "exports": [
-        {
-          "name": "notFoundHandler",
-          "kind": "variable",
-          "line": 13,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/middleware/requestId.ts",
-      "exports": [
-        {
-          "name": "requestId",
-          "kind": "function",
-          "line": 13,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/pages/DashboardPage.tsx",
+      "path": "src/pages/dashboard-page.tsx",
       "exports": [
         {
           "name": "DashboardPage",
           "kind": "function",
-          "line": 141,
+          "line": 25,
           "status": "complete"
         }
       ]
     },
     {
-      "path": "src/pages/DevEmbedPage.tsx",
-      "exports": [
-        {
-          "name": "DevEmbedPage",
-          "kind": "function",
-          "line": 29,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/pages/DevLoginPage.tsx",
-      "exports": [
-        {
-          "name": "DevLoginPage",
-          "kind": "function",
-          "line": 30,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/pages/EmailVerificationPage.tsx",
+      "path": "src/pages/email-verification-page.tsx",
       "exports": [
         {
           "name": "EmailVerificationPage",
@@ -1081,10 +1284,32 @@
       ]
     },
     {
-      "path": "src/pages/HomePage.tsx",
+      "path": "src/pages/home-page.tsx",
       "exports": [
         {
           "name": "HomePage",
+          "kind": "function",
+          "line": 10,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/login-page.tsx",
+      "exports": [
+        {
+          "name": "LoginPage",
+          "kind": "function",
+          "line": 60,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/verify-complete-page.tsx",
+      "exports": [
+        {
+          "name": "VerifyCompletePage",
           "kind": "function",
           "line": 12,
           "status": "complete"
@@ -1092,18 +1317,7 @@
       ]
     },
     {
-      "path": "src/pages/VerifyCompletePage.tsx",
-      "exports": [
-        {
-          "name": "VerifyCompletePage",
-          "kind": "function",
-          "line": 13,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/pages/VerifyPage.tsx",
+      "path": "src/pages/verify-page.tsx",
       "exports": [
         {
           "name": "VerifyPage",
@@ -1114,228 +1328,404 @@
       ]
     },
     {
-      "path": "src/queues/auditQueue.ts",
+      "path": "src/providers/auth-provider.tsx",
       "exports": [
         {
-          "name": "logEvent",
+          "name": "AuthProvider",
           "kind": "function",
-          "line": 32,
+          "line": 30,
           "status": "complete"
         },
         {
-          "name": "auditQueue",
-          "kind": "variable",
+          "name": "useAuthContext",
+          "kind": "function",
+          "line": 92,
+          "status": "complete"
+        },
+        {
+          "name": "useAuthMe",
+          "kind": "function",
+          "line": 101,
+          "status": "complete"
+        },
+        {
+          "name": "AuthContextValue",
+          "kind": "type",
+          "line": 20,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/providers/brand-provider.tsx",
+      "exports": [
+        {
+          "name": "BrandProvider",
+          "kind": "function",
+          "line": 24,
+          "status": "complete"
+        },
+        {
+          "name": "useBrand",
+          "kind": "function",
+          "line": 47,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/providers/theme-provider.tsx",
+      "exports": [
+        {
+          "name": "ThemeProvider",
+          "kind": "function",
+          "line": 22,
+          "status": "complete"
+        },
+        {
+          "name": "useTheme",
+          "kind": "function",
           "line": 15,
           "status": "complete"
-        },
+        }
+      ]
+    },
+    {
+      "path": "src/server/create-app.ts",
+      "exports": [
         {
-          "name": "LogEventData",
-          "kind": "interface",
-          "line": 18,
+          "name": "createApp",
+          "kind": "function",
+          "line": 37,
           "status": "complete"
         }
       ]
     },
     {
-      "path": "src/queues/cleanupQueue.ts",
+      "path": "src/components/brand/brand-logo.tsx",
       "exports": [
         {
-          "name": "cleanupQueue",
-          "kind": "variable",
-          "line": 14,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/queues/emailQueue.ts",
-      "exports": [
-        {
-          "name": "emailQueue",
-          "kind": "variable",
-          "line": 14,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/queues/processErrorQueue.ts",
-      "exports": [
-        {
-          "name": "processErrorQueue",
-          "kind": "variable",
-          "line": 11,
+          "name": "BrandLogo",
+          "kind": "function",
+          "line": 16,
           "status": "complete"
         },
         {
-          "name": "ProcessErrorJobData",
-          "kind": "interface",
-          "line": 16,
+          "name": "BrandTitle",
+          "kind": "function",
+          "line": 39,
           "status": "complete"
         }
       ]
     },
     {
-      "path": "src/routes/admin.ts",
+      "path": "src/components/data-table/apply-client-column-filters.ts",
       "exports": [
         {
-          "name": "adminRouter",
+          "name": "applyClientColumnFilters",
+          "kind": "function",
+          "line": 68,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/data-table/column-filter-config.ts",
+      "exports": [
+        {
+          "name": "resolveColumnFilter",
+          "kind": "function",
+          "line": 34,
+          "status": "complete"
+        },
+        {
+          "name": "isColumnFilterActive",
+          "kind": "function",
+          "line": 52,
+          "status": "complete"
+        },
+        {
+          "name": "formatFilterDisplayValue",
+          "kind": "function",
+          "line": 74,
+          "status": "complete"
+        },
+        {
+          "name": "DATA_TABLE_BOOLEAN_FILTER_OPTIONS",
           "kind": "variable",
-          "line": 16,
+          "line": 25,
           "status": "complete"
         }
       ]
     },
     {
-      "path": "src/routes/auth.ts",
+      "path": "src/components/data-table/column-filter-control.tsx",
       "exports": [
         {
-          "name": "authRouter",
+          "name": "ColumnFilterControl",
+          "kind": "function",
+          "line": 26,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/data-table/column-helpers.ts",
+      "exports": [
+        {
+          "name": "dbColumn",
+          "kind": "function",
+          "line": 38,
+          "status": "complete"
+        },
+        {
+          "name": "textColumn",
+          "kind": "function",
+          "line": 71,
+          "status": "complete"
+        },
+        {
+          "name": "emailColumn",
+          "kind": "function",
+          "line": 83,
+          "status": "complete"
+        },
+        {
+          "name": "dateColumn",
+          "kind": "function",
+          "line": 95,
+          "status": "complete"
+        },
+        {
+          "name": "numberColumn",
+          "kind": "function",
+          "line": 107,
+          "status": "complete"
+        },
+        {
+          "name": "booleanColumn",
+          "kind": "function",
+          "line": 119,
+          "status": "complete"
+        },
+        {
+          "name": "enumColumn",
+          "kind": "function",
+          "line": 147,
+          "status": "complete"
+        },
+        {
+          "name": "documentStatusColumn",
+          "kind": "function",
+          "line": 172,
+          "status": "complete"
+        },
+        {
+          "name": "disableColumnInteractions",
+          "kind": "function",
+          "line": 189,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/data-table/column-meta.ts",
+      "exports": [
+        {
+          "name": "DataTableColumnMeta",
+          "kind": "type",
+          "line": 15,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/data-table/data-table-column-header.tsx",
+      "exports": [
+        {
+          "name": "DataTableColumnHeader",
+          "kind": "function",
+          "line": 136,
+          "status": "complete"
+        },
+        {
+          "name": "DataTableFilterChip",
+          "kind": "function",
+          "line": 187,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/data-table/data-table-toolbar.tsx",
+      "exports": [
+        {
+          "name": "DataTableToolbar",
+          "kind": "function",
+          "line": 38,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/data-table/data-table.tsx",
+      "exports": [
+        {
+          "name": "DataTable",
+          "kind": "function",
+          "line": 88,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/data-table/datetime-column-filter.tsx",
+      "exports": [
+        {
+          "name": "commitDateTimeFilterDraft",
+          "kind": "function",
+          "line": 21,
+          "status": "complete"
+        },
+        {
+          "name": "openDateTimeFilterDraft",
+          "kind": "function",
+          "line": 29,
+          "status": "complete"
+        },
+        {
+          "name": "DateTimeColumnFilter",
+          "kind": "function",
+          "line": 86,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/data-table/index.ts",
+      "exports": [
+        {
+          "name": "dbColumn",
+          "kind": "function",
+          "line": 38,
+          "status": "complete"
+        },
+        {
+          "name": "disableColumnInteractions",
+          "kind": "function",
+          "line": 189,
+          "status": "complete"
+        },
+        {
+          "name": "dateColumn",
+          "kind": "function",
+          "line": 95,
+          "status": "complete"
+        },
+        {
+          "name": "DataTableColumnHeader",
+          "kind": "function",
+          "line": 136,
+          "status": "complete"
+        },
+        {
+          "name": "DataTableFilterChip",
+          "kind": "function",
+          "line": 187,
+          "status": "complete"
+        },
+        {
+          "name": "DataTableToolbar",
+          "kind": "function",
+          "line": 38,
+          "status": "complete"
+        },
+        {
+          "name": "DataTable",
+          "kind": "function",
+          "line": 88,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/data-table/table-header-state.ts",
+      "exports": [
+        {
+          "name": "sortDirectionForColumn",
+          "kind": "function",
+          "line": 13,
+          "status": "complete"
+        },
+        {
+          "name": "filterValueForColumn",
+          "kind": "function",
+          "line": 25,
+          "status": "complete"
+        },
+        {
+          "name": "hasActiveSorting",
+          "kind": "function",
+          "line": 33,
+          "status": "complete"
+        },
+        {
+          "name": "hasActiveColumnFilter",
+          "kind": "function",
+          "line": 38,
+          "status": "complete"
+        },
+        {
+          "name": "ColumnSortDirection",
+          "kind": "type",
+          "line": 10,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/data-table/tanstack-filter-fns.ts",
+      "exports": [
+        {
+          "name": "filterFnIdForDataType",
+          "kind": "function",
+          "line": 57,
+          "status": "complete"
+        },
+        {
+          "name": "textFilter",
           "kind": "variable",
           "line": 27,
           "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/routes/docs.ts",
-      "exports": [
+        },
         {
-          "name": "mountApiDocs",
-          "kind": "function",
-          "line": 20,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/routes/documents.ts",
-      "exports": [
-        {
-          "name": "documentsRouter",
+          "name": "multiSelectFilter",
           "kind": "variable",
-          "line": 18,
+          "line": 29,
           "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/routes/health.ts",
-      "exports": [
+        },
         {
-          "name": "healthRouter",
+          "name": "dateFilter",
           "kind": "variable",
-          "line": 15,
+          "line": 31,
           "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/routes/meta.ts",
-      "exports": [
+        },
         {
-          "name": "metaRouter",
+          "name": "dateTimeFilter",
           "kind": "variable",
-          "line": 12,
+          "line": 33,
           "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/routes/studio.ts",
-      "exports": [
+        },
         {
-          "name": "studioRouter",
+          "name": "numberFilter",
           "kind": "variable",
-          "line": 15,
+          "line": 35,
           "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/routes/upload.ts",
-      "exports": [
+        },
         {
-          "name": "uploadRouter",
+          "name": "filterFns",
           "kind": "variable",
-          "line": 45,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/routes/verify.ts",
-      "exports": [
-        {
-          "name": "verifyRouter",
-          "kind": "variable",
-          "line": 46,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/workers/auditWorker.ts",
-      "exports": [
-        {
-          "name": "auditWorker",
-          "kind": "variable",
-          "line": 24,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/workers/emailWorker.ts",
-      "exports": [
-        {
-          "name": "emailWorker",
-          "kind": "variable",
-          "line": 22,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/workers/fileScrubWorker.ts",
-      "exports": [
-        {
-          "name": "fileScrubWorker",
-          "kind": "variable",
-          "line": 24,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/workers/orphanReconciliationWorker.ts",
-      "exports": [
-        {
-          "name": "orphanReconciliationWorker",
-          "kind": "variable",
-          "line": 14,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/workers/processErrorWorker.ts",
-      "exports": [
-        {
-          "name": "processErrorWorker",
-          "kind": "variable",
-          "line": 20,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/workers/recordScrubWorker.ts",
-      "exports": [
-        {
-          "name": "recordScrubWorker",
-          "kind": "variable",
-          "line": 18,
+          "line": 38,
           "status": "complete"
         }
       ]
@@ -1363,52 +1753,23 @@
       ]
     },
     {
-      "path": "src/components/layout/admin-table-filters.tsx",
-      "exports": [
-        {
-          "name": "AdminTableFilters",
-          "kind": "function",
-          "line": 48,
-          "status": "complete"
-        },
-        {
-          "name": "setOptionalQueryParam",
-          "kind": "function",
-          "line": 108,
-          "status": "complete"
-        },
-        {
-          "name": "ADMIN_FILTER_SELECT_CLASS",
-          "kind": "variable",
-          "line": 13,
-          "status": "complete"
-        },
-        {
-          "name": "AdminTableFilterField",
-          "kind": "type",
-          "line": 17,
-          "status": "complete"
-        }
-      ]
-    },
-    {
       "path": "src/components/layout/app-header.tsx",
       "exports": [
         {
           "name": "AppHeader",
           "kind": "function",
-          "line": 24,
+          "line": 16,
           "status": "complete"
         }
       ]
     },
     {
-      "path": "src/components/layout/app-shell.tsx",
+      "path": "src/components/layout/app-shell-layout.tsx",
       "exports": [
         {
-          "name": "AppShell",
+          "name": "AppShellLayout",
           "kind": "function",
-          "line": 10,
+          "line": 17,
           "status": "complete"
         }
       ]
@@ -1419,18 +1780,99 @@
         {
           "name": "AppSidebar",
           "kind": "function",
-          "line": 28,
+          "line": 32,
           "status": "complete"
         }
       ]
     },
     {
-      "path": "src/components/layout/collapse-sidebar-for-verify.tsx",
+      "path": "src/components/layout/app-surface.tsx",
       "exports": [
         {
-          "name": "CollapseSidebarForVerify",
+          "name": "AppSurfaceBackdrop",
           "kind": "function",
-          "line": 13,
+          "line": 11,
+          "status": "complete"
+        },
+        {
+          "name": "SurfaceAccentLine",
+          "kind": "function",
+          "line": 18,
+          "status": "complete"
+        },
+        {
+          "name": "AppSurface",
+          "kind": "function",
+          "line": 36,
+          "status": "complete"
+        },
+        {
+          "name": "elevatedSurfaceClassName",
+          "kind": "variable",
+          "line": 46,
+          "status": "complete"
+        },
+        {
+          "name": "surfaceBandClassName",
+          "kind": "variable",
+          "line": 50,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/layout/auth-layout.tsx",
+      "exports": [
+        {
+          "name": "AuthMobileBrandHeader",
+          "kind": "function",
+          "line": 95,
+          "status": "complete"
+        },
+        {
+          "name": "AuthLegalFooter",
+          "kind": "function",
+          "line": 107,
+          "status": "complete"
+        },
+        {
+          "name": "AuthCard",
+          "kind": "function",
+          "line": 153,
+          "status": "complete"
+        },
+        {
+          "name": "AuthLayout",
+          "kind": "function",
+          "line": 194,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/layout/auth-skeletons.tsx",
+      "exports": [
+        {
+          "name": "AuthLoadingSkeleton",
+          "kind": "function",
+          "line": 10,
+          "status": "complete"
+        },
+        {
+          "name": "SidebarUserSkeleton",
+          "kind": "function",
+          "line": 20,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/layout/breadcrumb-trail.tsx",
+      "exports": [
+        {
+          "name": "BreadcrumbTrail",
+          "kind": "function",
+          "line": 21,
           "status": "complete"
         }
       ]
@@ -1458,29 +1900,12 @@
       ]
     },
     {
-      "path": "src/components/layout/nav-tile-grid.tsx",
+      "path": "src/components/layout/nav-index-tile.tsx",
       "exports": [
         {
-          "name": "NavTileGrid",
+          "name": "NavIndexTile",
           "kind": "function",
           "line": 20,
-          "status": "complete"
-        },
-        {
-          "name": "NavTileItem",
-          "kind": "type",
-          "line": 12,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/components/layout/nav-trail.tsx",
-      "exports": [
-        {
-          "name": "NavTrail",
-          "kind": "function",
-          "line": 21,
           "status": "complete"
         }
       ]
@@ -1501,17 +1926,17 @@
       "exports": [
         {
           "name": "PageContainer",
-          "kind": "variable",
-          "line": 36,
+          "kind": "function",
+          "line": 21,
           "status": "complete"
         }
       ]
     },
     {
-      "path": "src/components/layout/page-section.tsx",
+      "path": "src/components/layout/page-header.tsx",
       "exports": [
         {
-          "name": "PageSection",
+          "name": "PageHeader",
           "kind": "function",
           "line": 18,
           "status": "complete"
@@ -1519,58 +1944,12 @@
       ]
     },
     {
-      "path": "src/components/layout/require-auth.tsx",
+      "path": "src/components/layout/router-auth-sync.tsx",
       "exports": [
         {
-          "name": "AuthLoadingSkeleton",
+          "name": "RouterAuthSync",
           "kind": "function",
-          "line": 12,
-          "status": "complete"
-        },
-        {
-          "name": "RequireAuth",
-          "kind": "function",
-          "line": 28,
-          "status": "complete"
-        },
-        {
-          "name": "RequireAdmin",
-          "kind": "function",
-          "line": 53,
-          "status": "complete"
-        },
-        {
-          "name": "SidebarUserSkeleton",
-          "kind": "function",
-          "line": 58,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/components/layout/route-chrome-provider.tsx",
-      "exports": [
-        {
-          "name": "RouteChromeProvider",
-          "kind": "function",
-          "line": 24,
-          "status": "complete"
-        },
-        {
-          "name": "useRouteChrome",
-          "kind": "function",
-          "line": 40,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/components/layout/sidebar-layout.tsx",
-      "exports": [
-        {
-          "name": "SidebarLayout",
-          "kind": "function",
-          "line": 18,
+          "line": 15,
           "status": "complete"
         }
       ]
@@ -1587,6 +1966,17 @@
       ]
     },
     {
+      "path": "src/components/layout/sidebar-nav.tsx",
+      "exports": [
+        {
+          "name": "SidebarNav",
+          "kind": "function",
+          "line": 103,
+          "status": "complete"
+        }
+      ]
+    },
+    {
       "path": "src/components/layout/table-loading-skeleton.tsx",
       "exports": [
         {
@@ -1598,46 +1988,18 @@
       ]
     },
     {
-      "path": "src/components/layout/table-pagination.tsx",
+      "path": "src/components/navigation/router-button.tsx",
       "exports": [
         {
-          "name": "TablePagination",
-          "kind": "function",
-          "line": 19,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/components/layout/vellum-sidebar-nav.tsx",
-      "exports": [
-        {
-          "name": "VellumSidebarNav",
-          "kind": "function",
-          "line": 106,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/components/providers/auth-provider.tsx",
-      "exports": [
-        {
-          "name": "AuthProvider",
-          "kind": "function",
-          "line": 30,
+          "name": "RouterButton",
+          "kind": "variable",
+          "line": 11,
           "status": "complete"
         },
         {
-          "name": "useAuthContext",
-          "kind": "function",
-          "line": 92,
-          "status": "complete"
-        },
-        {
-          "name": "AuthContextValue",
-          "kind": "type",
-          "line": 20,
+          "name": "buttonVariants",
+          "kind": "variable",
+          "line": 14,
           "status": "complete"
         }
       ]
@@ -1794,6 +2156,23 @@
       ]
     },
     {
+      "path": "src/components/ui/calendar.tsx",
+      "exports": [
+        {
+          "name": "Calendar",
+          "kind": "function",
+          "line": 17,
+          "status": "complete"
+        },
+        {
+          "name": "CalendarDayButton",
+          "kind": "function",
+          "line": 141,
+          "status": "complete"
+        }
+      ]
+    },
+    {
       "path": "src/components/ui/card.tsx",
       "exports": [
         {
@@ -1836,53 +2215,6 @@
           "name": "CardContent",
           "kind": "function",
           "line": 81,
-          "status": "complete"
-        }
-      ]
-    },
-    {
-      "path": "src/components/ui/data-table.tsx",
-      "exports": [
-        {
-          "name": "DataTable",
-          "kind": "function",
-          "line": 262,
-          "status": "complete"
-        },
-        {
-          "name": "DataTableColumn",
-          "kind": "type",
-          "line": 32,
-          "status": "complete"
-        },
-        {
-          "name": "DataTableColumnDataType",
-          "kind": "type",
-          "line": 14,
-          "status": "complete"
-        },
-        {
-          "name": "DataTableColumnFilter",
-          "kind": "type",
-          "line": 27,
-          "status": "complete"
-        },
-        {
-          "name": "DataTableFilterOption",
-          "kind": "type",
-          "line": 24,
-          "status": "complete"
-        },
-        {
-          "name": "DataTableProps",
-          "kind": "type",
-          "line": 54,
-          "status": "complete"
-        },
-        {
-          "name": "DataTableSort",
-          "kind": "type",
-          "line": 10,
           "status": "complete"
         }
       ]
@@ -1983,29 +2315,6 @@
       ]
     },
     {
-      "path": "src/components/ui/hover-card.tsx",
-      "exports": [
-        {
-          "name": "HoverCard",
-          "kind": "function",
-          "line": 15,
-          "status": "complete"
-        },
-        {
-          "name": "HoverCardTrigger",
-          "kind": "function",
-          "line": 22,
-          "status": "complete"
-        },
-        {
-          "name": "HoverCardContent",
-          "kind": "function",
-          "line": 31,
-          "status": "complete"
-        }
-      ]
-    },
-    {
       "path": "src/components/ui/input.tsx",
       "exports": [
         {
@@ -2033,13 +2342,36 @@
         {
           "name": "MultiSelectCombobox",
           "kind": "function",
-          "line": 35,
+          "line": 34,
           "status": "complete"
         },
         {
           "name": "MultiSelectComboboxOption",
           "kind": "type",
-          "line": 20,
+          "line": 19,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/ui/popover.tsx",
+      "exports": [
+        {
+          "name": "Popover",
+          "kind": "function",
+          "line": 15,
+          "status": "complete"
+        },
+        {
+          "name": "PopoverTrigger",
+          "kind": "function",
+          "line": 22,
+          "status": "complete"
+        },
+        {
+          "name": "PopoverContent",
+          "kind": "function",
+          "line": 29,
           "status": "complete"
         }
       ]
@@ -2511,6 +2843,57 @@
       ]
     },
     {
+      "path": "src/lib/brand/get-brand-preset.ts",
+      "exports": [
+        {
+          "name": "getBrandPresetFromEnv",
+          "kind": "function",
+          "line": 10,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/brand/presets.ts",
+      "exports": [
+        {
+          "name": "getBrandPreset",
+          "kind": "function",
+          "line": 141,
+          "status": "complete"
+        },
+        {
+          "name": "BrandPreset",
+          "kind": "type",
+          "line": 8,
+          "status": "complete"
+        },
+        {
+          "name": "brandPresets",
+          "kind": "variable",
+          "line": 129,
+          "status": "complete"
+        },
+        {
+          "name": "BRAND_PRESET_IDS",
+          "kind": "variable",
+          "line": 147,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/brand/render-template.ts",
+      "exports": [
+        {
+          "name": "renderBrandTemplate",
+          "kind": "function",
+          "line": 8,
+          "status": "complete"
+        }
+      ]
+    },
+    {
       "path": "src/lib/compensation/compensation-stack.ts",
       "exports": [
         {
@@ -2607,7 +2990,7 @@
         {
           "name": "EmailService",
           "kind": "class",
-          "line": 15,
+          "line": 17,
           "status": "complete"
         }
       ]
@@ -2624,7 +3007,7 @@
         {
           "name": "IEmailProvider",
           "kind": "interface",
-          "line": 20,
+          "line": 22,
           "status": "complete"
         }
       ]
@@ -2742,37 +3125,37 @@
         {
           "name": "problemFromError",
           "kind": "function",
-          "line": 38,
+          "line": 31,
           "status": "complete"
         },
         {
           "name": "ProblemDetails",
           "kind": "interface",
-          "line": 17,
+          "line": 10,
           "status": "complete"
         },
         {
           "name": "sendProblem",
           "kind": "function",
-          "line": 16,
+          "line": 17,
           "status": "complete"
         },
         {
           "name": "recordProcessError",
           "kind": "function",
-          "line": 44,
+          "line": 45,
           "status": "complete"
         },
         {
           "name": "RecordProcessErrorInput",
           "kind": "interface",
-          "line": 15,
+          "line": 16,
           "status": "complete"
         },
         {
           "name": "ProcessErrorSource",
           "kind": "type",
-          "line": 12,
+          "line": 13,
           "status": "complete"
         },
         {
@@ -2847,19 +3230,19 @@
         {
           "name": "problemFromError",
           "kind": "function",
-          "line": 38,
+          "line": 31,
           "status": "complete"
         },
         {
           "name": "ProblemDetails",
           "kind": "interface",
-          "line": 17,
+          "line": 10,
           "status": "complete"
         },
         {
           "name": "ProblemFromErrorContext",
           "kind": "interface",
-          "line": 27,
+          "line": 20,
           "status": "complete"
         },
         {
@@ -2922,19 +3305,25 @@
         {
           "name": "recordProcessError",
           "kind": "function",
-          "line": 44,
+          "line": 45,
+          "status": "complete"
+        },
+        {
+          "name": "recordProcessErrorFromProblem",
+          "kind": "function",
+          "line": 104,
           "status": "complete"
         },
         {
           "name": "ProcessErrorSource",
           "kind": "type",
-          "line": 12,
+          "line": 13,
           "status": "complete"
         },
         {
           "name": "RecordProcessErrorInput",
           "kind": "interface",
-          "line": 15,
+          "line": 16,
           "status": "complete"
         }
       ]
@@ -2945,7 +3334,7 @@
         {
           "name": "sendProblem",
           "kind": "function",
-          "line": 16,
+          "line": 17,
           "status": "complete"
         }
       ]
@@ -2963,6 +3352,567 @@
           "name": "validationErrorFromZod",
           "kind": "function",
           "line": 36,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/http/api-envelope.ts",
+      "exports": [
+        {
+          "name": "apiEnvelopeKind",
+          "kind": "function",
+          "line": 19,
+          "status": "complete"
+        },
+        {
+          "name": "isApiEnvelope",
+          "kind": "function",
+          "line": 24,
+          "status": "complete"
+        },
+        {
+          "name": "ApiEnvelope",
+          "kind": "type",
+          "line": 13,
+          "status": "complete"
+        },
+        {
+          "name": "ApiEnvelopeKind",
+          "kind": "type",
+          "line": 16,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/http/build-problem.ts",
+      "exports": [
+        {
+          "name": "buildProblem",
+          "kind": "function",
+          "line": 25,
+          "status": "complete"
+        },
+        {
+          "name": "BuildProblemInput",
+          "kind": "type",
+          "line": 16,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/http/build-result.ts",
+      "exports": [
+        {
+          "name": "buildResult",
+          "kind": "function",
+          "line": 25,
+          "status": "complete"
+        },
+        {
+          "name": "BuildResultInput",
+          "kind": "type",
+          "line": 16,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/http/index.ts",
+      "exports": [
+        {
+          "name": "PROBLEM_CONTENT_TYPE",
+          "kind": "variable",
+          "line": 17,
+          "status": "complete"
+        },
+        {
+          "name": "RESULT_CONTENT_TYPE",
+          "kind": "variable",
+          "line": 20,
+          "status": "complete"
+        },
+        {
+          "name": "Rfc9457Document",
+          "kind": "interface",
+          "line": 8,
+          "status": "complete"
+        },
+        {
+          "name": "ProblemDetails",
+          "kind": "interface",
+          "line": 10,
+          "status": "complete"
+        },
+        {
+          "name": "InvalidParam",
+          "kind": "type",
+          "line": 15,
+          "status": "complete"
+        },
+        {
+          "name": "isProblemDetails",
+          "kind": "function",
+          "line": 21,
+          "status": "complete"
+        },
+        {
+          "name": "problemMessage",
+          "kind": "function",
+          "line": 32,
+          "status": "complete"
+        },
+        {
+          "name": "problemActionRequired",
+          "kind": "function",
+          "line": 37,
+          "status": "complete"
+        },
+        {
+          "name": "problemInvalidParams",
+          "kind": "function",
+          "line": 43,
+          "status": "complete"
+        },
+        {
+          "name": "VellumResult",
+          "kind": "interface",
+          "line": 10,
+          "status": "complete"
+        },
+        {
+          "name": "isVellumResult",
+          "kind": "function",
+          "line": 15,
+          "status": "complete"
+        },
+        {
+          "name": "unwrapResult",
+          "kind": "function",
+          "line": 26,
+          "status": "complete"
+        },
+        {
+          "name": "ApiEnvelope",
+          "kind": "type",
+          "line": 13,
+          "status": "complete"
+        },
+        {
+          "name": "ApiEnvelopeKind",
+          "kind": "type",
+          "line": 16,
+          "status": "complete"
+        },
+        {
+          "name": "apiEnvelopeKind",
+          "kind": "function",
+          "line": 19,
+          "status": "complete"
+        },
+        {
+          "name": "isApiEnvelope",
+          "kind": "function",
+          "line": 24,
+          "status": "complete"
+        },
+        {
+          "name": "buildProblem",
+          "kind": "function",
+          "line": 25,
+          "status": "complete"
+        },
+        {
+          "name": "BuildProblemInput",
+          "kind": "type",
+          "line": 16,
+          "status": "complete"
+        },
+        {
+          "name": "buildResult",
+          "kind": "function",
+          "line": 25,
+          "status": "complete"
+        },
+        {
+          "name": "BuildResultInput",
+          "kind": "type",
+          "line": 16,
+          "status": "complete"
+        },
+        {
+          "name": "parseApiEnvelope",
+          "kind": "function",
+          "line": 69,
+          "status": "complete"
+        },
+        {
+          "name": "parseProblem",
+          "kind": "function",
+          "line": 103,
+          "status": "complete"
+        },
+        {
+          "name": "parseResult",
+          "kind": "function",
+          "line": 117,
+          "status": "complete"
+        },
+        {
+          "name": "ParsedApiResponse",
+          "kind": "type",
+          "line": 16,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/http/parse-envelope.ts",
+      "exports": [
+        {
+          "name": "parseApiEnvelope",
+          "kind": "function",
+          "line": 69,
+          "status": "complete"
+        },
+        {
+          "name": "parseProblem",
+          "kind": "function",
+          "line": 103,
+          "status": "complete"
+        },
+        {
+          "name": "parseResult",
+          "kind": "function",
+          "line": 117,
+          "status": "complete"
+        },
+        {
+          "name": "ParsedApiResponse",
+          "kind": "type",
+          "line": 16,
+          "status": "complete"
+        },
+        {
+          "name": "problemMessage",
+          "kind": "function",
+          "line": 32,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/http/problem-details.ts",
+      "exports": [
+        {
+          "name": "isProblemDetails",
+          "kind": "function",
+          "line": 21,
+          "status": "complete"
+        },
+        {
+          "name": "problemMessage",
+          "kind": "function",
+          "line": 32,
+          "status": "complete"
+        },
+        {
+          "name": "problemActionRequired",
+          "kind": "function",
+          "line": 37,
+          "status": "complete"
+        },
+        {
+          "name": "problemInvalidParams",
+          "kind": "function",
+          "line": 43,
+          "status": "complete"
+        },
+        {
+          "name": "ProblemDetails",
+          "kind": "interface",
+          "line": 10,
+          "status": "complete"
+        },
+        {
+          "name": "InvalidParam",
+          "kind": "type",
+          "line": 15,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/http/rfc9457.ts",
+      "exports": [
+        {
+          "name": "Rfc9457Document",
+          "kind": "interface",
+          "line": 8,
+          "status": "complete"
+        },
+        {
+          "name": "PROBLEM_CONTENT_TYPE",
+          "kind": "variable",
+          "line": 17,
+          "status": "complete"
+        },
+        {
+          "name": "RESULT_CONTENT_TYPE",
+          "kind": "variable",
+          "line": 20,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/http/vellum-result.ts",
+      "exports": [
+        {
+          "name": "isVellumResult",
+          "kind": "function",
+          "line": 15,
+          "status": "complete"
+        },
+        {
+          "name": "unwrapResult",
+          "kind": "function",
+          "line": 26,
+          "status": "complete"
+        },
+        {
+          "name": "VellumResult",
+          "kind": "interface",
+          "line": 10,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/queries/admin.ts",
+      "exports": [
+        {
+          "name": "useAdminListPageQuery",
+          "kind": "function",
+          "line": 58,
+          "status": "complete"
+        },
+        {
+          "name": "useAdminUsersQuery",
+          "kind": "function",
+          "line": 70,
+          "status": "complete"
+        },
+        {
+          "name": "useAdminDocumentsQuery",
+          "kind": "function",
+          "line": 78,
+          "status": "complete"
+        },
+        {
+          "name": "useAdminDocumentQuery",
+          "kind": "function",
+          "line": 87,
+          "status": "complete"
+        },
+        {
+          "name": "AdminUserRow",
+          "kind": "type",
+          "line": 17,
+          "status": "complete"
+        },
+        {
+          "name": "AdminDocumentRow",
+          "kind": "type",
+          "line": 29,
+          "status": "complete"
+        },
+        {
+          "name": "AdminDocumentDetail",
+          "kind": "type",
+          "line": 43,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/queries/documents.ts",
+      "exports": [
+        {
+          "name": "useDocumentsQuery",
+          "kind": "function",
+          "line": 24,
+          "status": "complete"
+        },
+        {
+          "name": "useRequestDocumentLinkMutation",
+          "kind": "function",
+          "line": 35,
+          "status": "complete"
+        },
+        {
+          "name": "DocumentRow",
+          "kind": "type",
+          "line": 12,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/queries/fetch-json.ts",
+      "exports": [
+        {
+          "name": "fetchAdminListPage",
+          "kind": "function",
+          "line": 19,
+          "status": "complete"
+        },
+        {
+          "name": "AdminListResult",
+          "kind": "type",
+          "line": 11,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/queries/query-keys.ts",
+      "exports": [
+        {
+          "name": "buildAdminListQuery",
+          "kind": "function",
+          "line": 21,
+          "status": "complete"
+        },
+        {
+          "name": "adminListQuery",
+          "kind": "function",
+          "line": 39,
+          "status": "complete"
+        },
+        {
+          "name": "ListParams",
+          "kind": "type",
+          "line": 7,
+          "status": "complete"
+        },
+        {
+          "name": "AdminListParams",
+          "kind": "type",
+          "line": 13,
+          "status": "complete"
+        },
+        {
+          "name": "ADMIN_DEFAULT_PAGE_SIZE",
+          "kind": "variable",
+          "line": 18,
+          "status": "complete"
+        },
+        {
+          "name": "queryKeys",
+          "kind": "variable",
+          "line": 44,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/results/index.ts",
+      "exports": [
+        {
+          "name": "RESULT_TYPE_BASE_URL",
+          "kind": "variable",
+          "line": 8,
+          "status": "complete"
+        },
+        {
+          "name": "RESULT_TITLES",
+          "kind": "variable",
+          "line": 12,
+          "status": "complete"
+        },
+        {
+          "name": "RESULT_STATUS",
+          "kind": "variable",
+          "line": 22,
+          "status": "complete"
+        },
+        {
+          "name": "resultTypeUri",
+          "kind": "function",
+          "line": 29,
+          "status": "complete"
+        },
+        {
+          "name": "ResultTypeSlug",
+          "kind": "type",
+          "line": 19,
+          "status": "complete"
+        },
+        {
+          "name": "sendResult",
+          "kind": "function",
+          "line": 26,
+          "status": "complete"
+        },
+        {
+          "name": "sendResultEnvelope",
+          "kind": "function",
+          "line": 18,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/results/result-types.ts",
+      "exports": [
+        {
+          "name": "resultTypeUri",
+          "kind": "function",
+          "line": 29,
+          "status": "complete"
+        },
+        {
+          "name": "RESULT_TYPE_BASE_URL",
+          "kind": "variable",
+          "line": 8,
+          "status": "complete"
+        },
+        {
+          "name": "RESULT_TITLES",
+          "kind": "variable",
+          "line": 12,
+          "status": "complete"
+        },
+        {
+          "name": "ResultTypeSlug",
+          "kind": "type",
+          "line": 19,
+          "status": "complete"
+        },
+        {
+          "name": "RESULT_STATUS",
+          "kind": "variable",
+          "line": 22,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/results/send-result.ts",
+      "exports": [
+        {
+          "name": "sendResultEnvelope",
+          "kind": "function",
+          "line": 18,
+          "status": "complete"
+        },
+        {
+          "name": "sendResult",
+          "kind": "function",
+          "line": 26,
           "status": "complete"
         }
       ]
@@ -3032,122 +3982,449 @@
       ]
     },
     {
-      "path": "src/pages/admin/AdminAuditLogsPage.tsx",
+      "path": "src/pages/admin/admin-audit-logs-page.tsx",
       "exports": [
         {
           "name": "AdminAuditLogsPage",
           "kind": "function",
-          "line": 136,
+          "line": 27,
           "status": "complete"
         }
       ]
     },
     {
-      "path": "src/pages/admin/AdminDocumentDetailPage.tsx",
+      "path": "src/pages/admin/admin-document-detail-page.tsx",
       "exports": [
         {
           "name": "AdminDocumentDetailPage",
           "kind": "function",
-          "line": 58,
+          "line": 29,
           "status": "complete"
         }
       ]
     },
     {
-      "path": "src/pages/admin/AdminDocumentsPage.tsx",
+      "path": "src/pages/admin/admin-documents-page.tsx",
       "exports": [
         {
           "name": "AdminDocumentsPage",
           "kind": "function",
-          "line": 164,
+          "line": 20,
           "status": "complete"
         }
       ]
     },
     {
-      "path": "src/pages/admin/AdminFailedAuditLogsPage.tsx",
+      "path": "src/pages/admin/admin-failed-audit-logs-page.tsx",
       "exports": [
         {
           "name": "AdminFailedAuditLogsPage",
           "kind": "function",
-          "line": 101,
+          "line": 23,
           "status": "complete"
         }
       ]
     },
     {
-      "path": "src/pages/admin/AdminFailedProcessErrorsPage.tsx",
+      "path": "src/pages/admin/admin-failed-process-errors-page.tsx",
       "exports": [
         {
           "name": "AdminFailedProcessErrorsPage",
           "kind": "function",
-          "line": 100,
+          "line": 23,
           "status": "complete"
         }
       ]
     },
     {
-      "path": "src/pages/admin/AdminIndexPage.tsx",
+      "path": "src/pages/admin/admin-index-page.tsx",
       "exports": [
         {
           "name": "AdminIndexPage",
           "kind": "function",
-          "line": 11,
+          "line": 13,
           "status": "complete"
         }
       ]
     },
     {
-      "path": "src/pages/admin/AdminLayout.tsx",
+      "path": "src/pages/admin/admin-list-page.tsx",
       "exports": [
         {
-          "name": "AdminLayout",
+          "name": "AdminListPage",
           "kind": "function",
-          "line": 12,
+          "line": 32,
           "status": "complete"
         }
       ]
     },
     {
-      "path": "src/pages/admin/AdminProcessErrorsPage.tsx",
+      "path": "src/pages/admin/admin-process-errors-page.tsx",
       "exports": [
         {
           "name": "AdminProcessErrorsPage",
           "kind": "function",
-          "line": 107,
+          "line": 25,
           "status": "complete"
         }
       ]
     },
     {
-      "path": "src/pages/admin/AdminUsersPage.tsx",
+      "path": "src/pages/admin/admin-users-page.tsx",
       "exports": [
         {
           "name": "AdminUsersPage",
           "kind": "function",
-          "line": 128,
+          "line": 17,
           "status": "complete"
         }
       ]
     },
     {
-      "path": "src/pages/dev/DevIndexPage.tsx",
+      "path": "src/pages/dev/dev-embed-page.tsx",
+      "exports": [
+        {
+          "name": "DevEmbedPage",
+          "kind": "function",
+          "line": 26,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/dev/dev-index-page.tsx",
       "exports": [
         {
           "name": "DevIndexPage",
           "kind": "function",
-          "line": 11,
+          "line": 13,
           "status": "complete"
         }
       ]
     },
     {
-      "path": "src/pages/dev/DevLayout.tsx",
+      "path": "src/server/middleware/adminAuth.ts",
       "exports": [
         {
-          "name": "DevLayout",
+          "name": "adminAuth",
           "kind": "function",
-          "line": 12,
+          "line": 16,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/middleware/apiKeyAuth.ts",
+      "exports": [
+        {
+          "name": "apiKeyAuth",
+          "kind": "function",
+          "line": 16,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/middleware/asyncHandler.ts",
+      "exports": [
+        {
+          "name": "asyncHandler",
+          "kind": "function",
+          "line": 20,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/middleware/devAuth.ts",
+      "exports": [
+        {
+          "name": "dashboardAuth",
+          "kind": "function",
+          "line": 19,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/middleware/errorHandler.ts",
+      "exports": [
+        {
+          "name": "errorHandler",
+          "kind": "variable",
+          "line": 15,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/middleware/notFoundHandler.ts",
+      "exports": [
+        {
+          "name": "notFoundHandler",
+          "kind": "variable",
+          "line": 13,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/middleware/requestId.ts",
+      "exports": [
+        {
+          "name": "requestId",
+          "kind": "function",
+          "line": 13,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/queues/auditQueue.ts",
+      "exports": [
+        {
+          "name": "logEvent",
+          "kind": "function",
+          "line": 32,
+          "status": "complete"
+        },
+        {
+          "name": "auditQueue",
+          "kind": "variable",
+          "line": 15,
+          "status": "complete"
+        },
+        {
+          "name": "LogEventData",
+          "kind": "interface",
+          "line": 18,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/queues/cleanupQueue.ts",
+      "exports": [
+        {
+          "name": "cleanupQueue",
+          "kind": "variable",
+          "line": 14,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/queues/emailQueue.ts",
+      "exports": [
+        {
+          "name": "emailQueue",
+          "kind": "variable",
+          "line": 14,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/queues/processErrorQueue.ts",
+      "exports": [
+        {
+          "name": "processErrorQueue",
+          "kind": "variable",
+          "line": 11,
+          "status": "complete"
+        },
+        {
+          "name": "ProcessErrorJobData",
+          "kind": "interface",
+          "line": 16,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/routes/admin.ts",
+      "exports": [
+        {
+          "name": "adminRouter",
+          "kind": "variable",
+          "line": 17,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/routes/auth.ts",
+      "exports": [
+        {
+          "name": "authRouter",
+          "kind": "variable",
+          "line": 28,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/routes/docs.ts",
+      "exports": [
+        {
+          "name": "mountApiDocs",
+          "kind": "function",
+          "line": 20,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/routes/documents.ts",
+      "exports": [
+        {
+          "name": "documentsRouter",
+          "kind": "variable",
+          "line": 19,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/routes/health.ts",
+      "exports": [
+        {
+          "name": "healthRouter",
+          "kind": "variable",
+          "line": 16,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/routes/http-helpers.ts",
+      "exports": [
+        {
+          "name": "ok",
+          "kind": "function",
+          "line": 29,
+          "status": "complete"
+        },
+        {
+          "name": "created",
+          "kind": "function",
+          "line": 34,
+          "status": "complete"
+        },
+        {
+          "name": "okMessage",
+          "kind": "function",
+          "line": 39,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/routes/meta.ts",
+      "exports": [
+        {
+          "name": "metaRouter",
+          "kind": "variable",
+          "line": 13,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/routes/studio.ts",
+      "exports": [
+        {
+          "name": "studioRouter",
+          "kind": "variable",
+          "line": 15,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/routes/upload.ts",
+      "exports": [
+        {
+          "name": "uploadRouter",
+          "kind": "variable",
+          "line": 46,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/routes/verify.ts",
+      "exports": [
+        {
+          "name": "verifyRouter",
+          "kind": "variable",
+          "line": 47,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/workers/auditWorker.ts",
+      "exports": [
+        {
+          "name": "auditWorker",
+          "kind": "variable",
+          "line": 24,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/workers/emailWorker.ts",
+      "exports": [
+        {
+          "name": "emailWorker",
+          "kind": "variable",
+          "line": 22,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/workers/fileScrubWorker.ts",
+      "exports": [
+        {
+          "name": "fileScrubWorker",
+          "kind": "variable",
+          "line": 24,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/workers/orphanReconciliationWorker.ts",
+      "exports": [
+        {
+          "name": "orphanReconciliationWorker",
+          "kind": "variable",
+          "line": 14,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/workers/processErrorWorker.ts",
+      "exports": [
+        {
+          "name": "processErrorWorker",
+          "kind": "variable",
+          "line": 20,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/workers/recordScrubWorker.ts",
+      "exports": [
+        {
+          "name": "recordScrubWorker",
+          "kind": "variable",
+          "line": 18,
           "status": "complete"
         }
       ]
@@ -3169,15 +4446,15 @@
         {
           "name": "SesEmailProvider",
           "kind": "class",
-          "line": 13,
+          "line": 14,
           "status": "complete"
         }
       ]
     }
   ],
   "summary": {
-    "total": 402,
-    "documented": 402,
+    "total": 584,
+    "documented": 584,
     "coveragePercent": 100
   }
 }

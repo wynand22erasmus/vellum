@@ -1,5 +1,5 @@
 /**
- * Serialized filter values for {@link DataTable} column filters.
+ * Serialized filter values for `DataTable` column filters.
  *
  * @packageDocumentation
  */

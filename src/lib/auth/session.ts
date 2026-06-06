@@ -34,7 +34,7 @@ export async function createSessionToken(user: SessionUser): Promise<string> {
  * Verifies a session JWT and returns the embedded user claims.
  *
  * @param token - Raw cookie value
- * @throws {@link AppError} When the token is invalid or missing required claims
+ * @throws `AppError` When the token is invalid or missing required claims
  */
 export async function verifySessionToken(token: string): Promise<SessionUser> {
   const { payload } = await jwtVerify(token, secret);

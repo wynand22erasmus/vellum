@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 
-import { apiFetch } from '@/lib/api';
+import { apiFetch, parseApiEnvelope } from '@/lib/api';
 import type { AuthUser } from '@/lib/auth';
 
 let inFlight: Promise<AuthUser | null> | null = null;
@@ -28,11 +28,11 @@ export async function loadAuthSession(signal?: AbortSignal): Promise<AuthUser | 
   const task = (async () => {
     try {
       const res = await apiFetch('/api/auth/me', { signal });
-      if (!res.ok) {
+      const parsed = await parseApiEnvelope<{ user: AuthUser; provider: string }>(res);
+      if (!parsed.ok) {
         return null;
       }
-      const data = (await res.json()) as { user: AuthUser | null };
-      return data.user ?? null;
+      return parsed.data.user ?? null;
     } catch (err) {
       if (signal?.aborted || (err instanceof DOMException && err.name === 'AbortError')) {
         throw err;

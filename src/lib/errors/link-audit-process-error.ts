@@ -7,7 +7,7 @@
 import { prisma } from '../prisma.ts';
 
 /**
- * Sets bidirectional {@link AuditLog} ↔ {@link ProcessError} links after both rows exist.
+ * Sets bidirectional `AuditLog` ↔ `ProcessError` links after both rows exist.
  */
 export async function linkAuditLogToProcessError(
   auditLogId: string,
@@ -25,7 +25,7 @@ export async function linkAuditLogToProcessError(
   ]);
 }
 
-/** Sets {@link FailedAuditLog.processErrorId} after the process error row is persisted. */
+/** Sets `FailedAuditLog.processErrorId` after the process error row is persisted. */
 export async function linkFailedAuditLogToProcessError(
   failedAuditLogId: string,
   processErrorId: string,
@@ -37,7 +37,7 @@ export async function linkFailedAuditLogToProcessError(
 }
 
 /**
- * Resolves a {@link ProcessError} by correlationId and links it to a new {@link AuditLog}.
+ * Resolves a `ProcessError` by correlationId and links it to a new `AuditLog`.
  */
 export async function linkAuditLogByCorrelationId(
   auditLogId: string,
@@ -54,7 +54,7 @@ export async function linkAuditLogByCorrelationId(
 }
 
 /**
- * Resolves an {@link AuditLog} by metadata.correlationId and links it to a new {@link ProcessError}.
+ * Resolves an `AuditLog` by metadata.correlationId and links it to a new `ProcessError`.
  */
 export async function linkProcessErrorByCorrelationId(
   processErrorId: string,

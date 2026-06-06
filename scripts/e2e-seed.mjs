@@ -24,7 +24,9 @@ const root = path.join(__dirname, '..');
 const baseUrl = process.env.E2E_BASE_URL ?? buildPublicUrl();
 const apiKey = process.env.API_KEY ?? 'dev-api-key-change-in-production';
 const databaseUrl =
-  process.env.DATABASE_URL ?? 'postgresql://vellum:password@localhost:5432/vellum_db';
+  process.env.DATABASE_URL_HOST ??
+  process.env.DATABASE_URL ??
+  'postgresql://vellum:password@localhost:5432/vellum_db';
 const minioEndpoint = process.env.MINIO_ENDPOINT ?? 'http://localhost:9000';
 const minioUser = process.env.MINIO_ROOT_USER ?? 'minioadmin';
 const minioPassword = process.env.MINIO_ROOT_PASSWORD ?? 'minioadmin';
@@ -116,8 +118,12 @@ async function seedViaUpload() {
       body: form,
     });
     const uploadBody = await uploadRes.json().catch(() => ({}));
-    if (uploadRes.ok && uploadBody.id) {
-      return uploadBody.id;
+    const uploadedId =
+      (uploadBody.data && typeof uploadBody.data === 'object' && 'id' in uploadBody.data
+        ? uploadBody.data.id
+        : undefined) ?? uploadBody.id;
+    if (uploadRes.ok && typeof uploadedId === 'string' && uploadedId.length > 0) {
+      return uploadedId;
     }
     if (uploadRes.status === 503 && attempt < maxAttempts) {
       console.warn(

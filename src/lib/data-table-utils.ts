@@ -1,12 +1,13 @@
 /**
- * Client-side sort and filter helpers for {@link DataTable}.
+ * Client-side sort and filter helpers for `DataTable`.
  *
  * @packageDocumentation
  */
 
+import { isValid, parseISO } from 'date-fns';
 import { parseMultiSelectFilterValue } from './data-table-filter-value.ts';
 
-/** Active sort column and direction for {@link DataTable}. */
+/** Active sort column and direction for `DataTable`. */
 export type DataTableSort = {
   id: string;
   desc: boolean;
@@ -123,17 +124,80 @@ export function defaultNumberColumnFilter(cellValue: unknown, filterValue: strin
   return String(cellValue ?? '').includes(query);
 }
 
+function parseFilterableDate(value: string): Date | null {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    const parsed = parseISO(`${trimmed}T00:00:00.000Z`);
+    return isValid(parsed) ? parsed : null;
+  }
+  const parsed = parseISO(trimmed);
+  return isValid(parsed) ? parsed : null;
+}
+
+function parseCellDate(cellValue: unknown): Date | null {
+  return parseFilterableDate(String(cellValue ?? ''));
+}
+
+function isSameUtcDay(a: Date, b: Date): boolean {
+  return (
+    a.getUTCFullYear() === b.getUTCFullYear() &&
+    a.getUTCMonth() === b.getUTCMonth() &&
+    a.getUTCDate() === b.getUTCDate()
+  );
+}
+
+function isSameUtcMinute(a: Date, b: Date): boolean {
+  return (
+    isSameUtcDay(a, b) &&
+    a.getUTCHours() === b.getUTCHours() &&
+    a.getUTCMinutes() === b.getUTCMinutes()
+  );
+}
+
 /**
- * Date / datetime filter via ISO prefix match on the serialized cell value.
+ * Date-only filter: rows match when the cell UTC calendar day equals the selected date.
  */
-export function defaultDateColumnFilter(cellValue: unknown, filterValue: string): boolean {
-  const query = filterValue.trim().toLocaleLowerCase();
+export function defaultDateOnlyColumnFilter(cellValue: unknown, filterValue: string): boolean {
+  const query = filterValue.trim();
   if (!query) {
     return true;
   }
+
+  const filterDate = parseFilterableDate(query);
+  const cellDate = parseCellDate(cellValue);
+  if (filterDate && cellDate) {
+    return isSameUtcDay(cellDate, filterDate);
+  }
+
+  return String(cellValue ?? '').includes(query.slice(0, 10));
+}
+
+/**
+ * Datetime filter: rows match when the cell UTC timestamp falls in the selected minute.
+ */
+export function defaultDateTimeColumnFilter(cellValue: unknown, filterValue: string): boolean {
+  const query = filterValue.trim();
+  if (!query) {
+    return true;
+  }
+
+  const filterDate = parseFilterableDate(query);
+  const cellDate = parseCellDate(cellValue);
+  if (filterDate && cellDate) {
+    return isSameUtcMinute(cellDate, filterDate);
+  }
+
   return String(cellValue ?? '')
     .toLocaleLowerCase()
-    .includes(query);
+    .includes(query.toLocaleLowerCase());
+}
+
+/** @deprecated Use {@link defaultDateTimeColumnFilter} or {@link defaultDateOnlyColumnFilter}. */
+export function defaultDateColumnFilter(cellValue: unknown, filterValue: string): boolean {
+  return defaultDateTimeColumnFilter(cellValue, filterValue);
 }
 
 /** Reads a cell value from a row for sorting or filtering. */

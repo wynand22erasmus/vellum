@@ -5,6 +5,7 @@
  */
 
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
+import { getBrandPresetFromEnv } from '../../brand/get-brand-preset.ts';
 import type { EmailPayload, IEmailProvider } from '../IEmailProvider.ts';
 
 /**
@@ -17,6 +18,7 @@ export class SesEmailProvider implements IEmailProvider {
 
   /** @inheritdoc */
   async send(payload: EmailPayload): Promise<void> {
+    const preset = getBrandPresetFromEnv();
     await this.client.send(
       new SendEmailCommand({
         Destination: { ToAddresses: [payload.to] },
@@ -24,7 +26,7 @@ export class SesEmailProvider implements IEmailProvider {
           Subject: { Data: payload.subject },
           Body: { Text: { Data: payload.body } },
         },
-        Source: 'noreply@vellum.app',
+        Source: payload.from ?? `${preset.email.fromName} <${preset.email.fromAddress}>`,
       }),
     );
   }

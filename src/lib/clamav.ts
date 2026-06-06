@@ -35,7 +35,7 @@ function readClamdResponse(socket: net.Socket): Promise<string> {
  *
  * @param buffer - Raw upload bytes
  * @returns `clean: true` or `clean: false` with a signature name in `reason`
- * @throws {@link AppError} When ClamAV is unreachable or returns an unexpected response
+ * @throws `AppError` When ClamAV is unreachable or returns an unexpected response
  */
 export async function scanBuffer(buffer: Buffer): Promise<{ clean: boolean; reason?: string }> {
   return new Promise((resolve, reject) => {

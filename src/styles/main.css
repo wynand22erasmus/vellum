@@ -1,0 +1,164 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource/geist-sans/400.css";
+@import "@fontsource/geist-sans/500.css";
+@import "@fontsource/geist-sans/600.css";
+@import "@fontsource/geist-sans/700.css";
+@import "@fontsource-variable/geist-mono";
+@import "./brand-presets.css";
+@import "./surface-gradients.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Logo palette (sampled from public/logo.png):
+ *   blue avg   oklch(0.445 0.117 224.5)  #11559A
+ *   blue bright oklch(0.609 0.208 222)
+ *   blue deep  oklch(0.282 0.135 218)
+ *   teal       oklch(0.593 0.130 209)
+ *   gold       oklch(0.780 0.140 55)   complement
+ *   coral      oklch(0.672 0.160 15)    split complement
+ */
+
+@theme {
+  --color-success: oklch(0.52 0.14 165);
+  --color-success-muted: oklch(0.94 0.04 165);
+  --color-error: oklch(0.5 0.18 25);
+  --color-error-muted: oklch(0.95 0.03 25);
+  --color-logo-surface: oklch(0.96 0.028 224);
+  --color-brand-accent: oklch(0.78 0.14 55);
+  --color-brand-accent-foreground: oklch(0.28 0.1 218);
+}
+
+@theme inline {
+  --font-sans: "Geist Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, monospace;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* App defaults — aligned to Vellum logo blue (brand-presets.css overrides per client) */
+:root {
+  --radius: 0.5rem;
+  --logo-blue: oklch(0.445 0.117 224.5);
+  --logo-blue-bright: oklch(0.609 0.208 222);
+  --logo-blue-deep: oklch(0.282 0.135 218);
+  --logo-teal: oklch(0.593 0.13 209);
+  --logo-gold: oklch(0.78 0.14 55);
+  --logo-coral: oklch(0.672 0.16 15);
+
+  --background: oklch(0.985 0.014 224);
+  --foreground: var(--logo-blue-deep);
+  --card: oklch(1 0.006 224);
+  --card-foreground: var(--logo-blue-deep);
+  --popover: oklch(1 0.006 224);
+  --popover-foreground: var(--logo-blue-deep);
+  --primary: var(--logo-blue);
+  --primary-foreground: oklch(0.99 0.005 224);
+  --secondary: var(--logo-teal);
+  --secondary-foreground: oklch(0.99 0.005 224);
+  --muted: oklch(0.955 0.018 224);
+  --muted-foreground: oklch(0.48 0.06 224);
+  --accent: oklch(0.94 0.045 55);
+  --accent-foreground: oklch(0.32 0.1 218);
+  --destructive: oklch(0.55 0.2 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.88 0.028 224);
+  --input: oklch(0.88 0.028 224);
+  --ring: var(--logo-teal);
+  --chart-1: var(--logo-blue);
+  --chart-2: var(--logo-teal);
+  --chart-3: var(--logo-blue-bright);
+  --chart-4: var(--logo-gold);
+  --chart-5: var(--logo-coral);
+  --sidebar: oklch(0.975 0.016 224);
+  --sidebar-foreground: var(--logo-blue-deep);
+  --sidebar-primary: var(--logo-blue);
+  --sidebar-primary-foreground: oklch(0.99 0.005 224);
+  --sidebar-accent: oklch(0.94 0.045 55);
+  --sidebar-accent-foreground: var(--logo-blue-deep);
+  --sidebar-border: oklch(0.88 0.028 224);
+  --sidebar-ring: var(--logo-teal);
+}
+
+.dark {
+  --background: oklch(0.17 0.045 218);
+  --foreground: oklch(0.95 0.015 224);
+  --card: oklch(0.2 0.05 218);
+  --card-foreground: oklch(0.95 0.015 224);
+  --popover: oklch(0.2 0.05 218);
+  --popover-foreground: oklch(0.95 0.015 224);
+  --primary: var(--logo-blue-bright);
+  --primary-foreground: oklch(0.15 0.04 218);
+  --secondary: oklch(0.55 0.11 209);
+  --secondary-foreground: oklch(0.95 0.015 224);
+  --muted: oklch(0.24 0.04 218);
+  --muted-foreground: oklch(0.68 0.03 224);
+  --accent: oklch(0.28 0.055 55);
+  --accent-foreground: oklch(0.95 0.015 224);
+  --destructive: oklch(0.6 0.18 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.3 0.045 218);
+  --input: oklch(0.3 0.045 218);
+  --ring: var(--logo-blue-bright);
+  --sidebar: oklch(0.18 0.048 218);
+  --sidebar-foreground: oklch(0.95 0.015 224);
+  --sidebar-primary: var(--logo-blue-bright);
+  --sidebar-primary-foreground: oklch(0.15 0.04 218);
+  --sidebar-accent: oklch(0.24 0.05 218);
+  --sidebar-accent-foreground: oklch(0.95 0.015 224);
+  --sidebar-border: oklch(0.3 0.045 218);
+  --sidebar-ring: var(--logo-blue-bright);
+}
+
+@layer base {
+  .app-root {
+    @apply font-sans;
+  }
+
+  .app-root * {
+    @apply border-border outline-ring/50;
+  }
+
+  .app-root .font-data {
+    @apply font-mono;
+  }
+}

@@ -1,5 +1,5 @@
 /**
- * Maps jose JWT verification failures to {@link AppError}.
+ * Maps jose JWT verification failures to `AppError`.
  *
  * @packageDocumentation
  */
@@ -10,7 +10,7 @@ import { AppError } from './app-error.ts';
 type JwtContext = 'email-verification' | 'pending-verification';
 
 /**
- * Converts jose verification errors into operational {@link AppError} instances.
+ * Converts jose verification errors into operational `AppError` instances.
  *
  * @param err - Error from `jwtVerify`
  * @param context - Which auth token flow failed

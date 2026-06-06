@@ -20,7 +20,7 @@ const DEFAULT_ADMIN_EMAILS_FALLBACK = ['wynand22erasmus@gmail.com'];
  * @internal
  * @param key - Environment variable name
  * @returns Raw string value
- * @throws {@link AppError} When the variable is unset or empty
+ * @throws `AppError` When the variable is unset or empty
  */
 function requireEnv(key: string): string {
   const value = process.env[key];
@@ -83,7 +83,7 @@ export const env = {
   skipEmailVerification:
     optionalEnv('NODE_ENV', 'development') !== 'production' &&
     optionalEnv('SKIP_EMAIL_VERIFICATION', 'false') === 'true',
-  /** Lowercase emails promoted to {@link UserKind.ADMIN} on sign-in. */
+  /** Lowercase emails promoted to `UserKind` `ADMIN` on sign-in. */
   defaultAdminEmails: parseJsonStringArray(
     process.env.DEFAULT_ADMIN_EMAILS,
     DEFAULT_ADMIN_EMAILS_FALLBACK,
@@ -92,6 +92,8 @@ export const env = {
   logDir: optionalEnv('LOG_DIR', 'logs'),
   /** Base URL for RFC 9457 Problem Details `type` URIs. */
   problemTypeBaseUrl: optionalEnv('PROBLEM_TYPE_BASE_URL', 'https://vellum.dev/problems'),
+  /** Build-time white-label preset id (must match VITE_BRAND_PRESET). */
+  brandPreset: optionalEnv('BRAND_PRESET', 'vellum'),
   /** Enable orphan reconciliation cron job (Phase 4.2). */
   orphanReconcileEnabled: optionalEnv('ORPHAN_RECONCILE_ENABLED', 'false') === 'true',
   /** Cron pattern for orphan reconciliation (default: daily 03:00). */

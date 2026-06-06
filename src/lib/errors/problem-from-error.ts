@@ -12,16 +12,9 @@ import { validationErrorFromZod } from './validation-detail.ts';
 import { toOrphanExtension } from '../compensation/orphan.ts';
 import type { OrphanedResource } from '../compensation/orphan.ts';
 import { env } from '../env.ts';
+import type { ProblemDetails } from '../http/problem-details.ts';
 
-/** RFC 9457 Problem Details body (with extension members). */
-export interface ProblemDetails {
-  type: string;
-  title: string;
-  status: number;
-  detail?: string;
-  instance?: string;
-  [key: string]: unknown;
-}
+export type { ProblemDetails };
 
 /** Request-scoped values passed when mapping errors to Problem Details. */
 export interface ProblemFromErrorContext {

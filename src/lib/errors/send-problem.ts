@@ -5,7 +5,8 @@
  */
 
 import type { Response } from 'express';
-import type { ProblemDetails } from './problem-from-error.ts';
+import type { ProblemDetails } from '../http/problem-details.ts';
+import { PROBLEM_CONTENT_TYPE } from '../http/rfc9457.ts';
 
 /**
  * Writes an `application/problem+json` response.
@@ -19,6 +20,6 @@ export function sendProblem(res: Response, problem: ProblemDetails): void {
   }
   res
     .status(problem.status)
-    .type('application/problem+json')
+    .type(PROBLEM_CONTENT_TYPE)
     .json(problem);
 }

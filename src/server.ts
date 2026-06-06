@@ -5,7 +5,7 @@
  * @remarks Listens on `env.port` (default 3000). Serves the SPA from `dist/` when `NODE_ENV=production`.
  */
 
-import { createApp } from './app.ts';
+import { createApp } from './server/create-app.ts';
 import { env } from './lib/env.ts';
 import { recordProcessError } from './lib/errors/record-process-error.ts';
 import { problemFromError } from './lib/errors/problem-from-error.ts';

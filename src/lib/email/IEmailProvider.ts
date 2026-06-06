@@ -12,6 +12,8 @@ export interface EmailPayload {
   subject: string;
   /** Plain-text body */
   body: string;
+  /** Optional RFC5322 From header (defaults to provider preset). */
+  from?: string;
 }
 
 /**
