@@ -24,8 +24,9 @@ body:json {
 tests {
   test("returns presigned download URL", function () {
     expect(res.getStatus()).to.equal(200);
+    expect(res.getHeader("content-type")).to.contain("application/vnd.vellum.result+json");
     const body = res.getBody();
-    expect(body.downloadUrl).to.be.a("string").and.not.empty;
-    expect(body.fileName).to.equal(bru.getEnvVar("fileName"));
+    expect(body.data.downloadUrl).to.be.a("string").and.not.empty;
+    expect(body.data.fileName).to.equal(bru.getEnvVar("fileName"));
   });
 }

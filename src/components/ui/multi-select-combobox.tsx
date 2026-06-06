@@ -15,7 +15,6 @@ import {
   serializeMultiSelectFilterValue,
 } from '@/lib/data-table-filter-value';
 
-/** Selectable option in {@link MultiSelectCombobox}. */
 /** Option label/value pair for {@link MultiSelectCombobox}. */
 export type MultiSelectComboboxOption = { value: string; label: string };
 

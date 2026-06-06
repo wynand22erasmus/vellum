@@ -17,8 +17,9 @@ headers {
 tests {
   test("returns dev user profile", function () {
     expect(res.getStatus()).to.equal(200);
+    expect(res.getHeader("content-type")).to.contain("application/vnd.vellum.result+json");
     const body = res.getBody();
-    expect(body.provider).to.equal("dev");
-    expect(body.user.email).to.match(/@example\.com$/);
+    expect(body.data.provider).to.equal("dev");
+    expect(body.data.user.email).to.match(/@example\.com$/);
   });
 }

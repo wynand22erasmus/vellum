@@ -7,6 +7,10 @@ API tests live in a [Bruno 3 workspace](https://docs.usebruno.com/get-started/br
 - **Upload:** `Authorization: Bearer {{apiKey}}` (see `02-upload`).
 - **Dashboard:** In dev, Bruno sets `X-Dev-User-Email` (see `03-auth/Auth Me Dev`). The browser UI also sets a `vellum_session` cookie on sign-in; full-page routes such as `/docs/` require that cookie.
 
+## Success responses
+
+Successful JSON responses use `Content-Type: application/vnd.vellum.result+json`. Assert on `body.data.*` (e.g. `body.data.documents`, `body.data.downloadUrl`). Detail-only confirmations (logout, request-link) expose the message in `body.detail`. Errors remain `application/problem+json` — unchanged.
+
 ## Layout
 
 ```

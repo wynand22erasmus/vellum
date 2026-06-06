@@ -113,14 +113,87 @@ When undo fails, responses include `orphanedResources`, `compensationAttempted`,
 ## Frontend snippet
 
 ```ts
-import { parseProblem, problemMessage } from '@/lib/api';
+import { apiPost, ApiQueryError } from '@/lib/api-client';
 
-const res = await fetch('/api/verify', { method: 'POST', ... });
-if (!res.ok) {
-  const problem = await parseProblem(res);
-  setError(problemMessage(problem));
+try {
+  const data = await apiPost<{ downloadUrl?: string }>('/api/verify', { token, password });
+  // use data.downloadUrl
+} catch (err) {
+  if (err instanceof ApiQueryError) {
+    setError(err.message);
+  }
 }
 ```
+
+## Success responses (VellumResult)
+
+Successful API responses use `Content-Type: application/vnd.vellum.result+json` with an RFC 9457-inspired envelope:
+
+| Field | Purpose |
+|-------|---------|
+| `type` | Stable URI under `RESULT_TYPE_BASE_URL` (default `https://vellum.dev/results/<slug>`) |
+| `title` | Fixed catalog title (`OK`, `Created`, `Accepted`) |
+| `status` | HTTP status (200, 201, 202) |
+| `detail` | Optional human-readable confirmation (detail-only responses use `data: null`) |
+| `instance` | Request path when sent from Express helpers |
+| `data` | Typed payload; business fields live here |
+
+### Result type catalog
+
+| Slug | Status | Use |
+|------|--------|-----|
+| `ok` | 200 | Lists, reads, confirmations |
+| `created` | 201 | Resource creation (upload) |
+| `accepted` | 202 | Async acceptance (reserved) |
+
+### Backend
+
+Import helpers from `src/server/routes/http-helpers.ts` or `sendResult()` from `src/lib/results/`:
+
+```ts
+import { ok, created, okMessage } from './http-helpers.ts';
+
+ok(req, res, { documents, total, limit, offset });
+created(req, res, { id, warning });
+okMessage(req, res, 'Logged out.');
+```
+
+Throw `AppError` for failures — never bare `res.json()` on success paths.
+
+### Frontend
+
+Use the unified client in `src/lib/api-client.ts` (`apiGet`, `apiPost`, `fetchJson`). Types and parsers live in `src/lib/http/` and are re-exported from `src/lib/api.ts`.
+
+```ts
+import { parseApiEnvelope, unwrapResult } from '@/lib/api';
+
+const parsed = await parseApiEnvelope<MyPayload>(res);
+if (parsed.ok) {
+  const payload = parsed.data; // or unwrapResult(parsed.result)
+}
+```
+
+### Intentional exceptions
+
+| Location | Pattern | Why |
+|----------|---------|-----|
+| `src/server/routes/studio.ts` | Tuple `[error, results]` JSON | Prisma Studio query protocol |
+
+## Codebase conventions
+
+| Concern | Canonical import |
+|---------|------------------|
+| HTTP envelope types | `@/lib/http` or `@/lib/api` re-exports |
+| API transport + parsers | `@/lib/api` (`apiFetch`, `parseApiEnvelope`) |
+| Dashboard fetch | `@/lib/api-client` (`apiGet`, `apiPost`, `fetchJson`) |
+| Route success helpers | `./http-helpers.ts` (`ok`, `created`, `okMessage`) |
+| Sidebar nav | `@/lib/sidebar-nav` (`buildSidebarNav`) |
+| Auth loading skeletons | `@/components/layout/auth-skeletons` |
+| Shared layout / features | `@/components/layout/*`, `@/components/features/*` |
+| Providers | `@/providers/*` |
+| UI primitives | `@/components/ui/*` |
+
+Do not import from `@/ui/uiv3/*` (removed). CI gates: `npm run check:error-patterns` (includes a `ui/uiv3` path guard in `src/`).
 
 ## Orphan reconciliation (optional)
 
@@ -128,8 +201,8 @@ Set `ORPHAN_RECONCILE_ENABLED=true` to schedule daily `reconcile-orphans` jobs o
 
 ## Enforcement
 
-- ESLint `no-restricted-syntax` on inline error JSON in routes/middleware
-- `npm run check:error-patterns` (CI grep gate)
+- ESLint `no-restricted-syntax` on inline error JSON in routes/middleware; `no-restricted-imports` blocks `@/ui/uiv3/*`
+- `npm run check:error-patterns` — bans inline error JSON, bare `res.json()` in routes (except `studio.ts`), raw `fetch('/api/')` outside the allowlist, and legacy `ui/uiv3` path strings in `src/`
 - Completion: `rg 'json\(\s*\{\s*error'` on `src/` returns no matches
 
-See also [CONFIG.md](./CONFIG.md) for `LOG_DIR`, `PROBLEM_TYPE_BASE_URL`, and orphan reconciliation env vars.
+See also [CONFIG.md](./CONFIG.md) for `LOG_DIR`, `PROBLEM_TYPE_BASE_URL`, `RESULT_TYPE_BASE_URL`, and orphan reconciliation env vars.

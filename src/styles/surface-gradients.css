@@ -1,0 +1,271 @@
+/**
+ * Granular layered gradients for app shells, auth, and elevated surfaces.
+ *
+ * Each surface stacks: base wash → directional tint → radial glows → grid/noise → vignette.
+ */
+
+:root {
+  /* Shell wrapper (behind sidebar + inset) */
+  --shell-base: linear-gradient(
+    168deg,
+    oklch(0.988 0.012 224) 0%,
+    oklch(0.978 0.018 224) 18%,
+    oklch(0.962 0.024 215) 42%,
+    oklch(0.968 0.02 209) 68%,
+    oklch(0.976 0.016 224) 100%
+  );
+  --shell-glow-a: radial-gradient(
+    ellipse 80% 55% at 12% 8%,
+    oklch(0.593 0.13 209 / 0.14) 0%,
+    transparent 72%
+  );
+  --shell-glow-b: radial-gradient(
+    ellipse 65% 50% at 88% 92%,
+    oklch(0.78 0.14 55 / 0.1) 0%,
+    transparent 68%
+  );
+  --shell-glow-c: radial-gradient(
+    ellipse 45% 35% at 50% 50%,
+    oklch(0.609 0.208 222 / 0.05) 0%,
+    transparent 70%
+  );
+  --shell-vignette: radial-gradient(
+    ellipse 120% 90% at 50% 50%,
+    transparent 55%,
+    oklch(0.282 0.135 218 / 0.04) 100%
+  );
+
+  /* Main content backdrop (inside inset) */
+  --content-base: linear-gradient(
+    180deg,
+    oklch(0.99 0.008 224 / 0.92) 0%,
+    oklch(0.975 0.014 224 / 0.88) 35%,
+    oklch(0.965 0.02 209 / 0.86) 70%,
+    oklch(0.96 0.028 224 / 0.9) 100%
+  );
+  --content-glow-top: radial-gradient(
+    ellipse 90% 45% at 50% -5%,
+    oklch(0.593 0.13 209 / 0.11) 0%,
+    transparent 70%
+  );
+  --content-glow-bottom: radial-gradient(
+    ellipse 70% 40% at 100% 105%,
+    oklch(0.78 0.14 55 / 0.07) 0%,
+    transparent 65%
+  );
+  --content-grid: linear-gradient(to right, oklch(0.445 0.117 224.5 / 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.445 0.117 224.5 / 0.04) 1px, transparent 1px);
+
+  /* Sidebar inset panel */
+  --inset-base: linear-gradient(
+    145deg,
+    oklch(1 0.006 224 / 0.88) 0%,
+    oklch(0.985 0.012 224 / 0.82) 40%,
+    oklch(0.978 0.016 209 / 0.8) 100%
+  );
+  --inset-edge: linear-gradient(
+    90deg,
+    oklch(0.593 0.13 209 / 0.06) 0%,
+    transparent 12%,
+    transparent 88%,
+    oklch(0.78 0.14 55 / 0.05) 100%
+  );
+
+  /* Auth brand panel (login left) */
+  --auth-brand-base: linear-gradient(
+    152deg,
+    var(--logo-blue-deep) 0%,
+    oklch(0.34 0.128 220) 22%,
+    var(--logo-blue) 48%,
+    oklch(0.52 0.125 212) 72%,
+    var(--logo-teal) 100%
+  );
+  --auth-brand-glow-gold: radial-gradient(
+    circle at 14% 18%,
+    oklch(0.78 0.14 55 / 0.35) 0%,
+    transparent 38%
+  );
+  --auth-brand-glow-blue: radial-gradient(
+    circle at 82% 78%,
+    oklch(0.609 0.208 222 / 0.45) 0%,
+    transparent 42%
+  );
+  --auth-brand-glow-teal: radial-gradient(
+    circle at 50% 100%,
+    oklch(0.593 0.13 209 / 0.25) 0%,
+    transparent 50%
+  );
+  --auth-brand-grid: linear-gradient(to right, oklch(1 0 0 / 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(1 0 0 / 0.06) 1px, transparent 1px);
+
+  /* Muted bands (table headers, filter chips) */
+  --band-base: linear-gradient(
+    180deg,
+    oklch(0.955 0.018 224 / 0.65) 0%,
+    oklch(0.965 0.015 224 / 0.45) 100%
+  );
+  --band-edge: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(0.593 0.13 209 / 0.08) 50%,
+    transparent 100%
+  );
+
+  --grid-size: 24px;
+  --auth-grid-size: 32px;
+}
+
+.dark {
+  --shell-base: linear-gradient(
+    168deg,
+    oklch(0.155 0.044 218) 0%,
+    oklch(0.17 0.048 218) 22%,
+    oklch(0.185 0.05 215) 48%,
+    oklch(0.175 0.047 218) 74%,
+    oklch(0.16 0.043 218) 100%
+  );
+  --shell-glow-a: radial-gradient(
+    ellipse 80% 55% at 12% 8%,
+    oklch(0.593 0.13 209 / 0.12) 0%,
+    transparent 72%
+  );
+  --shell-glow-b: radial-gradient(
+    ellipse 65% 50% at 88% 92%,
+    oklch(0.78 0.14 55 / 0.08) 0%,
+    transparent 68%
+  );
+  --shell-glow-c: radial-gradient(
+    ellipse 45% 35% at 50% 50%,
+    oklch(0.609 0.208 222 / 0.06) 0%,
+    transparent 70%
+  );
+  --shell-vignette: radial-gradient(
+    ellipse 120% 90% at 50% 50%,
+    transparent 50%,
+    oklch(0 0 0 / 0.35) 100%
+  );
+
+  --content-base: linear-gradient(
+    180deg,
+    oklch(0.19 0.048 218 / 0.94) 0%,
+    oklch(0.185 0.046 218 / 0.9) 40%,
+    oklch(0.175 0.044 215 / 0.88) 100%
+  );
+  --content-glow-top: radial-gradient(
+    ellipse 90% 45% at 50% -5%,
+    oklch(0.593 0.13 209 / 0.1) 0%,
+    transparent 70%
+  );
+  --content-glow-bottom: radial-gradient(
+    ellipse 70% 40% at 100% 105%,
+    oklch(0.78 0.14 55 / 0.06) 0%,
+    transparent 65%
+  );
+  --content-grid: linear-gradient(to right, oklch(0.95 0.015 224 / 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.95 0.015 224 / 0.04) 1px, transparent 1px);
+
+  --inset-base: linear-gradient(
+    145deg,
+    oklch(0.21 0.05 218 / 0.92) 0%,
+    oklch(0.195 0.048 218 / 0.88) 45%,
+    oklch(0.18 0.046 215 / 0.85) 100%
+  );
+  --inset-edge: linear-gradient(
+    90deg,
+    oklch(0.593 0.13 209 / 0.08) 0%,
+    transparent 14%,
+    transparent 86%,
+    oklch(0.78 0.14 55 / 0.06) 100%
+  );
+
+  --band-base: linear-gradient(
+    180deg,
+    oklch(0.24 0.04 218 / 0.55) 0%,
+    oklch(0.22 0.038 218 / 0.35) 100%
+  );
+  --band-edge: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(0.609 0.208 222 / 0.1) 50%,
+    transparent 100%
+  );
+}
+
+@layer components {
+  /* Outermost shell (sidebar wrapper) */
+  .shell-bg {
+    background-image: var(--shell-glow-a), var(--shell-glow-b), var(--shell-glow-c),
+      var(--shell-vignette), var(--shell-base);
+    background-color: var(--background);
+  }
+
+  /* Sidebar inset main panel */
+  .inset-surface {
+    background-image: var(--inset-edge), var(--inset-base);
+    background-color: transparent;
+  }
+
+  /* Scrollable page content area */
+  .surface-backdrop {
+    background-image: var(--content-glow-top), var(--content-glow-bottom), var(--content-base);
+    background-color: transparent;
+  }
+
+  .surface-backdrop::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    background-image: var(--content-grid);
+    background-size: var(--grid-size) var(--grid-size);
+    opacity: 0.55;
+    mask-image: linear-gradient(180deg, black 0%, black 40%, transparent 100%);
+  }
+
+  /* Auth login brand column */
+  .auth-brand-panel {
+    background-image: var(--auth-brand-glow-gold), var(--auth-brand-glow-blue),
+      var(--auth-brand-glow-teal), var(--auth-brand-base);
+    background-color: var(--logo-blue-deep);
+  }
+
+  .auth-brand-panel::before {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    background-image: var(--auth-brand-grid);
+    background-size: var(--auth-grid-size) var(--auth-grid-size);
+    opacity: 0.45;
+  }
+
+  .auth-brand-panel::after {
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 90% 70% at 50% 100%, oklch(0 0 0 / 0.2) 0%, transparent 65%);
+  }
+
+  /* Table header / filter chip bands */
+  .surface-band {
+    background-image: var(--band-edge), var(--band-base);
+  }
+
+  /* Sidebar subtle depth */
+  .sidebar-surface {
+    background-image: linear-gradient(
+      180deg,
+      oklch(from var(--sidebar) l c h / 1) 0%,
+      oklch(from var(--sidebar) calc(l - 0.008) c h / 1) 100%
+    );
+  }
+
+  .dark .sidebar-surface {
+    background-image: linear-gradient(
+      180deg,
+      oklch(from var(--sidebar) l c h / 1) 0%,
+      oklch(from var(--sidebar) calc(l + 0.012) c h / 1) 100%
+    );
+  }
+}

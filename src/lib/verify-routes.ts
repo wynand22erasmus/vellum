@@ -29,6 +29,7 @@ export function triggerFileDownload(url: string, fileName?: string): void {
   const anchor = document.createElement('a');
   anchor.href = url;
   anchor.rel = 'noopener noreferrer';
+  anchor.target = '_blank';
   if (fileName) {
     anchor.download = fileName;
   }

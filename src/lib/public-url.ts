@@ -1,5 +1,5 @@
 /**
- * Builds public-facing URLs from {@link VELLUM_HOST} and related env vars.
+ * Builds public-facing URLs from `VELLUM_HOST` and related env vars.
  *
  * @packageDocumentation
  * @see docs/CONFIG.md

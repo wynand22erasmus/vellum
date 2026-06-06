@@ -14,7 +14,7 @@ let workosClient: WorkOS | null = null;
 /**
  * Returns a singleton WorkOS SDK client.
  *
- * @throws {@link AppError} When `WORKOS_API_KEY` or `WORKOS_CLIENT_ID` is unset
+ * @throws `AppError` When `WORKOS_API_KEY` or `WORKOS_CLIENT_ID` is unset
  */
 export function getWorkOS(): WorkOS {
   const apiKey = env.workosApiKey();

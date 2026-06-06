@@ -23,10 +23,10 @@ describe('Health API (browser)', () => {
     }, BASE_URL);
 
     assert.equal(health.status, 200);
-    assert.equal(health.body.status, 'ok');
-    assert.equal(health.body.checks.database, true);
-    assert.equal(health.body.checks.redis, true);
-    assert.equal(health.body.checks.clamav, true);
+    assert.equal(health.body.data.status, 'ok');
+    assert.equal(health.body.data.checks.database, true);
+    assert.equal(health.body.data.checks.redis, true);
+    assert.equal(health.body.data.checks.clamav, true);
     await page.close();
   });
 });

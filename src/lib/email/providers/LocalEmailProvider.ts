@@ -21,7 +21,7 @@ export class LocalEmailProvider implements IEmailProvider {
   /** @inheritdoc */
   async send(payload: EmailPayload): Promise<void> {
     await this.transporter.sendMail({
-      from: 'noreply@vellum.local',
+      from: payload.from ?? 'noreply@vellum.local',
       to: payload.to,
       subject: payload.subject,
       text: payload.body,

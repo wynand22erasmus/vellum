@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const addMock = vi.fn().mockResolvedValue(undefined);
 const appendMock = vi.fn();
 
-vi.mock('../../queues/processErrorQueue.ts', () => ({
+vi.mock('../../server/queues/processErrorQueue.ts', () => ({
   processErrorQueue: { add: addMock },
 }));
 

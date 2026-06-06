@@ -18,10 +18,11 @@ describe('Dev login page', () => {
     const page = await newPage(browser);
     await clearDevSession(page);
     await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle0' });
+    await page.waitForSelector('#email', { timeout: 15_000 });
     await page.type('#email', state.recipientEmail);
     await Promise.all([
       page.waitForNavigation({ waitUntil: 'networkidle0' }),
-      page.click('button[type="submit"]'),
+      page.click('form button[type="submit"]'),
     ]);
     assert.equal(new URL(page.url()).pathname, '/dashboard');
     await page.close();
@@ -29,9 +30,11 @@ describe('Dev login page', () => {
 
   it('blocks empty email via HTML validation (negative)', async () => {
     const page = await newPage(browser);
+    await clearDevSession(page);
     await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle0' });
+    await page.waitForSelector('#email', { timeout: 15_000 });
 
-    await page.click('button[type="submit"]');
+    await page.click('form button[type="submit"]');
     const isValid = await page.$eval(
       '#email',
       (el) => (el as HTMLInputElement).checkValidity(),

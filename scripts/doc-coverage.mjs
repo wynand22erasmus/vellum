@@ -16,6 +16,13 @@ const project = new Project({
   tsConfigFilePath: path.join(root, 'tsconfig.typedoc.json'),
 });
 
+/** @param {string} relPath @param {string} name */
+function shouldSkipExport(relPath, name) {
+  if (relPath.endsWith('routeTree.gen.ts')) return true;
+  if (name === 'Route' && relPath.includes(`${path.sep}routes${path.sep}`)) return true;
+  return false;
+}
+
 /** @param {import('ts-morph').Node} node */
 function getJsDocNode(node) {
   if (Node.isVariableDeclaration(node)) {
@@ -93,6 +100,8 @@ for (const sourceFile of sourceFiles) {
 
   for (const [name, declarations] of exported) {
     for (const decl of declarations) {
+      if (shouldSkipExport(relPath, name)) continue;
+
       const ok = hasMeaningfulJsDoc(decl);
       total += 1;
       if (ok) documented += 1;

@@ -78,7 +78,28 @@ npm run worker      # terminal 2
 
 Compose helper detection order: `docker compose` → `podman compose` → `docker-compose` → `podman-compose`.
 
-The legacy ui-v1 React app lives under `backup/ui-v1/` for reference and is **not** built or served. The active UI is in `src/` (pages, components, hooks) alongside the API.
+The web UI uses TanStack Router at `/` (`src/routes/`, `src/pages/`, `src/components/`). The Express backend lives under `src/server/` (`create-app.ts`, `routes/`, `middleware/`, `queues/`, `workers/`). Shared hooks and helpers are in `src/hooks/` and `src/lib/`.
+
+### Backend entrypoints
+
+| File | Role |
+|------|------|
+| `src/server.ts` | Production HTTP server (container CMD). Listens on `env.port` (default 3000), serves the built SPA from `dist/` when `NODE_ENV=production`. |
+| `src/api-server.ts` | Development API-only server on `PORT` (default 5173). Used by `npm run dev:api` and the dev stack; no Vite UI. |
+| `src/server/workers/index.ts` | BullMQ worker process (`npm run worker`). Registers cron schedulers and loads email, audit, scrub, and reconciliation workers. |
+| `src/server/create-app.ts` | Shared Express factory: middleware, API routers, and production SPA fallback. Imported by both server entrypoints. |
+
+## Deploying
+
+After pulling changes that touch the API, SPA build, or envelope format, rebuild and restart the app container so `create-app.ts` serves the current `dist/` bundle and API responses:
+
+```bash
+npm run up          # rebuild + restart app, worker, nginx (compose)
+# or, for a running stack:
+npm run compose -- up -d --build app worker
+```
+
+The worker container should be restarted when queue handlers or `src/server/workers/` change. Nginx proxies to the app container; a stale app process will serve an old SPA or omit new API routes until restarted.
 
 ## API usage
 
@@ -139,23 +160,29 @@ SESSION_SECRET=...   # 32+ random characters
 curl http://localhost:5173/api/health
 ```
 
-Returns status for database, Redis, and ClamAV.
+Success responses use the VellumResult envelope (`Content-Type: application/vnd.vellum.result+json`). Read dependency status from `data.status` and `data.checks` (not top-level fields). See [docs/ERROR_HANDLING.md](./docs/ERROR_HANDLING.md).
 
 ## E2E tests (Bruno + Puppeteer)
 
 Requires the stack to be up and ClamAV healthy. See [docs/e2e-test-plan.md](./docs/e2e-test-plan.md) for coverage matrix.
+
+On a new machine, install Puppeteer’s Chrome once before browser tests:
+
+```bash
+npm run test:e2e:prepare   # first time only — Chrome → .cache/puppeteer
+```
 
 ```bash
 npm run test:e2e:seed    # seed document (upload or DB fallback)
 npm run test:api         # Bruno API collection (needs seed)
 npm run test:api:smoke   # Bruno smoke tests (no seed)
 npm run test:api:remote  # Bruno full suite using Remote env (edit bruno/…/Remote.bru)
-npm run test:e2e         # Puppeteer browser tests (needs seed)
+npm run test:e2e         # Puppeteer browser tests (needs seed; uses http://localhost:5174)
 npm run test:e2e:smoke   # Puppeteer smoke (no seed)
 npm run test:e2e:all     # seed + API + UI
 ```
 
-Bruno workspace: [bruno/README.md](./bruno/README.md). Set `SKIP_VIRUS_SCAN=true` in `.env` for reliable uploads during E2E (see `.env.docker.example`). Optional: `E2E_BASE_URL`, `E2E_HEADLESS=false`.
+Bruno workspace: [bruno/README.md](./bruno/README.md). Set `SKIP_VIRUS_SCAN=true` in `.env` for reliable uploads during E2E (see `.env.docker.example`). Optional: `E2E_BASE_URL` (UI default `http://localhost:5174`), `E2E_HEADLESS=false`.
 
 ## API reference (TypeDoc)
 

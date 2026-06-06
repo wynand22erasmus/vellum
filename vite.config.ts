@@ -3,6 +3,7 @@ import { defineConfig, loadEnv } from 'vite';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import babel from '@rolldown/plugin-babel';
 import tailwindcss from '@tailwindcss/vite';
+import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import { configureAdminerProxy } from './vite-adminer-proxy.ts';
 import { configureMailpitProxy } from './vite-mailpit-proxy.ts';
 import { configureMinioConsoleProxy } from './vite-minio-console-proxy.ts';
@@ -81,6 +82,12 @@ export default defineConfig(({ mode }) => {
       },
     },
     plugins: [
+      tanstackRouter({
+        target: 'react',
+        routesDirectory: './src/routes',
+        generatedRouteTree: './src/routeTree.gen.ts',
+        autoCodeSplitting: true,
+      }),
       react(),
       tailwindcss(),
       babel({ presets: [reactCompilerPreset()] }),

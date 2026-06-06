@@ -17,9 +17,10 @@ headers {
 tests {
   test("lists documents for recipient", function () {
     expect(res.getStatus()).to.equal(200);
+    expect(res.getHeader("content-type")).to.contain("application/vnd.vellum.result+json");
     const body = res.getBody();
-    expect(body.documents).to.be.an("array");
-    const match = body.documents.find((d) => d.fileName === bru.getEnvVar("fileName"));
+    expect(body.data.documents).to.be.an("array");
+    const match = body.data.documents.find((d) => d.fileName === bru.getEnvVar("fileName"));
     expect(match, "seeded document should appear in list").to.exist;
     expect(match.linkActive).to.equal(true);
     expect(match.fileAvailable).to.equal(true);

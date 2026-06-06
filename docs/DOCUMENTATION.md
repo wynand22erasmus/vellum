@@ -51,9 +51,9 @@ ESLint JSDoc rules should be enabled now that the 80% gate is met (next maintena
 
 1. **Foundation** — `lib/env`, `lib/prisma`, `lib/redis`, `lib/utils`, theme modules, `prisma/schema.prisma`, `e2e/helpers.ts` ✓
 2. **Services** — auth, storage, email, clamav ✓
-3. **Jobs** — queues and workers ✓
-4. **HTTP** — middleware, routes, app entrypoints ✓
-5. **UI** — components and pages in `src/` (in progress: restore coverage after ui-v2 merge into main tree)
+3. **Jobs** — `src/server/queues/` and `src/server/workers/` ✓
+4. **HTTP** — `src/server/middleware/`, `src/server/routes/`, `src/server/create-app.ts`, entrypoints `src/server.ts` and `src/api-server.ts` ✓
+5. **UI** — TanStack Router in `src/routes/` + `src/pages/` + `src/app.tsx`; Vite entry `src/main.tsx`
 6. **Infra** — Docker, scripts, Bruno
 
 See the project plan in chat history or your issue tracker for the full checklist.

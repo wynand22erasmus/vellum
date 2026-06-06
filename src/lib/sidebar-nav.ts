@@ -39,6 +39,12 @@ export type SidebarNavModel = {
 
 const HIDDEN_DEV_IDS = new Set(['minio-api', 'app']);
 
+/** Normalizes app paths to root-relative URLs. */
+export function normalizeAppPath(path: string): string {
+  if (!path || path === '/') return '/';
+  return path.startsWith('/') ? path : `/${path}`;
+}
+
 function filterDevServices(services: DevServiceLink[]): DevServiceLink[] {
   return services.filter((service) => !HIDDEN_DEV_IDS.has(service.id));
 }
@@ -46,15 +52,15 @@ function filterDevServices(services: DevServiceLink[]): DevServiceLink[] {
 /**
  * Builds the sidebar navigation model for the current user and dev services.
  *
- * @param options - Pathname, session user, and available dev service links
+ * @param options - Session user and available dev service links
  */
 export function buildSidebarNav(options: {
-  pathname: string;
   user: AuthUser | null;
   devServices: DevServiceLink[];
 }): SidebarNavModel {
   const { user, devServices } = options;
   const isAdmin = user?.kind === 'ADMIN';
+  const path = normalizeAppPath;
 
   if (!user) {
     return { topLinks: [], sections: [] };
@@ -64,7 +70,7 @@ export function buildSidebarNav(options: {
     {
       id: 'dashboard',
       label: PAGE_LABELS.dashboard.nav,
-      href: PAGE_LABELS.dashboard.href!,
+      href: path(PAGE_LABELS.dashboard.href!),
     },
   ];
 
@@ -74,47 +80,50 @@ export function buildSidebarNav(options: {
     sections.push({
       id: 'admin',
       label: PAGE_LABELS.admin.nav,
-      href: PAGE_LABELS.admin.href,
+      href: path(PAGE_LABELS.admin.href!),
       children: [
         {
           id: 'admin-documents',
           label: PAGE_LABELS.adminDocuments.nav,
-          href: PAGE_LABELS.adminDocuments.href!,
+          href: path(PAGE_LABELS.adminDocuments.href!),
         },
         {
           id: 'admin-users',
           label: PAGE_LABELS.adminUsers.nav,
-          href: PAGE_LABELS.adminUsers.href!,
+          href: path(PAGE_LABELS.adminUsers.href!),
         },
         {
           id: 'admin-audit',
           label: PAGE_LABELS.adminAuditLogs.nav,
-          href: PAGE_LABELS.adminAuditLogs.href!,
+          href: path(PAGE_LABELS.adminAuditLogs.href!),
         },
         {
           id: 'admin-failed-audit',
           label: PAGE_LABELS.adminFailedAuditLogs.nav,
-          href: PAGE_LABELS.adminFailedAuditLogs.href!,
+          href: path(PAGE_LABELS.adminFailedAuditLogs.href!),
         },
         {
           id: 'admin-process-errors',
           label: PAGE_LABELS.adminProcessErrors.nav,
-          href: PAGE_LABELS.adminProcessErrors.href!,
+          href: path(PAGE_LABELS.adminProcessErrors.href!),
         },
         {
           id: 'admin-failed-process-errors',
           label: PAGE_LABELS.adminFailedProcessErrors.nav,
-          href: PAGE_LABELS.adminFailedProcessErrors.href!,
+          href: path(PAGE_LABELS.adminFailedProcessErrors.href!),
         },
       ],
     });
 
-    const devChildren = buildDevServiceLinks(filterDevServices(devServices));
+    const devChildren = buildDevServiceLinks(filterDevServices(devServices)).map((child) => ({
+      ...child,
+      href: path(child.href),
+    }));
     if (devChildren.length > 0) {
       sections.push({
         id: 'development',
         label: PAGE_LABELS.development.nav,
-        href: PAGE_LABELS.development.href,
+        href: path(PAGE_LABELS.development.href!),
         children: devChildren,
       });
     }

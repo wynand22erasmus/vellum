@@ -53,9 +53,14 @@ export function loadState(): E2EState {
  * Launches a headless Chromium instance (set `E2E_HEADLESS=false` to debug).
  */
 export async function launchBrowser(): Promise<Browser> {
+  const configured = process.env.PUPPETEER_EXECUTABLE_PATH;
+  const resolvedPath = configured
+    ? configured
+    : path.resolve(process.cwd(), puppeteer.executablePath());
   return puppeteer.launch({
     headless: process.env.E2E_HEADLESS !== 'false',
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    executablePath: resolvedPath,
   });
 }
 
@@ -77,9 +82,11 @@ export async function newPage(browser: Browser): Promise<Page> {
  * @param email - Recipient email matching seeded document data
  */
 export async function devLogin(page: Page, email: string): Promise<void> {
+  await clearDevSession(page);
   await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle0' });
+  await page.waitForSelector('#email', { timeout: DEFAULT_TIMEOUT_MS });
   await page.type('#email', email);
-  await page.click('button[type="submit"]');
+  await page.click('form button[type="submit"]');
   await page.waitForFunction(
     () => window.location.pathname === '/dashboard',
     { timeout: DEFAULT_TIMEOUT_MS },
@@ -93,5 +100,8 @@ export async function devLogin(page: Page, email: string): Promise<void> {
  */
 export async function clearDevSession(page: Page): Promise<void> {
   await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
-  await page.evaluate(() => localStorage.removeItem('vellum_dev_email'));
+  await page.evaluate(async () => {
+    localStorage.removeItem('vellum_dev_email');
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+  });
 }

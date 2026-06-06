@@ -12,6 +12,7 @@
             window.matchMedia('(prefers-color-scheme: dark)').matches);
         if (dark) document.documentElement.classList.add('dark');
         document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        document.documentElement.dataset.brand = 'vellum';
       })();
     </script>
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />

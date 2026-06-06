@@ -26,6 +26,6 @@ tests {
     expect(res.getStatus()).to.equal(404);
     expect(res.getHeader("content-type")).to.contain("application/problem+json");
     expect(res.getBody().type).to.be.a("string");
-    expect(res.getBody().detail).to.contain("Invalid link");
+    expect(res.getBody().detail).to.contain("download link");
   });
 }

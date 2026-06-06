@@ -781,7 +781,7 @@ All non-critical operations are offloaded to BullMQ. This decouples the HTTP req
 All audit logging throughout the application calls this single helper. It is intentionally fire-and-forget: the calling code does not block waiting for the log to be written.
 
 ```typescript
-// src/queues/auditQueue.ts
+// src/server/queues/auditQueue.ts
 import { Queue } from "bullmq";
 import { connection } from "../lib/redis";
 
@@ -806,7 +806,7 @@ export const logEvent = (data: {
 ### 11.3 Email Worker
 
 ```typescript
-// src/workers/emailWorker.ts
+// src/server/workers/emailWorker.ts
 import { Worker } from "bullmq";
 import { prisma } from "../lib/prisma";
 import { EmailService } from "../lib/email/EmailService";
@@ -843,7 +843,7 @@ export const emailWorker = new Worker(
 ### 11.4 Audit Worker
 
 ```typescript
-// src/workers/auditWorker.ts
+// src/server/workers/auditWorker.ts
 import { Worker } from "bullmq";
 import { prisma } from "../lib/prisma";
 import { addYears } from "date-fns";
@@ -878,7 +878,7 @@ export const auditWorker = new Worker(
 Deletes files from MinIO that have exceeded their `fileExpiresAt` timestamp.
 
 ```typescript
-// src/workers/fileScrubWorker.ts
+// src/server/workers/fileScrubWorker.ts
 import { Worker } from "bullmq";
 import { prisma } from "../lib/prisma";
 import { s3Client } from "../lib/storage/s3Client";
@@ -927,7 +927,7 @@ export const fileScrubWorker = new Worker(
 Purges Postgres rows that have exceeded their `recordExpiresAt` timestamp.
 
 ```typescript
-// src/workers/recordScrubWorker.ts
+// src/server/workers/recordScrubWorker.ts
 export const recordScrubWorker = new Worker(
   "cleanup-queue",
   async (job) => {

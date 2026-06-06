@@ -77,7 +77,7 @@ export async function upsertWorkOSUser(workosUser: WorkOSUser): Promise<AuthUser
  * Creates or updates a dev-auth user (`dev:{email}` id).
  *
  * @remarks New users start with `emailVerified: false` until they use
- * {@link ../auth/emailVerification.ts | the dev verification link}. When
+ * `createEmailVerificationToken` (dev Mailpit flow). When
  * `SKIP_EMAIL_VERIFICATION` is enabled, new users are created as verified.
  *
  * @param email - Recipient email from `X-Dev-User-Email`

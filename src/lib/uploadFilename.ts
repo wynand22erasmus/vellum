@@ -169,7 +169,7 @@ export function effectiveExtensionFromBasename(basename: string): string | null 
  *
  * @param originalName - Multipart `originalname`
  * @param allowedExtensions - Lowercase extensions without leading dots; may include `*` to allow all
- * @throws {@link AppError} When the filename is invalid or the extension is disallowed
+ * @throws `AppError` When the filename is invalid or the extension is disallowed
  */
 export function resolveUploadFileName(
   originalName: string,

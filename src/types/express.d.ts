@@ -9,13 +9,13 @@ import type { AuthUser } from '../lib/auth/types.ts';
 declare global {
   namespace Express {
     interface Request {
-      /** Set by {@link ../middleware/requestId.ts}. */
+      /** Set by `requestId`. */
       requestId?: string;
       /** Shared incident UUID for audit + process-error linking (e.g. verify wrong password). */
       errorCorrelationId?: string;
       /** Document context for process-error linking on public routes. */
       errorDocumentId?: string;
-      /** Set by {@link ../middleware/devAuth.ts} or {@link ../middleware/adminAuth.ts}. */
+      /** Set by `dashboardAuth` or `adminAuth`. */
       user?: AuthUser;
     }
   }

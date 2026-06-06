@@ -17,6 +17,7 @@ headers {
 tests {
   test("sends fresh access link", function () {
     expect(res.getStatus()).to.equal(200);
-    expect(res.getBody().message).to.contain("link");
+    expect(res.getHeader("content-type")).to.contain("application/vnd.vellum.result+json");
+    expect(res.getBody().detail).to.contain("link");
   });
 }

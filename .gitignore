@@ -38,6 +38,8 @@ docs/api/
 
 # Test
 coverage/
+.cache/puppeteer/
+.tanstack/
 e2e/.state.json
 bruno/collections/vellum-api/environments/Seeded.bru
 

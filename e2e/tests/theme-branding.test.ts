@@ -1,6 +1,6 @@
 import { after, before, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { BASE_URL, launchBrowser, newPage } from '../helpers.ts';
+import { BASE_URL, devLogin, launchBrowser, loadState, newPage } from '../helpers.ts';
 
 describe('Theme and branding', () => {
   let browser: Awaited<ReturnType<typeof launchBrowser>>;
@@ -27,25 +27,17 @@ describe('Theme and branding', () => {
     await page.close();
   });
 
-  it('changes theme via guest footer menu (positive)', async () => {
+  it('changes theme via signed-in user menu (positive)', async () => {
+    const state = loadState();
     const page = await newPage(browser);
-    await page.goto(BASE_URL, { waitUntil: 'networkidle0' });
+    await devLogin(page, state.recipientEmail);
 
     const before = await page.evaluate(() => localStorage.getItem('vellum-theme'));
 
-    const themeButtons = await page.$$('aside button');
-    const themeBtn = await (async () => {
-      for (const btn of themeButtons) {
-        const text = await page.evaluate((el) => el.textContent?.trim() ?? '', btn);
-        if (text === 'Theme') {
-          return btn;
-        }
-      }
-      return null;
-    })();
-    assert.ok(themeBtn, 'theme menu should exist in sidebar footer when logged out');
-
-    await themeBtn.click();
+    await page.waitForSelector('[data-sidebar="footer"] [data-sidebar="menu-button"]', {
+      timeout: 5000,
+    });
+    await page.click('[data-sidebar="footer"] [data-sidebar="menu-button"]');
     await page.waitForSelector('[role="menuitemradio"]', { timeout: 5000 });
 
     const target =

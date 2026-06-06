@@ -79,20 +79,30 @@
 
 Prerequisites: stack running (`npm run up`), migrations applied.
 
+On a new machine, install Puppeteer’s Chrome once before browser tests:
+
+```bash
+npm run test:e2e:prepare   # first time only
+```
+
 ```bash
 npm run test:e2e:seed    # upload or DB fallback → e2e/.state.json + bruno/collections/vellum-api Seeded env
 npm run test:api         # full Bruno collection (Seeded env)
 npm run test:api:smoke   # Bruno without seed (health, upload negatives, auth, verify negatives)
 npm run test:api:remote  # full suite against Remote env (other hosts; see bruno/README.md)
-npm run test:e2e         # full Puppeteer suite (requires seed)
+npm run test:e2e         # full Puppeteer suite (requires seed; default UI http://localhost:5174)
 npm run test:e2e:smoke   # Puppeteer smoke (no seed)
 npm run test:e2e:all     # seed + API + UI
 ```
+
+### API envelope assertions
+
+Bruno success tests expect `application/vnd.vellum.result+json` and read payloads from `body.data.*`. Health checks use `body.data.status` and `body.data.checks.*`.
 
 ### Reliability notes
 
 - Set `SKIP_VIRUS_SCAN=true` in `.env` (see `.env.docker.example`) so uploads succeed without waiting on ClamAV INSTREAM scans.
 - If upload still fails, `e2e-seed` falls back to direct MinIO + Postgres insert automatically.
-- Host seed uses `DATABASE_URL=postgresql://vellum:password@localhost:5432/vellum_db` and `MINIO_ENDPOINT=http://localhost:9000`.
+- Host seed prefers `DATABASE_URL_HOST` (see `.env`), then `DATABASE_URL`, then `postgresql://vellum:password@localhost:5432/vellum_db`. MinIO: `MINIO_ENDPOINT=http://localhost:9000`.
 
-Environment: `E2E_BASE_URL`, `API_KEY`, `E2E_SEED_RETRIES`, `E2E_HEADLESS=false` to debug the browser.
+Environment: `E2E_BASE_URL` (UI tests; default in npm scripts is `http://localhost:5174`), `API_KEY`, `E2E_SEED_RETRIES`, `E2E_HEADLESS=false`, `PUPPETEER_EXECUTABLE_PATH` (optional override).
