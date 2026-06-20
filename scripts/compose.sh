@@ -13,6 +13,9 @@ if [[ -f .env ]]; then
   set +a
 fi
 
+# shellcheck disable=SC1091
+source "$ROOT_DIR/scripts/host-ports.env"
+
 export VELLUM_PROJECT="${VELLUM_PROJECT:-vellum}"
 export VELLUM_ENV="${VELLUM_ENV:-development}"
 

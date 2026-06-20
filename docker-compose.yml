@@ -42,7 +42,7 @@ services:
       <<: *app-env
       PORT: "5173"
     ports:
-      - "5173:5173"
+      - "${APP_HOST_PORT:-8573}:5173"
     volumes:
       - .:/app
       - app_node_modules:/app/node_modules
@@ -111,7 +111,7 @@ services:
       <<: *vellum-labels
       com.vellum.service: sftp
     ports:
-      - "${SFTP_PORT:-2222}:22"
+      - "${SFTP_PORT:-8522}:22"
     volumes:
       - sftp_data:/home/partner/upload
     command: partner:${SFTP_PASSWORD:-devpassword}:1001
@@ -133,9 +133,9 @@ services:
       POSTGRES_PASSWORD: password
       PRISMA_STUDIO_PORT: "5555"
     ports:
-      - "5432:5432"
-      - "${PRISMA_STUDIO_PORT:-5555}:5555"
-      - "${DB_ADMIN_PORT:-8081}:8081"
+      - "${POSTGRES_HOST_PORT:-8532}:5432"
+      - "${PRISMA_STUDIO_PORT:-8555}:5555"
+      - "${DB_ADMIN_PORT:-8581}:8081"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./prisma:/opt/vellum-prisma/prisma:ro
@@ -152,7 +152,7 @@ services:
       <<: *vellum-labels
       com.vellum.service: redis
     ports:
-      - "6379:6379"
+      - "${REDIS_HOST_PORT:-8579}:6379"
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
@@ -164,15 +164,15 @@ services:
       com.vellum.service: minio
     command: server /data --console-address ":9001"
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "${MINIO_HOST_PORT:-8500}:9000"
+      - "${MINIO_CONSOLE_HOST_PORT:-8501}:9001"
     volumes:
       - minio_data:/data
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
       # Console subpath when embedded in the dev UI (see vite-minio-console-proxy.ts).
-      MINIO_BROWSER_REDIRECT_URL: http://${VELLUM_HOST:-localhost}:8080/dev-proxy/minio-console/
+      MINIO_BROWSER_REDIRECT_URL: http://${VELLUM_HOST:-localhost}:${VELLUM_PUBLIC_PORT:-8580}/dev-proxy/minio-console/
 
   clamav:
     image: clamav/clamav:latest
@@ -195,10 +195,10 @@ services:
     environment:
       MP_WEBROOT: /dev-proxy/mailpit
       # Allow dev UI proxy origin when Host cannot be preserved (dev only).
-      MP_API_CORS: "http://${VELLUM_HOST:-localhost}:8080,http://${VELLUM_HOST:-localhost}:5174,http://127.0.0.1:5174,http://localhost:5174"
+      MP_API_CORS: "http://${VELLUM_HOST:-localhost}:${VELLUM_PUBLIC_PORT:-8580},http://${VELLUM_HOST:-localhost}:${WEB_HOST_PORT:-8574},http://127.0.0.1:${WEB_HOST_PORT:-8574},http://localhost:${WEB_HOST_PORT:-8574}"
     ports:
-      - "8025:8025"
-      - "1025:1025"
+      - "${MAILPIT_UI_HOST_PORT:-8525}:8025"
+      - "${MAILPIT_SMTP_HOST_PORT:-8510}:1025"
 
   webhook-tester:
     image: ghcr.io/tarampampam/webhook-tester:2
@@ -207,7 +207,7 @@ services:
       com.vellum.service: webhook-tester
     command: ["start", "--auto-create-sessions"]
     ports:
-      - "8090:8080"
+      - "${WEBHOOK_HOST_PORT:-8590}:8080"
 
   web:
     image: ${VELLUM_PROJECT:-vellum}-app:${VELLUM_ENV:-development}
@@ -219,7 +219,7 @@ services:
       <<: *app-env
       VELLUM_API_URL: http://app:5173
     ports:
-      - "5174:5174"
+      - "${WEB_HOST_PORT:-8574}:5174"
     volumes:
       - .:/app
       - app_node_modules:/app/node_modules
@@ -227,25 +227,6 @@ services:
       app:
         condition: service_healthy
     command: ["npm", "run", "dev"]
-
-  nginx:
-    image: nginx:alpine
-    labels:
-      <<: *vellum-labels
-      com.vellum.service: nginx
-    ports:
-      - "8080:8080"
-    environment:
-      VELLUM_HOST: ${VELLUM_HOST:-localhost}
-      NGINX_ENTRYPOINT_LOCAL_RESOLVERS: "1"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/default.conf.template:/etc/nginx/templates/default.conf.template:ro
-    depends_on:
-      app:
-        condition: service_healthy
-      web:
-        condition: service_started
 
 volumes:
   postgres_data:

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Start the local dev stack: Express API on :5173 and Vite UI on :5174.
+ * Start the local dev stack: Express API on :8573 and Vite UI on :8574 (dev 85** ports).
  *
  * Invoked via `npm run dev:stack`. Spawns `dev:api` and `dev` concurrently and
  * forwards SIGINT/SIGTERM to both child processes.

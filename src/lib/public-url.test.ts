@@ -13,6 +13,7 @@ const envKeys = [
   'WORKOS_REDIRECT_URI',
   'MINIO_ENDPOINT',
   'MINIO_PUBLIC_ENDPOINT',
+  'MINIO_HOST_PORT',
 ] as const;
 
 function clearUrlEnv(): void {
@@ -31,14 +32,14 @@ describe('buildPublicUrl', () => {
     expect(buildPublicUrl()).toBe('https://app.example.com');
   });
 
-  it('defaults localhost to port 5174', () => {
-    expect(buildPublicUrl()).toBe('http://localhost:5174');
+  it('defaults localhost to port 8580', () => {
+    expect(buildPublicUrl()).toBe('http://localhost:8580');
   });
 
   it('builds URL from VELLUM_HOST and public port', () => {
     process.env.VELLUM_HOST = 'devman.wtfgang.win';
-    process.env.VELLUM_PUBLIC_PORT = '8080';
-    expect(buildPublicUrl()).toBe('http://devman.wtfgang.win:8080');
+    process.env.VELLUM_PUBLIC_PORT = '8580';
+    expect(buildPublicUrl()).toBe('http://devman.wtfgang.win:8580');
   });
 
   it('omits standard https port', () => {
@@ -62,17 +63,17 @@ describe('buildMinioPublicEndpoint', () => {
   it('rewrites internal minio hostname using VELLUM_HOST', () => {
     process.env.MINIO_ENDPOINT = 'http://minio:9000';
     process.env.VELLUM_HOST = 'devman.wtfgang.win';
-    expect(buildMinioPublicEndpoint()).toBe('http://devman.wtfgang.win:9000');
+    expect(buildMinioPublicEndpoint()).toBe('http://devman.wtfgang.win:8500');
   });
 
   it('defaults internal minio to localhost when VELLUM_HOST unset', () => {
     process.env.MINIO_ENDPOINT = 'http://minio:9000';
-    expect(buildMinioPublicEndpoint()).toBe('http://localhost:9000');
+    expect(buildMinioPublicEndpoint()).toBe('http://localhost:8500');
   });
 
   it('passes through localhost MINIO_ENDPOINT unchanged', () => {
-    process.env.MINIO_ENDPOINT = 'http://localhost:9000';
-    expect(buildMinioPublicEndpoint()).toBe('http://localhost:9000');
+    process.env.MINIO_ENDPOINT = 'http://localhost:8500';
+    expect(buildMinioPublicEndpoint()).toBe('http://localhost:8500');
   });
 });
 
@@ -83,9 +84,9 @@ describe('buildWorkosRedirectUri', () => {
 
   it('derives callback from public URL', () => {
     process.env.VELLUM_HOST = 'devman.wtfgang.win';
-    process.env.VELLUM_PUBLIC_PORT = '8080';
+    process.env.VELLUM_PUBLIC_PORT = '8580';
     expect(buildWorkosRedirectUri()).toBe(
-      'http://devman.wtfgang.win:8080/api/auth/callback',
+      'http://devman.wtfgang.win:8580/api/auth/callback',
     );
   });
 });
