@@ -1,0 +1,30 @@
+meta {
+  name: List Webhook Deliveries
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/dev/webhook-deliveries?limit=20
+  body: none
+  auth: none
+}
+
+headers {
+  Cookie: {{sessionCookie}}
+}
+
+tests {
+  test("returns 200 with delivery list envelope", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getHeader("content-type")).to.contain("application/vnd.vellum.result+json");
+    const body = res.getBody();
+    expect(body.type).to.contain("/results/ok");
+    expect(body.data.deliveries).to.be.an("array");
+    expect(body.data.total).to.be.a("number");
+  });
+}
+
+docs {
+  Admin session required. Non-production only. Lists rows from `WebhookDelivery`.
+}
