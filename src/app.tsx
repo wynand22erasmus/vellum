@@ -33,7 +33,7 @@ const defaultContext: RouterContext = {
   },
 };
 
-/** Shared TanStack Router instance. */
+/** @internal Shared TanStack Router instance. */
 const router = createRouter({
   routeTree,
   context: defaultContext,
@@ -41,6 +41,7 @@ const router = createRouter({
   defaultPreloadStaleTime: 0,
 });
 
+/** @internal Re-export for TanStack Router module registration. */
 export { router };
 
 declare module '@tanstack/react-router' {

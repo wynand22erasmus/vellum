@@ -7,16 +7,12 @@
 import { useEffect } from 'react';
 import type { AuthContextValue } from '@/providers/auth-provider';
 
-type InvalidateRouter = {
-  invalidate: () => Promise<void>;
-};
-
 /** Invalidate the router when session state changes (login/logout/refresh). */
 export function RouterAuthSync({
   router,
   auth,
 }: {
-  router: InvalidateRouter;
+  router: { invalidate: () => Promise<void> };
   auth: AuthContextValue;
 }) {
   useEffect(() => {

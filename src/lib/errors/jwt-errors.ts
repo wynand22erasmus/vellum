@@ -7,15 +7,16 @@
 import { errors as joseErrors } from 'jose';
 import { AppError } from './app-error.ts';
 
-type JwtContext = 'email-verification' | 'pending-verification';
-
 /**
  * Converts jose verification errors into operational `AppError` instances.
  *
  * @param err - Error from `jwtVerify`
  * @param context - Which auth token flow failed
  */
-export function appErrorFromJwtVerify(err: unknown, context: JwtContext): AppError {
+export function appErrorFromJwtVerify(
+  err: unknown,
+  context: 'email-verification' | 'pending-verification',
+): AppError {
   if (err instanceof joseErrors.JWTExpired) {
     if (context === 'email-verification') {
       return AppError.gone(

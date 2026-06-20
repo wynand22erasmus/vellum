@@ -7,7 +7,8 @@
 import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
-type PageHeaderProps = {
+/** Props for {@link PageHeader}. */
+export type PageHeaderProps = {
   title: string;
   description?: string;
   actions?: ReactNode;
