@@ -15,6 +15,9 @@ export type DocumentRow = {
   linkExpiresAt: string;
   fileExpiresAt: string;
   isUsed: boolean;
+  maxDownloads: number;
+  downloadCount: number;
+  downloadsRemaining: number;
   linkActive: boolean;
   fileAvailable: boolean;
   createdAt: string;

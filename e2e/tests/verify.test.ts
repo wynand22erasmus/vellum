@@ -56,10 +56,12 @@ describe('Verify page', () => {
     await page.click('form button[type="submit"]');
 
     await page.waitForSelector('[data-testid="verify-complete"]', { timeout: 15_000 });
+    await page.waitForSelector('[data-testid="file-sha256-display"]', { timeout: 5_000 });
 
     const body = await page.$eval('body', (el) => el.textContent ?? '');
     assert.match(body, /Download complete/i);
-    assert.match(body, /close this browser tab/i);
+    assert.match(body, /SHA-256 checksum/i);
+    assert.match(body, /sha256sum/i);
     await page.close();
   });
 });

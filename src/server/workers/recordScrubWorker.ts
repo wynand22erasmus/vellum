@@ -27,7 +27,7 @@ export const recordScrubWorker = new Worker(
       where: { expiresAt: { lt: now } },
     });
 
-    await prisma.document.deleteMany({
+    await prisma.documentFile.deleteMany({
       where: { recordExpiresAt: { lt: now } },
     });
 

@@ -19,41 +19,41 @@ import { redisConnection } from '../../lib/redis.ts';
 /**
  * Handles `cleanup-queue` jobs named `scrub-files`.
  *
- * @remarks DB update before S3 delete; per-document compensation on failure.
+ * @remarks DB update before S3 delete; per-file compensation on failure.
  */
 export const fileScrubWorker = new Worker(
   'cleanup-queue',
   async (job) => {
     if (job.name !== 'scrub-files') return;
 
-    const expiredDocs = await prisma.document.findMany({
+    const expiredFiles = await prisma.documentFile.findMany({
       where: {
         fileExpiresAt: { lt: new Date() },
         s3Key: { not: null },
       },
     });
 
-    for (const doc of expiredDocs) {
-      const originalS3Key = doc.s3Key!;
+    for (const file of expiredFiles) {
+      const originalS3Key = file.s3Key!;
       const snapshot = {
-        s3Key: doc.s3Key,
-        deletedAt: doc.deletedAt,
+        s3Key: file.s3Key,
+        deletedAt: file.deletedAt,
       };
 
       const stack = new CompensationStack();
 
       try {
         await stack.run(async () => {
-          await prisma.document.update({
-            where: { id: doc.id },
+          await prisma.documentFile.update({
+            where: { id: file.id },
             data: { s3Key: null, deletedAt: new Date() },
           });
 
           stack.registerUndo(
-            'restore document s3Key',
+            'restore document file s3Key',
             async () => {
-              await prisma.document.update({
-                where: { id: doc.id },
+              await prisma.documentFile.update({
+                where: { id: file.id },
                 data: { s3Key: snapshot.s3Key, deletedAt: snapshot.deletedAt },
               });
             },
@@ -65,8 +65,7 @@ export const fileScrubWorker = new Worker(
 
         logEvent({
           eventType: 'FILE_SCRUBBED',
-          documentId: doc.id,
-          metadata: { originalS3Key },
+          metadata: { fileId: file.id, originalS3Key },
         });
       } catch (err) {
         const { problem, internal } = problemFromError(err);
@@ -77,10 +76,12 @@ export const fileScrubWorker = new Worker(
           status: problem.status,
           detail: problem.detail ?? problem.title,
           source: 'worker',
-          documentId: doc.id,
+          extensions: {
+            ...extensions,
+            fileId: file.id,
+          },
           jobId: job.id,
           jobName: job.name,
-          ...(Object.keys(extensions).length > 0 ? { extensions } : {}),
           internal,
         });
       }

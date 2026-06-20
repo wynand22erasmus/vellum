@@ -17,6 +17,7 @@ import { recordProcessError } from '../../lib/errors/record-process-error.ts';
 import { problemFromError } from '../../lib/errors/problem-from-error.ts';
 import { redisConnection } from '../../lib/redis.ts';
 import type { LogEventData } from '../queues/auditQueue.ts';
+import { enqueueWebhookDelivery } from '../queues/webhookQueue.ts';
 
 /**
  * Consumes `log-event` jobs and inserts `AuditLog` rows with compliance TTL.
@@ -43,6 +44,8 @@ export const auditWorker = new Worker(
     if (correlationId) {
       await linkAuditLogByCorrelationId(auditLog.id, correlationId);
     }
+
+    enqueueWebhookDelivery(auditLog.id, auditLog.eventType);
   },
   { connection: redisConnection },
 );

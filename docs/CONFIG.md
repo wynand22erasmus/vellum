@@ -48,8 +48,20 @@ Built services (`app`, `worker`) publish images named `{VELLUM_PROJECT}-{service
 | `PRISMA_STUDIO_PORT` | No | `5555` | Prisma Studio in the **postgres** container |
 | `DB_ADMIN_PORT` | No | `8081` | Adminer SQL UI in the **postgres** container |
 | `DATABASE_URL_HOST` | No | — | PostgreSQL URL for host-side tools when Compose is not running (`localhost:5432`) |
-| `REPORTING_LIFETIME_YEARS` | No | `5` | Audit log retention horizon |
 | `MAX_UPLOAD_BYTES` | No | `52428800` (50 MiB) | Upload size limit |
+| `MAX_BATCH_RECIPIENTS` | No | `50` | Max entries in `recipients` for `POST /api/upload/batch` |
+| `SFTP_ENABLED` | No | `false` | When `true`, worker polls the SFTP inbox for file + manifest pairs |
+| `SFTP_PORT` | No | `2222` | Host port for the Compose `sftp` service (atmoz/sftp) |
+| `SFTP_PASSWORD` | No | `devpassword` | SFTP user password in Compose (`partner` user) |
+| `SFTP_USER` | No | `partner` | SFTP username label in audit metadata |
+| `SFTP_INBOX_PATH` | No | `/sftp` | Inbox directory watched by the worker (shared volume with SFTP upload root) |
+| `SFTP_ARCHIVE_PATH` | No | `/sftp/archive` | Successful ingestions moved here |
+| `SFTP_FAILED_PATH` | No | `/sftp/failed` | Failed ingestions quarantined here |
+| `SFTP_MANIFEST_SUFFIX` | No | `.json` | Sidecar manifest suffix (`report.pdf` → `report.pdf.json`) |
+| `SFTP_POLL_INTERVAL_MS` | No | `5000` | Inbox poll interval |
+| `SFTP_STABLE_FILE_MS` | No | `2000` | Minimum unchanged file size duration before processing |
+
+See [SFTP_INGESTION.md](./SFTP_INGESTION.md) for drop format, audit pipeline, and local testing.
 | `ALLOWED_UPLOAD_EXTENSIONS` | No | built-in list (pdf, txt, docx, …) | JSON array of allowed extensions without dots (e.g. `["pdf","txt"]`). Use `["*"]` to allow any extension; misleading trailing types (e.g. `.pdf.exe`) are still stripped from stored filenames |
 | `SKIP_VIRUS_SCAN` | No | `false` | Skip ClamAV on upload in non-production (for E2E when scanner is slow) |
 | `LOG_DIR` | No | `logs` | Directory for NDJSON process-error logs |
@@ -57,8 +69,39 @@ Built services (`app`, `worker`) publish images named `{VELLUM_PROJECT}-{service
 | `RESULT_TYPE_BASE_URL` | No | `https://vellum.dev/results` | Base URL for VellumResult success envelope `type` URIs |
 | `ORPHAN_RECONCILE_ENABLED` | No | `false` | Enable daily orphan reconciliation worker |
 | `ORPHAN_RECONCILE_CRON` | No | `0 3 * * *` | Cron pattern for orphan reconciliation |
+| `CAPTCHA_PROVIDER` | No | `off` | `off` or `hcaptcha` — gate verify password submit |
+| `HCAPTCHA_SITE_KEY` | If hcaptcha | — | Public site key (also exposed via `GET /api/meta`) |
+| `HCAPTCHA_SECRET_KEY` | If hcaptcha | — | Server secret for siteverify |
+| `SKIP_CAPTCHA` | No | `false` | Dev/E2E only — bypass captcha (ignored in production) |
+| `RECIPIENT_OTP_ENABLED` | No | `false` | Master switch for per-upload recipient OTP |
+| `OTP_TTL_SECONDS` | No | `600` | Redis OTP session TTL |
+| `OTP_MAX_ATTEMPTS` | No | `5` | Wrong OTP attempts before session invalidation |
+| `OTP_MAX_RESENDS` | No | `3` | Resend limit per OTP session |
+| `RECIPIENT_OTP_DEV_CODE` | No | — | Dev/E2E fixed code (e.g. `123456`) |
+| `TWILIO_ACCOUNT_SID` | If SMS/WhatsApp | — | Twilio account SID |
+| `TWILIO_AUTH_TOKEN` | If SMS/WhatsApp | — | Twilio auth token |
+| `TWILIO_FROM_NUMBER` | If SMS/WhatsApp | — | Twilio sender (E.164; prefix `whatsapp:` for WhatsApp) |
+| `TOTP_ENCRYPTION_KEY` | No | `SESSION_SECRET` | AES key material for `DocumentUserLink.totpSecretEnc` |
 
 See [ERROR_HANDLING.md](./ERROR_HANDLING.md) for the full error-handling standard.
+
+## Audit events and webhooks
+
+Event catalog, `metadata` conventions, logging gaps, and webhook delivery specification: [EVENTS_AND_WEBHOOKS.md](./EVENTS_AND_WEBHOOKS.md).
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `REPORTING_LIFETIME_YEARS` | No | `5` | Audit log retention horizon (also on `AuditLog.expiresAt`) |
+| `AUDIT_EXPORT_MAX_LIMIT` | No | `500` | Max rows per admin audit export page |
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `WEBHOOKS_ENABLED` | No | `false` | Master switch for outbound webhook delivery |
+| `WEBHOOK_SECRET` | If enabled | — | HMAC key for `X-Vellum-Signature` |
+| `WEBHOOK_MAX_RETRIES` | No | `5` | BullMQ retry attempts per delivery job |
+| `WEBHOOK_URL_<EVENT>` | No | — | Per–`AuditEventType` target URL (see [EVENTS_AND_WEBHOOKS.md](./EVENTS_AND_WEBHOOKS.md)) |
+
+Outbound webhooks are implemented (roadmap item 11). Full event → env var mapping: [EVENTS_AND_WEBHOOKS.md](./EVENTS_AND_WEBHOOKS.md#configuration).
 
 ## E2E-only variables
 
@@ -119,12 +162,16 @@ See [README.md](../README.md) for WorkOS and Docker-specific setup.
 
 ## White-label branding
 
-Build-time brand presets drive the SPA shell, favicons, and transactional email copy. Presets live in [`src/lib/brand/presets.ts`](../src/lib/brand/presets.ts); static assets under `public/brands/{preset-id}/`.
+Build-time brand presets drive the SPA shell, favicons, transactional email copy, and SMS/WhatsApp OTP messages. Presets live in [`src/lib/brand/presets.ts`](../src/lib/brand/presets.ts); static assets under `public/brands/{preset-id}/`.
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `VITE_BRAND_PRESET` | No | `vellum` | SPA brand preset id (Vite build / dev) |
-| `BRAND_PRESET` | No | `vellum` | Server brand preset id (email sender, subjects, body templates) |
+| `BRAND_PRESET` | No | `vellum` | Server brand preset id (email, SMS, and WhatsApp templates) |
+| `BRAND_LOGO_URL` | No | `{APP_URL}{preset logos.full}` | Absolute logo URL for HTML notification emails |
+| `BRAND_PRIMARY_COLOR` | No | Preset default (hex) | CTA button and accent color in HTML emails |
+| `BRAND_FOOTER_HTML` | No | Preset legal footer | HTML fragment for email footer (copyright, links) |
+| `BRAND_SUPPORT_EMAIL` | No | Preset default | Support address appended to email footer |
 
 ### Per-client env files
 
@@ -145,9 +192,34 @@ Build-time brand presets drive the SPA shell, favicons, and transactional email 
 
 ### Adding a new client preset
 
-1. Add a `BrandPreset` entry in `src/lib/brand/presets.ts` (display name, tagline, logos, email templates).
+1. Add a `BrandPreset` entry in `src/lib/brand/presets.ts` (display name, tagline, logos, email templates, `sms.templates.recipientOtp`, `whatsapp.templates.recipientOtp`).
 2. Add CSS overrides in `src/styles/brand-presets.css` under `[data-brand="{id}"]`.
 3. Place assets in `public/brands/{id}/` (`mark.png`, `full.png`, `favicon.png`, `apple-touch-icon.png`).
 4. Create `.env.brand.{id}` with `VITE_BRAND_PRESET={id}` and `BRAND_PRESET={id}`.
 5. Add npm scripts mirroring `dev:brand` / `build:brand:*` if needed.
 6. Run `BRAND_ID={id} npm run brand:images` after updating source artwork.
+
+### SMS and WhatsApp OTP templates
+
+Recipient OTP messages sent via Twilio use the same `{{placeholder}}` syntax as email templates. Configure per preset in `presets.ts`:
+
+| Key | Used by |
+|-----|---------|
+| `sms.templates.recipientOtp` | Twilio SMS when `otpChannel` is `sms` |
+| `whatsapp.templates.recipientOtp` | Twilio WhatsApp when `otpChannel` is `whatsapp` |
+
+Supported placeholders: `{{displayName}}`, `{{code}}`, `{{fileName}}`, `{{expiresMinutes}}` (derived from `OTP_TTL_SECONDS`).
+
+Example (default Vellum SMS):
+
+```text
+Your {{displayName}} download code for "{{fileName}}" is {{code}}. It expires in {{expiresMinutes}} minute(s).
+```
+
+Set `BRAND_PRESET` (server) to the preset id at runtime; rebuild the SPA with matching `VITE_BRAND_PRESET` for consistent white-labeling.
+
+### HTML notification emails
+
+Download-link, email-verification, and recipient OTP messages are sent as **multipart/alternative** (plain text + branded HTML) via Mailpit (dev) or SES (prod). Templates reuse the same `{{placeholder}}` copy as plain text in [`presets.ts`](../src/lib/brand/presets.ts); HTML layout lives in [`render-html-email.ts`](../src/lib/brand/render-html-email.ts).
+
+Preview in development: upload a document or request a link regenerate, then open **Mailpit** at `http://$VELLUM_HOST:8025` and select the HTML tab on the message.

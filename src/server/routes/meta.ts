@@ -19,5 +19,12 @@ metaRouter.get('/meta', (req, res) => {
   ok(req, res, {
     isProduction: env.isProduction,
     devServices: getDevServices(),
+    captcha: {
+      provider: env.captchaProvider,
+      siteKey:
+        env.captchaProvider === 'hcaptcha' ? (env.hcaptchaSiteKey() ?? null) : null,
+      required: env.captchaProvider === 'hcaptcha' && !env.skipCaptcha,
+    },
+    recipientOtpEnabled: env.recipientOtpEnabled,
   });
 });

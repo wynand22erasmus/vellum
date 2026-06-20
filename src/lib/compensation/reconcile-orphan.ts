@@ -6,7 +6,7 @@
 
 import type { Prisma } from '../../../generated/client.ts';
 import { prisma } from '../prisma.ts';
-import { deleteDocumentIfExists } from './document.ts';
+import { deleteDocumentFileIfExists, deleteDocumentIfExists } from './document.ts';
 import { deleteObjectIfExists } from './storage.ts';
 import type { OrphanedResource } from './orphan.ts';
 
@@ -38,7 +38,7 @@ function isOrphanedResource(value: unknown): value is OrphanedResource {
   if (kind === 's3Object') {
     return typeof (value as { s3Key?: string }).s3Key === 'string';
   }
-  if (kind === 'document') {
+  if (kind === 'document' || kind === 'documentFile') {
     return typeof (value as { id?: string }).id === 'string';
   }
   return false;
@@ -49,19 +49,24 @@ async function reconcileOrphan(entry: OrphanedResource): Promise<void> {
     await deleteObjectIfExists(entry.s3Key);
     return;
   }
+  if (entry.kind === 'documentFile') {
+    await deleteDocumentFileIfExists(entry.id);
+    return;
+  }
   if (entry.kind === 'document') {
-    const doc = await prisma.document.findUnique({
+    const link = await prisma.documentUserLink.findUnique({
       where: { id: entry.id },
-      select: { s3Key: true, linkExpiresAt: true },
+      include: { documentFile: true },
     });
-    if (!doc) {
+    if (!link) {
       return;
     }
-    const linkActive = doc.s3Key !== null && new Date() <= doc.linkExpiresAt;
+    const linkActive =
+      link.documentFile.s3Key !== null && new Date() <= link.linkExpiresAt && !link.revokedAt;
     if (linkActive) {
       return;
     }
-    if (doc.s3Key === null) {
+    if (link.documentFile.s3Key === null) {
       await deleteDocumentIfExists(entry.id);
     }
   }

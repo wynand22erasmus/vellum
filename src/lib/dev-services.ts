@@ -45,6 +45,7 @@ export function getDevServices(): DevServiceLink[] {
   const host = devHost();
   const minio = minioHost(minioPublicEndpoint);
   const mailpitUiPort = process.env.MAILPIT_UI_PORT?.trim() || '8025';
+  const webhookTesterPort = process.env.WEBHOOK_TESTER_PORT?.trim() || '8090';
   const minioConsolePort = process.env.MINIO_CONSOLE_PORT?.trim() || '9001';
   const prismaStudioPort = process.env.PRISMA_STUDIO_PORT?.trim() || '5555';
   const dbAdminPort = process.env.DB_ADMIN_PORT?.trim() || '8081';
@@ -62,6 +63,18 @@ export function getDevServices(): DevServiceLink[] {
       label: 'API docs',
       url: '/docs/',
       description: 'Interactive OpenAPI reference for the Vellum API.',
+    },
+    {
+      id: 'webhooks',
+      label: 'Webhook inspector',
+      url: '/dev/webhooks',
+      description: 'Inspect outbound audit webhook delivery attempts.',
+    },
+    {
+      id: 'webhook-tester',
+      label: 'Webhook tester',
+      url: httpUrl(host, webhookTesterPort),
+      description: 'Catch outbound webhook POSTs during local integration.',
     },
     {
       id: 'mailpit',

@@ -6,10 +6,15 @@
 
 import { Badge } from '@/components/ui/badge';
 
-type DocumentStatusBadgesProps = {
+/** Props for {@link DocumentStatusBadges}. */
+export type DocumentStatusBadgesProps = {
   linkActive: boolean;
   fileAvailable: boolean;
   isUsed?: boolean;
+  maxDownloads?: number;
+  downloadCount?: number;
+  downloadsRemaining?: number;
+  revokedAt?: string | null;
   deletedAt?: string | null;
   formatDeletedAt?: (iso: string) => string;
 };
@@ -34,17 +39,30 @@ export function DocumentStatusBadges({
   linkActive,
   fileAvailable,
   isUsed,
+  maxDownloads,
+  downloadCount,
+  downloadsRemaining,
+  revokedAt,
   deletedAt,
   formatDeletedAt,
 }: DocumentStatusBadgesProps) {
+  const downloadLabel =
+    maxDownloads !== undefined && downloadCount !== undefined
+      ? downloadsRemaining !== undefined
+        ? `${downloadCount}/${maxDownloads} downloads`
+        : `${downloadCount}/${maxDownloads} downloads`
+      : null;
+
   return (
     <div className="flex flex-wrap gap-1">
+      {revokedAt ? <Badge variant="destructive">Revoked</Badge> : null}
       <StatusBadge label={linkActive ? 'Link active' : 'Link expired'} active={linkActive} />
       <StatusBadge
         label={fileAvailable ? 'File available' : 'File scrubbed'}
         active={fileAvailable}
       />
-      {isUsed ? <Badge variant="outline">Downloaded</Badge> : null}
+      {downloadLabel ? <Badge variant="outline">{downloadLabel}</Badge> : null}
+      {isUsed && !downloadLabel ? <Badge variant="outline">Downloaded</Badge> : null}
       {deletedAt ? (
         <Badge variant="outline">
           Deleted{formatDeletedAt ? ` ${formatDeletedAt(deletedAt)}` : ''}

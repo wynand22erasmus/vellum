@@ -10,6 +10,7 @@ import { AppError } from '../errors/app-error.ts';
 export type OrphanedResource =
   | { kind: 's3Object'; s3Key: string }
   | { kind: 'document'; id: string }
+  | { kind: 'documentFile'; id: string }
   | { kind: 'presignedUrl'; documentId: string };
 
 /**

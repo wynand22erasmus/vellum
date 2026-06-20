@@ -51,7 +51,10 @@ export const queryKeys = {
     users: (params?: AdminListParams) => [...queryKeys.admin.all, 'users', params ?? {}] as const,
     documents: (params?: AdminListParams) =>
       [...queryKeys.admin.all, 'documents', params ?? {}] as const,
+    documentFiles: (params?: AdminListParams) =>
+      [...queryKeys.admin.all, 'document-files', params ?? {}] as const,
     document: (id: string) => [...queryKeys.admin.all, 'document', id] as const,
+    documentFile: (id: string) => [...queryKeys.admin.all, 'document-file', id] as const,
     auditLogs: (params?: AdminListParams) =>
       [...queryKeys.admin.all, 'audit-logs', params ?? {}] as const,
     failedAuditLogs: (params?: AdminListParams) =>
