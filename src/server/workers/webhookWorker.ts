@@ -58,7 +58,6 @@ export const webhookWorker = new Worker(
 
     let responseStatus: number | null = null;
     let responseBody: string | null = null;
-    let success = false;
 
     try {
       const controller = new AbortController();
@@ -80,9 +79,8 @@ export const webhookWorker = new Worker(
       clearTimeout(timeout);
       responseStatus = response.status;
       responseBody = truncateResponseBody(await response.text());
-      success = response.ok;
 
-      if (!success) {
+      if (!response.ok) {
         throw new Error(
           `Webhook delivery failed with HTTP ${response.status} from ${targetUrl}.`,
         );
