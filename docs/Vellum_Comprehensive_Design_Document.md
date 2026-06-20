@@ -4,28 +4,96 @@
 
 ### Comprehensive Design Document
 
-#### Version 1.0 — May 2026
+#### Version 2.1 — June 2026 (reviewed against codebase)
+
+> **Purpose of this document:** This document describes the **current** Vellum system in enough detail that an engineering team could recreate it from scratch — architecture, data model, security model, API surface, background processing, configuration, and operational behavior. It supersedes Version 1.0 (May 2026), which described the original monolithic `Document` model before the feature roadmap (items 1–11) shipped.
+>
+> **Companion docs:** [USAGE.md](./USAGE.md) (operator guide), [CONFIG.md](./CONFIG.md) (environment variables), [EVENTS_AND_WEBHOOKS.md](./EVENTS_AND_WEBHOOKS.md) (audit + webhooks), [SFTP_INGESTION.md](./SFTP_INGESTION.md), [ERROR_HANDLING.md](./ERROR_HANDLING.md).
+
+---
+
+## How to read this document
+
+This document serves **two audiences**. You do not need to read every section — use the guide below.
+
+| If you are… | Start here | Technical sections (optional) |
+|-------------|------------|--------------------------------|
+| **Executive / product owner** | [Executive summary](#executive-summary), [§1 Overview](#1-project-overview), [§2 Personas](#2-personas-and-roles), [§7 Security (plain language)](#71-two-key-and-optional-third-key-access-model) | Skip API and schema details |
+| **Compliance / audit** | [§16 Audit & webhooks](#16-audit-compliance-and-webhooks), [Appendix A](#appendix-a-audit-event-catalog), [§8 Lifecycle](#8-document-lifecycle) | Export API in §9.6 |
+| **Operator / support** | [USAGE.md](./USAGE.md) first, then [§18 Admin tools](#18-admin-and-development-tools), [§5 Infrastructure](#5-infrastructure-and-deployment) | Compose ports table |
+| **Integrator / developer** | Full document; prioritize [§9 API](#9-api-design), [§6 Data model](#6-data-model), [§14 Workers](#14-background-job-processing) | [§24 Recreation checklist](#24-recreation-checklist) |
+
+**Format convention:** Sections marked with a **Plain language** block explain the same topic in everyday terms. Technical tables, code, and diagrams follow for implementers. Both are intentional — neither replaces the other.
+
+---
+
+## Executive summary
+
+Vellum lets organizations **send sensitive files to specific people by email** without exposing the file in the email itself. Instead, the recipient gets a secure link and must also know a **separate password** (like a PIN) that the sender shares by phone or SMS. Optional extra checks (a one-time code or captcha) can be turned on for higher-risk scenarios.
+
+**Why it exists:** Regulated industries need proof of who received what, when, and whether access succeeded or failed — often for years after the event. Vellum stores that proof even after the file itself is automatically deleted.
+
+**How it works in one paragraph:** A backend system uploads a file through an API (or drops it on SFTP). Vellum scans for viruses, stores the file securely, and emails the recipient a link. The recipient opens the link, enters the password (and optional code), and downloads the file through a short-lived secure URL. Administrators can browse records, export audit logs, and connect webhooks so their own systems are notified of every important event.
+
+**What changed in v2.0 (product):** One file can go to many recipients without duplicating storage; downloads can be limited and retried within a grace window; links can be revoked instantly; integrators receive signed webhook notifications; partners can upload via SFTP; recipients see a checksum to verify file integrity.
+
+**Document v2.1** adds dual-audience plain-language sections and has been cross-checked against the current codebase (no further product features beyond v2.0).
+
+---
+
+## Glossary (non-technical)
+
+| Term | Meaning |
+|------|---------|
+| **Integrator** | The organization's backend system that uploads files to Vellum (not the human recipient). |
+| **Recipient** | The person who receives the email link and downloads the file. |
+| **Administrator** | Internal staff who can view records, export audits, and use operator tools — without automatic access to file contents. |
+| **Verify link** | The URL in the email; it proves that the recipient has the message. It expires after a configured time. |
+| **File password** | A secret chosen at upload time; the recipient must be told it separately. Vellum never sends it by email. |
+| **OTP / verification code** | Optional one-time code (email, text, WhatsApp, or authenticator app) after the password. |
+| **Presigned URL** | A temporary direct download link (30 seconds) to storage; the app server never holds the file bytes. |
+| **Audit log** | An immutable record of an action (login, download, email sent, revocation, etc.) kept for compliance. |
+| **Webhook** | An automatic HTTP notification from Vellum to the integrator's system when an audit event occurs. |
+| **TTL (time to live)** | How long something lasts before expiry — separately configurable for the link, the stored file, and database records. |
+| **Scrub / purge** | Automatic deletion of expired files from storage (scrub) or old rows from the database (purge). |
+| **SHA-256 checksum** | A fingerprint of the file contents; it lets the recipient confirm the download was not corrupted or swapped. |
+| **White-label** | Custom branding (logo, colors, email wording) so Vellum appears as the client's product. |
 
 ---
 
 ## Table of Contents
 
-1. Project Overview
-2. Technology Stack
-3. System Architecture
-4. Infrastructure & Deployment
-5. Database Design
-6. Security Architecture
-7. API Design
-8. Authentication & Authorization
-9. Document Lifecycle Management
-10. Email System
-11. Background Job Processing
-12. Audit & Compliance
-13. AWS Migration Plan
-14. Appendix A: Project Naming
-15. Appendix B: Industry Use Cases
-16. Appendix C: Known Issues & Recommendations
+0. [How to read this document](#how-to-read-this-document)
+0. [Executive summary](#executive-summary)
+0. [Glossary](#glossary-non-technical)
+1. [Project Overview](#1-project-overview)
+2. [Personas and Roles](#2-personas-and-roles)
+3. [Technology Stack](#3-technology-stack)
+4. [System Architecture](#4-system-architecture)
+5. [Infrastructure and Deployment](#5-infrastructure-and-deployment)
+6. [Data Model](#6-data-model)
+7. [Security Architecture](#7-security-architecture)
+8. [Document Lifecycle](#8-document-lifecycle)
+9. [API Design](#9-api-design)
+10. [Authentication and Authorization](#10-authentication-and-authorization)
+11. [Frontend Application](#11-frontend-application)
+12. [Email and White-Label Branding](#12-email-and-white-label-branding)
+13. [Recipient OTP and hCaptcha](#13-recipient-otp-and-hcaptcha)
+14. [Background Job Processing](#14-background-job-processing)
+15. [SFTP Ingestion](#15-sftp-ingestion)
+16. [Audit, Compliance, and Webhooks](#16-audit-compliance-and-webhooks)
+17. [Error Handling and Compensation](#17-error-handling-and-compensation)
+18. [Admin and Development Tools](#18-admin-and-development-tools)
+19. [Configuration Reference](#19-configuration-reference)
+20. [Testing Strategy](#20-testing-strategy)
+21. [Source Layout](#21-source-layout)
+22. [AWS Production Migration](#22-aws-production-migration)
+23. [Future Work (Out of Scope for Current Release)](#23-future-work-out-of-scope-for-current-release)
+24. [Recreation Checklist](#24-recreation-checklist)
+25. [Appendix A: Audit Event Catalog](#appendix-a-audit-event-catalog)
+26. [Appendix B: Evolution from v1.0](#appendix-b-evolution-from-v10)
+27. [Appendix C: FAQ (non-technical)](#appendix-c-frequently-asked-questions-non-technical)
+28. [Appendix D: Document maintenance](#appendix-d-document-maintenance)
 
 ---
 
@@ -33,1133 +101,1222 @@
 
 ### 1.1 Purpose
 
-Vellum is a secure, API-first document transfer platform designed for regulated industries. It allows an authorized uploader to securely deliver documents to a specified recipient via a password-protected, time-limited download link delivered by email.
+Vellum is a secure, **API-first** document transfer platform for regulated industries. An authorized integrator uploads a file on behalf of a sender; Vellum virus-scans it, stores it in object storage, and emails the recipient a time-limited verify link. The recipient must also know a **file password** communicated out-of-band. Even authenticated dashboard users must complete the verify flow to download — the dashboard only helps regenerate links.
 
-### 1.2 Name
+> **Plain language:** Think of Vellum as a **secure courier for digital documents**. Your company's system drops off a package (the file); Vellum checks it for malware, locks it in a vault, and emails the recipient directions (the link). Opening the email is not enough — they also need a password you give them separately. The vault eventually destroys the package on schedule, but keeps a receipt (audit log) for regulators.
 
-**Vellum** — Named after the high-quality parchment historically used for important legal, financial, and academic documents. The name is intentionally generic, professional, and institution-neutral, making it suitable for use by banks, insurance companies, universities, and fax-to-email services without carrying any specific industry personality.
+### 1.2 Name and Positioning
 
-### 1.3 Target Industries
+**Vellum** — named after parchment used for legal and financial records. Institution-neutral branding makes it suitable for banks, insurers, universities, and fax-to-email services.
 
-- Banking & Finance (SOX / Basel III)
-- Insurance
-- Fax-to-Email Services
-- Universities & Academic Institutions
+### 1.3 Core Value Proposition
 
-### 1.4 Core Value Proposition
+| Capability | Description |
+|------------|-------------|
+| **API-first** | Machine upload via Bearer API key; optional SFTP MFT drop |
+| **Two-key download** | Possession (email link token) + knowledge (file password) on every download |
+| **Optional third factor** | Recipient OTP (email, SMS, WhatsApp, or TOTP authenticator) after password |
+| **Self-cleaning vault** | Files scrubbed from object storage on TTL; audit rows retained for compliance |
+| **Multi-tier lifecycle** | Independent TTLs for verify link, object storage, and database record |
+| **Download limits** | Configurable `maxDownloads` per recipient link (default 1) |
+| **Integrity proof** | SHA-256 checksum shown to recipient after successful verify |
+| **Full audit trail** | Every login, email, download, revocation, SFTP step, and OTP event logged |
+| **Outbound webhooks** | Per-event HTTP POST with HMAC signature for integrator SIEM/automation |
+| **White-label** | Brand presets for SPA shell, HTML emails, SMS/WhatsApp OTP copy |
 
-- **API-First:** Designed primarily for machine-to-machine uploads.
-- **Two-Key Security:** Every download requires both a possession factor (email link) and a knowledge factor (file password).
-- **Self-Cleaning Vault:** Files are automatically scrubbed on expiry while audit records are retained for compliance.
-- **Multi-Tier Lifecycle:** Separate, independently configurable TTLs for the link, the file, and the database record.
-- **Full Audit Trail:** Every email, login, and file access event is recorded for regulatory compliance.
+### 1.4 Target Industries
+
+Banking and finance (SOX), insurance, fax-to-email, and universities — any environment that requires provable document delivery with retention and audit.
+
+### 1.5 Typical journey (non-technical)
+
+| Step | Who | What happens |
+|------|-----|--------------|
+| 1 | Integrator | Uploads `report.pdf` for `customer@bank.com` with a password and expiry times |
+| 2 | Vellum | Scans for viruses, stores file, emails customer a branded link (not the password) |
+| 3 | Sender | Calls or texts customer with the file password |
+| 4 | Customer | Clicks link, completes captcha/OTP if enabled, enters password, downloads file |
+| 5 | Vellum | Records success in audit log; optional webhook notifies integrator's SIEM |
+| 6 | Vellum (later) | Deletes file from storage on schedule; keeps audit rows for years |
 
 ---
 
-## 2. Technology Stack
+## 2. Personas and Roles
+
+> **Plain language:** Three types of people/systems interact with Vellum. **Integrators** are machines that send files. **Recipients** are customers or staff who receive them. **Administrators** are your internal team who monitor and export records — they cannot bypass the password step to download someone else's file.
+
+| Persona | Typical user | Primary surfaces | Auth mechanism |
+|---------|--------------|------------------|----------------|
+| **Integrator** | Backend system, MFT job, scripts | `POST /api/upload`, `POST /api/upload/batch`, `POST /api/documents/:id/revoke` | `Authorization: Bearer <API_KEY>` |
+| **Recipient** | Person receiving a document | Email link → `/verify/{token}`, optional `/dashboard` | None for verify; session cookie for dashboard |
+| **Administrator** | Operator, compliance, engineering | `/admin`, `/docs/`, audit export, dev tools; **Revoke link** on `/admin/documents/:id` | Session cookie + `UserKind.ADMIN` |
+
+Dashboard users are stored in Postgres (`users` table) with `kind` of `ADMIN` or `CONSUMER`. Admins are assigned on first sign-in when their email appears in `DEFAULT_ADMIN_EMAILS`. **Revocation** is available to integrators (API key) and admins (session cookie or admin UI button); see §7.5.
+
+---
+
+## 3. Technology Stack
 
 | Layer | Technology | Purpose |
-| :--- | :--- | :--- |
-| **Runtime** | Node.js + TypeScript | Backend application server |
-| **Frontend** | Vite + React + shadcn/ui | User dashboard |
-| **Database** | PostgreSQL + Prisma ORM | Metadata & audit records |
-| **Object Storage** | MinIO (Dev) / AWS S3 (Prod) | Document storage |
-| **Job Queue** | BullMQ + Redis | Background & async processing |
-| **Virus Scanning** | ClamAV | Malware detection on upload |
-| **Authentication** | WorkOS | SSO / Identity management |
-| **Email (Dev)** | Mailpit + Nodemailer | Local SMTP testing & inspection |
-| **Email (Prod)** | AWS SES + Nodemailer | Production email delivery |
+|-------|------------|---------|
+| **Runtime** | Node.js 24+ / TypeScript (ESM) | API server and workers |
+| **Frontend** | Vite + React 19 + TanStack Router + shadcn/ui + Tailwind | SPA dashboard, verify flow, admin UI |
+| **Database** | PostgreSQL 15 + Prisma ORM | Metadata, users, audit, webhook delivery log |
+| **Object storage** | MinIO (dev) / AWS S3 (prod) | Document bytes; presigned downloads |
+| **Job queue** | BullMQ + Redis | Email, audit, webhook, scrub, reconciliation |
+| **Virus scanning** | ClamAV (INSTREAM) | Malware detection before storage |
+| **Authentication** | WorkOS AuthKit (prod) / dev mock | Dashboard SSO |
+| **Email (dev)** | Mailpit + Nodemailer | Local SMTP + HTML preview |
+| **Email (prod)** | AWS SES + Nodemailer | Production delivery |
+| **SMS/WhatsApp OTP** | Twilio | Optional recipient OTP channels |
+| **Captcha** | hCaptcha | Optional gate before password submit |
+| **SFTP** | atmoz/sftp (Compose) | Legacy MFT partner drop |
 | **Validation** | Zod | API input validation |
-| **Password Hashing** | Argon2 | File password hashing |
-| **Orchestration** | Docker Compose | Multi-container management |
-| **Reverse Proxy** | Nginx | SSL termination & routing |
+| **Password hashing** | Argon2 | File password hashing (`passwordHash` on links) |
+| **Session** | HS256 JWT in HTTP-only cookie | Dashboard session (`vellum_session`) |
+| **API errors** | RFC 9457 Problem Details | Uniform error responses |
+| **Orchestration** | Docker Compose / Podman Compose | Multi-container stack |
+| **Reverse proxy** | Nginx | Unified entry on :8080 in dev compose |
+| **API docs** | TypeDoc → static HTML | Admin-only `/docs/` |
+| **HTTP testing** | Bruno collections | Smoke and integration API tests |
+| **E2E** | Puppeteer + Vitest | Browser and unit tests |
 
 ---
 
-## 3. System Architecture
+## 4. System Architecture
 
-### 3.1 High-Level Overview
+> **Plain language:** Vellum runs as several cooperating services in containers — a web interface, an API, background workers, a database, file storage, email, and a virus scanner. The diagram below is for engineers; the [Typical journey (§1.5)](#15-typical-journey-non-technical) describes the same flow in business terms.
 
-Vellum is composed of two primary Docker images:
-
-1. **Application Container:** Node.js/TypeScript API, Vite/React frontend, and BullMQ workers.
-2. **Storage Container:** MinIO, the S3-compatible self-hosted object store.
-
-These are supported by additional containers (Postgres, Redis, ClamAV, Mailpit, Nginx) all orchestrated via Docker Compose.
-
-### 3.2 Component Diagram
+### 4.1 Container Topology (Development Compose)
 
 ```text
-                    ┌────────────────────────────┐
-                    │     Nginx (Reverse Proxy)   │
-                    │   SSL Termination / Routing │
-                    └────────────┬───────────────┘
-                                 │
-          ┌──────────────────────┼─────────────────────┐
-          │                      │                     │
- ┌────────▼───────┐    ┌─────────▼──────┐    ┌────────▼────────┐
- │ React Frontend │    │ Node.js API    │    │  BullMQ Workers │
- │ (Vite/shadcn)  │    │ (TypeScript)   │    │ email-queue     │
- └────────────────┘    └────────┬───────┘    │ audit-queue     │
-                                │            │ cleanup-queue   │
-          ┌─────────────────────┼────────────└────────┬────────┘
-          │                     │                     │
- ┌────────▼───────┐    ┌────────▼───────┐    ┌────────▼────────┐
- │  PostgreSQL    │    │     Redis      │    │     MinIO       │
- │  (Prisma ORM)  │    │   (BullMQ)     │    │  (S3 Storage)   │
- └────────────────┘    └────────────────┘    └─────────────────┘
-
- ┌────────────────┐    ┌────────────────┐
- │    ClamAV      │    │   Mailpit      │
- │ (Virus Scanner)│    │ (Dev SMTP)     │
- └────────────────┘    └────────────────┘
+                         ┌─────────────────────────────────────┐
+                         │  nginx (:8080) — unified entry      │
+                         └──────────────┬──────────────────────┘
+                                        │
+              ┌─────────────────────────┼─────────────────────────┐
+              │                         │                         │
+     ┌────────▼────────┐      ┌─────────▼─────────┐     ┌───────▼────────┐
+     │  web (:5174)    │      │  app (:5173)      │     │  worker        │
+     │  Vite dev SPA   │      │  Express API      │     │  BullMQ + SFTP │
+     └─────────────────┘      └─────────┬─────────┘     └───────┬────────┘
+                                        │                       │
+     ┌──────────────┐  ┌────────────────┼───────────┐  ┌────────┴────────┐
+     │  PostgreSQL  │  │     Redis      │  MinIO    │  ClamAV           │
+     │  + Studio    │  │   (BullMQ)     │  (:9000)  │  (virus scan)     │
+     │  + Adminer   │  └────────────────┘           └───────────────────┘
+     └──────────────┘
+     ┌──────────────┐  ┌────────────────┐  ┌─────────────────────────────┐
+     │  Mailpit     │  │  sftp (:2222)  │  │  webhook-tester (:8090)    │
+     │  (:8025 UI)  │  │  partner drop  │  │  dev webhook capture        │
+     └──────────────┘  └────────────────┘  └─────────────────────────────┘
 ```
 
-### 3.3 Request Flow Summary
+**Process separation:**
 
-#### Upload Flow
+| Process | Entry file | Command | Role |
+|---------|------------|---------|------|
+| API (dev) | `src/api-server.ts` | `npm run dev:api` | Express on :5173, no Vite |
+| SPA (dev) | Vite | `npm run dev` | React on :5174, proxies API |
+| API (prod) | `src/server.ts` | production CMD | Express on `PORT`, serves `dist/` |
+| Workers | `src/server/workers/index.ts` | `npm run worker` | All BullMQ consumers + SFTP watcher |
+
+Both API entrypoints import `createApp()` from `src/server/create-app.ts`.
+
+### 4.2 Logical Component Diagram
 
 ```text
-API Client → Nginx → Node.js API → ClamAV Scan
- → MinIO (store file) → Postgres (store metadata)
-  → email-queue (BullMQ) → Email Sent to Recipient
+┌─────────────────────────────────────────────────────────────────────────┐
+│                           Client Layer                                   │
+│  Integrator (curl/Bruno) │ Recipient browser │ Admin browser            │
+└────────────┬─────────────────────────┬──────────────────┬─────────────────┘
+             │                         │                  │
+             ▼                         ▼                  ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│  Express API (create-app.ts)                                            │
+│  Routes: upload, verify, documents, revoke, admin, auth, health, meta  │
+│  Middleware: apiKeyAuth, integratorOrAdminAuth, dashboardAuth, adminAuth, errorHandler │
+└─────┬──────────────────┬─────────────────────┬──────────────────────────┘
+      │                  │                     │
+      ▼                  ▼                     ▼
+┌───────────┐    ┌───────────────┐    ┌─────────────────────────────────┐
+│  Prisma   │    │  S3/MinIO     │    │  BullMQ Queues                   │
+│  Postgres │    │  presign/put  │    │  email, audit, webhook, cleanup  │
+└───────────┘    └───────────────┘    └──────────────┬──────────────────┘
+                                                      │
+                                                      ▼
+                                            ┌─────────────────┐
+                                            │  Workers         │
+                                            │  email, audit,   │
+                                            │  webhook, scrub, │
+                                            │  process-error,  │
+                                            │  orphan-reconcile│
+                                            └─────────────────┘
 ```
 
-#### Download Flow (Path A)
+### 4.3 End-to-End Upload Flow (HTTP API)
+
+```mermaid
+sequenceDiagram
+  participant I as Integrator
+  participant API as Express API
+  participant AV as ClamAV
+  participant S3 as MinIO/S3
+  participant DB as PostgreSQL
+  participant Q as email-queue
+  participant W as emailWorker
+  participant M as Mailpit/SES
+
+  I->>API: POST /api/upload (Bearer + multipart)
+  API->>API: Zod validate fields; compute sha256
+  API->>DB: find DocumentFile by sha256
+  alt New unique bytes (no dedup hit)
+    API->>AV: INSTREAM scan buffer
+    AV-->>API: clean
+    API->>DB: create DocumentFile row
+    API->>S3: PutObject; set s3Key
+  else Existing DocumentFile with s3Key
+    Note over API: Skip scan + upload; reuse file row
+  end
+  API->>DB: create DocumentUserLink (token, passwordHash, TTLs)
+  API->>Q: enqueue send-initial-link
+  API-->>I: 201 { id, fileId, sha256, maxDownloads, warning }
+  Q->>W: process job
+  W->>M: multipart email (plain + HTML)
+  W->>Q: audit-queue (EMAIL_INITIAL_SENT)
+```
+
+**Password rule:** The upload response includes an explicit warning: the file password must be delivered to the recipient **outside** Vellum (for example, by SMS, phone, or a separate email). Vellum never emails the password.
+
+### 4.4 End-to-End Download Flow (Verify)
+
+```mermaid
+sequenceDiagram
+  participant R as Recipient
+  participant SPA as Verify page
+  participant API as Express API
+  participant DB as PostgreSQL
+  participant S3 as MinIO/S3
+  participant A as audit-queue
+
+  R->>SPA: GET /verify/{token}
+  R->>SPA: hCaptcha (if enabled)
+  R->>API: POST /api/verify { token, password, hcaptchaToken? }
+  API->>DB: load DocumentUserLink + DocumentFile
+  API->>API: check expiry, revoke, scrub, download limits, re-verify window
+  API->>API: Argon2 verify password
+  alt OTP required
+    API-->>SPA: { otpRequired, otpSessionId, channel }
+    R->>API: POST /api/verify/otp { token, otpSessionId, code }
+  end
+  API->>S3: generatePresignedUrl (30s, attachment disposition)
+  API->>DB: update downloadCount, isUsed, verifySuccessCount
+  API->>A: FILE_DOWNLOAD_SUCCESS
+  API-->>SPA: { downloadUrl, sha256, fileName }
+  SPA->>SPA: navigate /verify/{token}/complete
+  R->>S3: browser GET presigned URL
+```
+
+File bytes **never** pass through Node.js — only a short-lived presigned URL is returned.
+
+### 4.5 Dashboard Regenerate Link Flow
+
+```mermaid
+sequenceDiagram
+  participant U as Recipient (session)
+  participant API as Express API
+  participant DB as PostgreSQL
+  participant Q as email-queue
+
+  U->>API: POST /api/documents/:id/request-link
+  API->>DB: find link by id + recipientEmail match
+  API->>DB: rotate downloadToken, reset verify counters, extend linkExpiresAt
+  API->>Q: send-regenerate-link
+  API-->>U: 200 OK
+  Note over Q: emailWorker emits EMAIL_REGENERATE_SENT
+```
+
+Regenerating a link does **not** bypass password or OTP — it only sends a fresh token.
+
+### 4.6 Express Middleware and Route Mount Order
+
+Order matters for auth precedence (from `create-app.ts`):
 
 ```text
-Recipient Email Link → React Frontend (password prompt)
- → POST /api/verify → Postgres (validate token + expiry)
-  → Argon2 (verify password) → MinIO (generate 30s presigned URL)
-   → Postgres (isUsed = true) → audit-queue (log event)
-    → 30s URL returned to browser → Browser downloads from MinIO
+trust proxy → helmet → cors → cookieParser → json → requestId
+/api/health, /api/meta                    (public)
+/api/upload                             apiKeyAuth
+/api/verify                             (public, rate-limited)
+/api/documents/:id/revoke               integratorOrAdminAuth  (before dashboard)
+/api/documents                          dashboardAuth
+/api/admin                              adminAuth
+/api/studio                             adminAuth
+/api/dev                                adminAuth (non-prod webhook API)
+/api/auth                               (mixed)
+/docs/                                  adminAuth (via mountApiDocs)
+production: static dist + SPA fallback
+notFoundHandler → errorHandler
 ```
 
-#### Dashboard Flow (Path B)
+Revoke is mounted **before** dashboard auth on the same `/api/documents` prefix so integrators can call it with only a Bearer token.
+
+---
+
+## 5. Infrastructure and Deployment
+
+### 5.1 Docker Compose Services
+
+See `docker-compose.yml`. Key services:
+
+| Service | Image / build | Ports | Notes |
+|---------|---------------|-------|-------|
+| `app` | `{VELLUM_PROJECT}-app:{VELLUM_ENV}` | 5173 | API; healthcheck on `/api/health` |
+| `web` | same as app | 5174 | Vite dev UI |
+| `worker` | `{VELLUM_PROJECT}-worker:{VELLUM_ENV}` | — | BullMQ + SFTP watcher |
+| `nginx` | nginx:alpine | 8080 | Proxies web + app |
+| `postgres` | custom Dockerfile | 5432, 5555, 8081 | DB + Prisma Studio + Adminer |
+| `redis` | redis:alpine | 6379 | AOF persistence |
+| `minio` | minio/minio | 9000, 9001 | S3-compatible storage |
+| `clamav` | clamav/clamav | — | Health gate for app/worker |
+| `mailpit` | axllent/mailpit | 8025, 1025 | Dev SMTP + UI |
+| `sftp` | atmoz/sftp:alpine | 2222 | Partner file drop |
+| `webhook-tester` | ghcr.io/tarampampam/webhook-tester | 8090 | Dev webhook capture |
+
+Image tags and OCI labels use `VELLUM_PROJECT` and `VELLUM_ENV` (see [CONFIG.md](./CONFIG.md)).
+
+### 5.2 Startup and Migrations
+
+`npm run up` builds and starts the stack. The app container entrypoint runs `prisma migrate deploy` on startup (see `scripts/docker-entrypoint.sh`) and retries until the database accepts connections. On first boot, allow 2–5 minutes for ClamAV to become ready.
+
+> **Plain language:** Starting the stack also updates the database schema automatically. On first boot, wait a few minutes for the virus scanner to become ready before testing uploads.
+
+### 5.3 Production vs Development
+
+| Aspect | Development | Production |
+|--------|-------------|------------|
+| `NODE_ENV` | `development` | `production` |
+| SPA | Vite dev server (`web` container) | Static files from `dist/` served by Express |
+| Auth | `AUTH_PROVIDER=dev` mock login | WorkOS AuthKit |
+| Email | Mailpit | AWS SES |
+| Storage | MinIO | AWS S3 |
+| Captcha/OTP bypass flags | `SKIP_CAPTCHA`, `SKIP_VIRUS_SCAN`, `SKIP_EMAIL_VERIFICATION` allowed | Ignored |
+
+### 5.4 Public URL Derivation
+
+Email links and OAuth callbacks use `APP_URL` or derive from `VELLUM_HOST`, `VELLUM_PUBLIC_SCHEME`, and `VELLUM_PUBLIC_PORT`. Presigned download URLs use `MINIO_PUBLIC_ENDPOINT` (browser-reachable), which defaults to `http://{VELLUM_HOST}:9000` when the internal endpoint is `minio`.
+
+---
+
+## 6. Data Model
+
+### 6.1 Design Principle: File / Link Split
+
+As of version 2.0, Vellum separates **shared file assets** from **per-recipient download links** (document version 2.1 describes that model):
+
+| Model | Table | Represents |
+|-------|-------|--------------|
+| `DocumentFile` | `document_files` | One stored object (deduplicated by SHA-256) |
+| `DocumentUserLink` | `document_user_links` | One recipient's token, password, limits, OTP config |
+
+This enables batch upload (one file, many recipients) and SHA-256 deduplication without duplicating S3 objects.
+
+> **Plain language:** The **file** is the document in the vault (stored once). Each **link** is a separate envelope to a different recipient — each with their own password, expiry, and download limits — pointing at the same vault object when the content is identical.
+
+### 6.2 Entity Relationship
 
 ```text
-User → WorkOS Login → React Dashboard
- → GET /api/documents (filtered by email)
-  → "Send Access Link" → POST /api/documents/:id/request-link
-   → New token generated → email-queue (BullMQ)
-    → New email sent → Recipient follows Path A
+DocumentFile 1 ──< * DocumentUserLink
+DocumentUserLink 1 ──< * AuditLog  (via documentId → link id, legacy column name)
+
+User (standalone)
+AuditLog (optional userId, optional documentId)
+ProcessError (standalone, cross-linked to audit failures)
+WebhookDelivery → auditLogId (no FK, string reference)
+FailedAuditLog / FailedProcessError / FailedWebhookDelivery (dead letters)
 ```
+
+### 6.3 DocumentFile
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Primary key |
+| `sha256` | String @unique | SHA-256 hex (64 chars) — dedup key |
+| `s3Key` | String? | Object key; `null` after scrub |
+| `fileName` | String | Original filename (sanitized) |
+| `fileExpiresAt` | DateTime | When object may be deleted from storage |
+| `recordExpiresAt` | DateTime | When DB row may be purged (`REPORTING_LIFETIME_YEARS`) |
+| `deletedAt` | DateTime? | Set when scrubbed |
+| `byteSize` | Int? | File size in bytes |
+| `createdAt` | DateTime | Insert time |
+
+**Dedup behavior:** On upload, compute SHA-256. If a row exists with a matching hash and a non-null `s3Key`, reuse it (extend `fileExpiresAt` if the new request is longer). Skip virus scan and S3 upload for deduplicated bytes.
+
+### 6.4 DocumentUserLink
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | UUID | Primary key; API "document id" for integrators |
+| `documentFileId` | UUID FK | Shared file reference |
+| `recipientEmail` | String | Recipient inbox for download link |
+| `passwordHash` | String | Argon2 hash of file password |
+| `downloadToken` | String @unique | Opaque token in verify URL |
+| `linkExpiresAt` | DateTime | When verify link stops working |
+| `maxDownloads` | Int default 1 | Successful download cap |
+| `downloadCount` | Int default 0 | Consumptions used |
+| `verifySuccessCount` | Int default 0 | Re-verify attempts in current window |
+| `lastVerifiedAt` | DateTime? | Start of current re-verify window |
+| `isUsed` | Boolean default false | Fully consumed (all downloads + re-verify exhausted) |
+| `revokedAt` | DateTime? | Manual revocation timestamp |
+| `otpChannel` | RecipientOtpChannel? | Optional second factor channel |
+| `recipientPhone` | String? | E.164 for SMS/WhatsApp OTP |
+| `totpSecretEnc` | String? | AES-256-GCM encrypted TOTP secret |
+| `batchId` | String? | Groups batch upload links |
+| `createdAt` | DateTime | Insert time |
+
+**Legacy note:** `AuditLog.documentId` stores the **link** id (`DocumentUserLink.id`), not the file id, for API backward compatibility.
+
+### 6.5 User
+
+| Field | Description |
+|-------|-------------|
+| `id` | WorkOS user id or `dev:{email}` |
+| `email` | Unique, normalized lowercase |
+| `emailVerified` | Required before dashboard sign-in (except admins) |
+| `kind` | `ADMIN` or `CONSUMER` |
+| `firstName`, `lastName`, `profilePictureUrl` | From WorkOS profile |
+| `lastSignInAt` | Updated on login |
+
+### 6.6 AuditLog
+
+Immutable compliance events. See [Appendix A](#appendix-a-audit-event-catalog).
+
+| Field | Description |
+|-------|-------------|
+| `eventType` | `AuditEventType` enum |
+| `timestamp` | UTC insert time |
+| `userId` | Dashboard user when applicable |
+| `documentId` | Link id when applicable |
+| `ipAddress`, `userAgent` | HTTP context |
+| `metadata` | JSON event-specific payload |
+| `expiresAt` | Retention horizon |
+| `processErrorId` | Cross-link to operational error |
+
+### 6.7 WebhookDelivery
+
+One row per HTTP delivery attempt:
+
+| Field | Description |
+|-------|-------------|
+| `deliveryId` | UUID; matches `X-Vellum-Delivery-Id` header |
+| `auditLogId` | Source audit row |
+| `eventType`, `targetUrl`, `payload` | Delivery context |
+| `responseStatus`, `responseBody` | Truncated target response |
+| `success`, `attempt` | Outcome and retry count |
+
+### 6.8 ProcessError and Dead Letters
+
+Operational failures (HTTP 4xx/5xx, worker crashes) persist to `ProcessError` via the process-error queue. Failed queue writes go to `FailedAuditLog`, `FailedProcessError`, or `FailedWebhookDelivery`. Cross-table linking uses `correlationId`, `processErrorId`, and `failedAuditLogId` — see [ERROR_HANDLING.md](./ERROR_HANDLING.md).
+
+### 6.9 Prisma Migrations (Current)
+
+| Migration | Scope |
+|-----------|-------|
+| `20260602160000_init` | Initial schema |
+| `20260607120000_roadmap_items_1_4` | Download limits, revocation, audit export fields, re-verify columns |
+| `20260607140000_roadmap_items_5_10` | OTP fields, captcha audit enum, recipient OTP channel |
+| `20260608140000_batch_upload_document_split` | `DocumentFile` + `DocumentUserLink` split |
+| `20260609120000_sftp_ingestion_audit_events` | SFTP audit enum values |
+| `20260609180000_webhook_delivery` | `WebhookDelivery`, `FailedWebhookDelivery` |
 
 ---
 
-## 4. Infrastructure & Deployment
+## 7. Security Architecture
 
-### 4.1 Docker Compose Configuration
+> **Plain language:** Security is layered. Upload requires a secret API key. Download requires the email link **and** the file password (and optionally a one-time code). Files are scanned for malware before storage. Download URLs expire in 30 seconds. Failed attempts are logged. Administrators cannot silently read files — they see metadata and audit trails only.
 
-```yaml
-version: "3.8"
+### 7.1 Two-Key (and Optional Third-Key) Access Model
 
-services:
-  app:
-    build: .
-    env_file: .env
-    depends_on:
-      clamav:
-        condition: service_healthy
-      postgres:
-        condition: service_started
-      redis:
-        condition: service_started
-      minio:
-        condition: service_started
+| Factor | Mechanism | Storage |
+|--------|-----------|---------|
+| **Possession** | Verify URL contains `downloadToken` | `DocumentUserLink.downloadToken` |
+| **Knowledge** | File password entered on verify page | Argon2 hash in `passwordHash` |
+| **Optional OTP** | Code after password when `RECIPIENT_OTP_ENABLED` **and** the link has `otpChannel` set at upload | Redis session + channel-specific delivery |
 
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: vellum_db
-      POSTGRES_USER: vellum
-      POSTGRES_PASSWORD: password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+Dashboard session cookies do **not** grant file access. Admins use the same verify flow unless testing via API.
 
-  redis:
-    image: redis:alpine
-    volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes
+| Factor | Plain-language analogy |
+|--------|------------------------|
+| **Possession** | Having the emailed invitation |
+| **Knowledge** | Knowing the PIN/password the sender told you separately |
+| **Optional OTP** | A code sent by text or generated by an authenticator app |
 
-  minio:
-    image: minio/minio
-    command: server /data --console-address ":9001"
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    volumes:
-      - minio_data:/data
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+### 7.2 Upload Security
 
-  clamav:
-    image: clamav/clamav:latest
-    volumes:
-      - clamav_data:/var/lib/clamav
-    healthcheck:
-      test: ["CMD", "clamdcheck.sh"]
-      interval: 30s
-      retries: 10
-      start_period: 120s
+1. **API key** required on `POST /api/upload` and `/api/upload/batch`.
+2. **Zod validation** on all multipart fields.
+3. **Extension allowlist** via `ALLOWED_UPLOAD_EXTENSIONS`; misleading double extensions stripped.
+4. **Size limit** via `MAX_UPLOAD_BYTES` (default 50 MiB; the entire file is buffered in memory via Multer).
+5. **ClamAV INSTREAM scan** before first storage of unique bytes (skippable in dev via `SKIP_VIRUS_SCAN`).
+6. **Argon2** hashing of file passwords; plaintext never persisted.
+7. **Compensation stack** on upload — failed steps undo the S3 put and database rows that were created in that request.
 
-  mailpit:
-    image: axllent/mailpit
-    ports:
-      - "8025:8025" # Web UI for dev inspection
-      - "1025:1025" # SMTP
+### 7.3 Download Security
 
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./certs:/etc/nginx/certs
+1. No file bytes through Node.js — **30-second presigned URL** only.
+2. `Content-Disposition: attachment` forces download.
+3. **hCaptcha** before password submit when `CAPTCHA_PROVIDER=hcaptcha`.
+4. **Download limits** — reject when `downloadCount >= maxDownloads`.
+5. **Re-verify window** — after the first successful verify, the recipient may retry requesting a presigned URL within the window before final consumption (see §8.3).
+6. All verify outcomes audited (`FILE_DOWNLOAD_SUCCESS` or `FILE_DOWNLOAD_FAILED` with `metadata.reason`).
+7. **Rate limiting:** verify password — 5 attempts per 15 minutes per token or IP; OTP — 10 attempts per 15 minutes per session/token/IP (`express-rate-limit` in `verify.ts`).
 
-volumes:
-  postgres_data:
-  redis_data:
-  minio_data:
-  clamav_data:
-```
+### 7.4 Presigned URL Policy
 
-### 4.2 Environment Variables
+- **Expiry:** 30 seconds (`expiresIn: 30` in `generatePresignedUrl`).
+- **Client:** Separate S3 client using `MINIO_PUBLIC_ENDPOINT` so browser can reach MinIO/S3.
+- **Disposition:** `attachment; filename="{fileName}"` to force download.
 
-```bash
-# Application
-NODE_ENV=development
-APP_URL=https://vellum.local
-PORT=3000
+### 7.5 Revocation
 
-# PostgreSQL
-DATABASE_URL=postgresql://vellum:password@postgres:5432/vellum_db
+`POST /api/documents/:id/revoke` sets `linkExpiresAt = now`, `revokedAt = now`, `isUsed = true`. Shared `DocumentFile` is **not** deleted — other recipient links may still reference it. Emits `LINK_REVOKED`. Implemented in `src/lib/revoke-document.ts`; mounted before dashboard auth so API key callers can revoke without session.
 
-# Redis
-REDIS_URL=redis://redis:6379
+### 7.6 Webhook Security
 
-# MinIO / S3
-MINIO_ENDPOINT=http://minio:9000
-MINIO_ROOT_USER=minioadmin
-MINIO_ROOT_PASSWORD=minioadmin
-MINIO_BUCKET_NAME=vellum-documents
-AWS_REGION=us-east-1
+Vellum signs the raw JSON body with HMAC-SHA256 in `X-Vellum-Signature: sha256={hex}` using `WEBHOOK_SECRET`. Integrators must verify the signature before trusting the payload.
 
-# ClamAV
-CLAMAV_HOST=clamav
-CLAMAV_PORT=3310
+### 7.7 Session Security
 
-# WorkOS
-WORKOS_API_KEY=sk_xxxxx
-WORKOS_CLIENT_ID=client_xxxxx
-WORKOS_REDIRECT_URI=https://vellum.local/api/auth/callback
-
-# Email
-EMAIL_PROVIDER=local  # 'local' | 'ses'
-MAILPIT_HOST=mailpit
-MAILPIT_PORT=1025
-
-# AWS SES (Production)
-AWS_SES_REGION=us-east-1
-AWS_ACCESS_KEY_ID=xxxxxx
-AWS_SECRET_ACCESS_KEY=xxxxxx
-
-# Lifecycle Configuration
-REPORTING_LIFETIME_YEARS=5
-DEFAULT_LINK_TTL_SECONDS=86400
-MAX_FILE_RETENTION_DAYS=90
-```
+`vellum_session` cookie: HTTP-only, HS256 JWT signed with `SESSION_SECRET` (32+ chars in production), 7-day TTL.
 
 ---
 
-## 5. Database Design
+## 8. Document Lifecycle
 
-### 5.1 Prisma Schema
+> **Plain language:** Every document has three independent clocks: (1) how long the **email link** works, (2) how long the **file** stays in storage, and (3) how long **records** are kept for auditors. When the file clock runs out, the bytes are deleted but the audit history remains until the record clock runs out (typically five years).
 
-```prisma
-enum AuditEventType {
-  USER_LOGIN
-  EMAIL_INITIAL_SENT
-  EMAIL_REGENERATE_SENT
-  FILE_DOWNLOAD_SUCCESS
-  FILE_DOWNLOAD_FAILED
-  FILE_SCRUBBED
-}
+### 8.1 Three-Tier TTL
 
-model Document {
-  id             String    @id @default(uuid())
-  s3Key          String?   // Nullified once the file is deleted from S3
-  fileName       String
-  recipientEmail String    @index
-  passwordHash   String    // Argon2 hash of the file password
-  downloadToken  String    @unique
+| Tier | Field | Meaning |
+|------|-------|---------|
+| **Link** | `DocumentUserLink.linkExpiresAt` | Verify URL validity |
+| **File** | `DocumentFile.fileExpiresAt` | Object storage retention |
+| **Record** | `DocumentFile.recordExpiresAt` | Database row retention (default +5 years from upload) |
 
-  // Three-Tier Lifecycle Timestamps
-  linkExpiresAt  DateTime  // When the current email token expires
-  fileExpiresAt  DateTime  // When the file is scrubbed from S3
-  recordExpiresAt DateTime  // When the DB record is purged (default: 5 years)
+Constraint: `linkTtl ≤ fileTtl` at upload time. Link TTL is always set **per upload** via the `linkTtl` field (seconds) — there is no global default read from environment at runtime.
 
-  isUsed         Boolean   @default(false) // True after a link is consumed
-  deletedAt      DateTime? // Populated by the file scrub worker
-  createdAt      DateTime  @default(now())
+| Tier | Plain-language question it answers |
+|------|-----------------------------------|
+| **Link** | "How long can the recipient use the email link?" |
+| **File** | "How long do we keep the actual file in storage?" |
+| **Record** | "How long do we keep the paper trail in the database?" |
 
-  auditLogs      AuditLog[]
-}
+### 8.2 Upload Paths
 
-model AuditLog {
-  id          String         @id @default(uuid())
-  eventType   AuditEventType
-  timestamp   DateTime       @default(now())
+| Path | Trigger | Module |
+|------|---------|--------|
+| HTTP single | `POST /api/upload` | `src/server/routes/upload.ts` |
+| HTTP batch | `POST /api/upload/batch` | same + `parseBatchRecipients` |
+| SFTP drop | Worker inbox poll | `src/server/sftp/` |
 
-  // Optional relations: not all events relate to both a document and a user
-  userId      String?
-  documentId  String?
-  document    Document?      @relation(fields: [documentId], references: [id])
+All paths call `ingestDocumentFile()` then `createDocumentUserLink()`.
 
-  // Request context
-  ipAddress   String?
-  userAgent   String?
-  metadata    Json?          // Flexible event-specific data
+**`createDocumentUserLink()` steps:**
 
-  expiresAt   DateTime       // Configurable retention (default: 5 years)
-}
-```
+1. Resolve `maxDownloads` (field or `DEFAULT_MAX_DOWNLOADS`).
+2. If `RECIPIENT_OTP_ENABLED`, persist `otpChannel`; generate encrypted TOTP secret + provisioning URI for `authenticator`.
+3. Hash password with Argon2; generate 32-byte hex `downloadToken`.
+4. Insert `DocumentUserLink` with `linkExpiresAt = now + linkTtl`.
+5. Enqueue `send-initial-link` on email-queue.
+6. Register compensation undo (delete link row on downstream failure).
 
-### 5.2 Data Relationships
+### 8.3 Download Consumption and Re-Verify Window
 
-- One `Document` can have many `AuditLog` entries.
-- `AuditLog.documentId` is nullable to support events not tied to a specific document (e.g., `USER_LOGIN`).
-- When a `Document` record is purged by the audit scrub worker, its associated `AuditLog` entries should be purged first, or the foreign key must be set to `onDelete: SetNull`.
+Implemented in `src/lib/verify-consumption.ts`:
 
----
+1. Before password check, reject if `downloadCount >= maxDownloads` (`download_limit_reached`).
+2. If `isUsed` and outside re-verify window or max re-verify attempts exceeded → `link_consumed`.
+3. On successful verify, increment `verifySuccessCount` within window.
+4. When `verifySuccessCount` reaches `maxReverifyAttempts` (env), increment `downloadCount` and possibly set `isUsed = true` if all downloads consumed.
+5. Reset `verifySuccessCount` when a consumption completes but downloads remain.
 
-## 6. Security Architecture
+This **softens the one-time-download experience**: the recipient can retry the download if the browser fails within the grace window before the link is fully consumed.
 
-### 6.1 The "Two-Key" Access Model
+**Configuration:**
 
-Vellum enforces a mandatory two-factor verification model for every file download, regardless of whether the user is authenticated via WorkOS or not.
+| Variable | Default | Meaning |
+|----------|---------|---------|
+| `REVERIFY_WINDOW_MS` | `300000` (5 min) | Duration of a re-verify window after the first successful verify in a consumption cycle |
+| `MAX_REVERIFY_ATTEMPTS` | `3` | Successful verifies allowed within one window before one `downloadCount` increment |
 
-| Factor | Requirement | Managed By |
-| :--- | :--- | :--- |
-| **Possession** | Access Link (Token) | Delivered via email, stored in Prisma |
-| **Knowledge** | File Password | Known to recipient, stored as Argon2 hash |
+**Example (`maxDownloads=1`, defaults):** The recipient verifies the password → receives a presigned URL → the browser fails to download → they may re-enter the password up to 3 times within 5 minutes → on the 3rd success, `downloadCount` becomes 1 and `isUsed` becomes true (unless more downloads are allowed).
 
-Even authenticated WorkOS users (Path B) must complete Path A. They may request a new link from the dashboard, but the download itself is always gated by the email-link + password flow.
+**Implementation reference:** `getVerifyRejection()` and `computeVerifyConsumptionUpdate()` in `src/lib/verify-consumption.ts`; applied in `completeDownload()` after Argon2 and optional OTP succeed.
 
-### 6.2 Upload Security
+### 8.4 Scrub Workers
 
-1. **API Authentication:** Uploaders must present a valid API Key or WorkOS JWT.
-2. **Input Validation:** All request body fields are validated via **Zod** before processing.
-3. **Virus Scanning:** Every file is scanned by **ClamAV** before being stored in MinIO. Files that fail scanning are rejected and never stored.
-4. **Password Hashing:** File passwords are hashed with **Argon2** before being written to Postgres. Plaintext passwords are never persisted.
+| Worker | Schedule | Action |
+|--------|----------|--------|
+| `fileScrubWorker` | Hourly cron | Null `DocumentFile.s3Key`, delete S3 object, emit `FILE_SCRUBBED` |
+| `recordScrubWorker` | Monthly cron | Purge expired `DocumentFile`, links, and audit rows past `expiresAt` |
 
-### 6.3 Download Security
+File scrub: DB update first, then S3 delete (compensation restores DB on S3 failure).
 
-1. No file bytes ever pass through the Node.js server.
-2. After successful Path A validation, a **30-second Presigned URL** is generated.
-3. The Presigned URL uses a `Content-Disposition: attachment` header to force a file download rather than browser rendering.
-4. `isUsed` is set to `true` immediately after the URL is generated.
-5. All access attempts (both successes and failures) are logged asynchronously to the `audit-queue`.
+### 8.5 SHA-256 Integrity
 
-### 6.4 Presigned URL Generation
-
-```typescript
-// src/lib/storage/s3Client.ts
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-
-const s3Client = new S3Client({
-  endpoint: process.env.MINIO_ENDPOINT,
-  region: process.env.AWS_REGION,
-  credentials: {
-    accessKeyId: process.env.MINIO_ROOT_USER,
-    secretAccessKey: process.env.MINIO_ROOT_PASSWORD,
-  },
-  forcePathStyle: true, // Required for MinIO compatibility
-});
-
-export const generatePresignedUrl = async (
-  s3Key: string,
-  fileName: string
-): Promise<string> => {
-  const command = new GetObjectCommand({
-    Bucket: process.env.MINIO_BUCKET_NAME,
-    Key: s3Key,
-    ResponseContentDisposition: `attachment; filename="${fileName}"`,
-  });
-  return await getSignedUrl(s3Client, command, { expiresIn: 30 });
-};
-```
+Computed at ingest (`computeSha256`). Returned on successful verify and shown on `/verify/{token}/complete` via the `FileSha256Display` component. The recipient can compare locally with `sha256sum downloaded-file`.
 
 ---
 
-## 7. API Design
+## 9. API Design
 
-### 7.1 Endpoints
+> **Plain language:** The API is how other systems talk to Vellum — upload files, revoke links, and (for admins) export audit data. Recipients mostly use the **website** (verify page), not the API directly. Success responses use a consistent JSON envelope; errors use a standard format (Problem Details) that client apps can parse reliably.
 
-| Method | Path | Auth | Description |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/upload` | API Key (`Authorization: Bearer`) | Upload a document |
-| `POST` | `/api/verify` | None | Validate token + password, receive presigned URL |
-| `GET` | `/api/documents` | Session cookie (`vellum_session`) | List documents for authenticated user |
-| `POST` | `/api/documents/:id/request-link` | Session cookie | Request a new download link |
-| `GET` | `/api/auth/login` | None | Redirect to WorkOS AuthKit (production) |
-| `GET` | `/api/auth/callback` | WorkOS | OAuth callback; sets session cookie |
-| `POST` | `/api/auth/dev/request-login` | None | Dev sign-in; sets session cookie when verified |
-| `GET` | `/docs/` | Session cookie + `ADMIN` | Generated TypeDoc HTML (admin only) |
+### 9.1 Response Envelopes
 
-### 7.2 Upload Endpoint
+| Type | Content-Type | Shape |
+|------|--------------|-------|
+| Success | `application/vnd.vellum.result+json` | `{ type, title, status, data, ... }` |
+| Error | `application/problem+json` | RFC 9457 Problem Details |
 
-```typescript
-// POST /api/upload
-const uploadSchema = zod
-  .object({
-    recipientEmail: zod.string().email(),
-    password: zod.string().min(8),
-    linkTtl: zod.number().int().positive(), // Seconds
-    fileTtl: zod.number().int().positive(), // Seconds
-  })
-  .refine((data) => data.linkTtl <= data.fileTtl, {
-    message: "linkTtl cannot exceed fileTtl",
-  });
+See [ERROR_HANDLING.md](./ERROR_HANDLING.md).
 
-router.post("/upload", async (req, res) => {
-  const { recipientEmail, password, linkTtl, fileTtl } =
-    uploadSchema.parse(req.body);
+### 9.2 Endpoint Catalog
 
-  // 1. Scan with ClamAV
-  // 2. Upload to MinIO → receive s3Key
-  const passwordHash = await argon2.hash(password);
+| Method | Path | Auth | Purpose |
+|--------|------|------|---------|
+| `GET` | `/api/health` | None | DB, Redis, ClamAV status |
+| `GET` | `/api/meta` | None | Public config (hCaptcha site key, feature flags) |
+| `POST` | `/api/upload` | API key | Single-recipient upload |
+| `POST` | `/api/upload/batch` | API key | Multi-recipient upload |
+| `POST` | `/api/verify` | None | Password (+ captcha) → URL or OTP session |
+| `POST` | `/api/verify/otp` | None | OTP code → presigned URL + sha256 |
+| `POST` | `/api/verify/otp/resend` | None | Resend email/SMS/WhatsApp OTP |
+| `GET` | `/api/documents` | Session | List links for recipient email |
+| `POST` | `/api/documents/:id/request-link` | Session | Regenerate link email |
+| `POST` | `/api/documents/:id/revoke` | API key or admin | Revoke link |
+| `GET` | `/api/admin/*` | Admin session | Read-only table browser + audit export |
+| `GET` | `/api/dev/webhook-deliveries` | Admin (non-prod) | Webhook inspector API |
+| `GET` | `/api/auth/login` | None | WorkOS redirect |
+| `GET` | `/api/auth/callback` | WorkOS | OAuth callback |
+| `POST` | `/api/auth/dev/request-login` | None | Dev login email |
+| `GET` | `/api/auth/verify-email` | Token | Dev email verification |
+| `GET` | `/api/auth/me` | Session | Current user |
+| `POST` | `/api/auth/logout` | Session | Clear cookie |
+| `GET` | `/docs/` | Admin session | TypeDoc HTML |
 
-  const now = new Date();
-  const doc = await prisma.document.create({
-    data: {
-      s3Key: uploadedS3Key,
-      fileName: originalName,
-      recipientEmail,
-      passwordHash,
-      downloadToken: crypto.randomBytes(32).toString("hex"),
-      linkExpiresAt: addSeconds(now, linkTtl),
-      fileExpiresAt: addSeconds(now, fileTtl),
-      recordExpiresAt: addYears(
-        now,
-        Number(process.env.REPORTING_LIFETIME_YEARS)
-      ),
-    },
-  });
+### 9.3 Upload Request (Single)
 
-  await emailQueue.add("send-initial-link", { docId: doc.id });
+**Multipart fields** (validated by `uploadFieldsSchema`):
 
-  res.status(201).json({ id: doc.id });
-});
-```
+| Field | Required | Notes |
+|-------|----------|-------|
+| `file` | Yes | Document bytes |
+| `recipientEmail` | Yes | |
+| `password` | Yes | Min 8 chars |
+| `linkTtl` | Yes | Seconds |
+| `fileTtl` | Yes | Seconds; must be ≥ linkTtl |
+| `maxDownloads` | No | Default `DEFAULT_MAX_DOWNLOADS` (1) |
+| `otpChannel` | No | `email`, `sms`, `whatsapp`, `authenticator` |
+| `recipientPhone` | If sms/whatsapp | E.164 |
 
-### 7.3 Verify Endpoint (Path A)
+**Response (`201`):** `{ id, linkId, fileId, sha256, maxDownloads, otpChannel?, totpProvisioningUri?, warning }`
 
-```typescript
-// POST /api/verify
-router.post("/verify", async (req, res) => {
-  const { token, password } = req.body;
+### 9.4 Upload Request (Batch)
 
-  const doc = await prisma.document.findUnique({
-    where: { downloadToken: token },
-  });
+| Field | Required | Notes |
+|-------|----------|-------|
+| `file` | Yes | Shared bytes |
+| `recipients` | Yes | JSON array, max `MAX_BATCH_RECIPIENTS` (50) |
 
-  if (!doc) {
-    return res.status(404).json({ error: "Invalid link." });
-  }
+**Response (`201`):** `{ batchId, fileId, sha256, links: [{ id, recipientEmail }], warning }`
 
-  if (new Date() > doc.linkExpiresAt) {
-    return res.status(410).json({
-      error: "This link has expired.",
-      actionRequired:
-        "Please log in to your Vellum dashboard to request a new link.",
-    });
-  }
+### 9.5 Verify Request
 
-  const isValid = await argon2.verify(doc.passwordHash, password);
-  if (!isValid) {
-    logEvent({
-      eventType: "FILE_DOWNLOAD_FAILED",
-      documentId: doc.id,
-      metadata: { reason: "Incorrect password" },
-      ip: req.ip,
-    });
-    return res.status(401).json({ error: "Invalid file password." });
-  }
+**POST /api/verify** body: `{ token, password, hcaptchaToken? }`
 
-  const downloadUrl = await generatePresignedUrl(doc.s3Key!, doc.fileName);
+Failure reasons in audit `metadata.reason`: `invalid_token`, `revoked`, `file_scrubbed`, `expired_link`, `download_limit_reached`, `link_consumed`, `Incorrect password`, `rate_limited`, `captcha_failed`.
 
-  await prisma.document.update({
-    where: { id: doc.id },
-    data: { isUsed: true },
-  });
+**POST /api/verify/otp** body: `{ token, otpSessionId, code }`
 
-  logEvent({
-    eventType: "FILE_DOWNLOAD_SUCCESS",
-    documentId: doc.id,
-    ip: req.ip,
-    userAgent: req.headers["user-agent"],
-  });
+**POST /api/verify/otp/resend** body: `{ token, otpSessionId }`
 
-  res.json({ downloadUrl });
-});
-```
+### 9.6 Audit Export
 
-### 7.4 Request New Link Endpoint (Path B)
+**GET /api/admin/audit-logs** — admin session.
 
-```typescript
-// POST /api/documents/:id/request-link
-router.post("/:id/request-link", async (req, res) => {
-  const user = req.user; // WorkOS JWT middleware
-
-  const doc = await prisma.document.findFirst({
-    where: { id: req.params.id, recipientEmail: user.email },
-  });
-
-  if (!doc) {
-    return res.status(404).json({ error: "Document not found." });
-  }
-
-  if (!doc.s3Key || new Date() > doc.fileExpiresAt) {
-    return res.status(410).json({
-      error:
-        "The source file has been permanently deleted per the retention policy.",
-    });
-  }
-
-  // Enforce: new linkExpiresAt must not exceed fileExpiresAt
-  const requestedExpiry = addHours(new Date(), 24);
-  const newLinkExpiresAt =
-    requestedExpiry > doc.fileExpiresAt ? doc.fileExpiresAt : requestedExpiry;
-
-  const updatedDoc = await prisma.document.update({
-    where: { id: doc.id },
-    data: {
-      downloadToken: crypto.randomBytes(32).toString("hex"),
-      linkExpiresAt: newLinkExpiresAt,
-      isUsed: false,
-    },
-  });
-
-  await emailQueue.add("send-regenerate-link", {
-    docId: updatedDoc.id,
-    requestedBy: user.id,
-  });
-
-  res.json({ message: "A fresh link has been sent to your email." });
-});
-```
+| Query | Purpose |
+|-------|---------|
+| `format=csv` or `Accept: text/csv` | CSV download |
+| `limit` | Page size (max `AUDIT_EXPORT_MAX_LIMIT`) |
+| `cursor` | Cursor pagination |
+| `eventType`, `documentId`, `userId` | Filters (`documentId` = recipient **link** id) |
+| `from`, `to` | ISO date range |
+| `includeExpired` | Include rows past retention |
 
 ---
 
-## 8. Authentication & Authorization
+## 10. Authentication and Authorization
 
-### 8.1 Identity providers
+> **Plain language:** Three doors: (1) **API key** for machines uploading files, (2) **session cookie** for humans using the dashboard after login, (3) **admin role** for operator pages. The verify/download page is intentionally **public** (no login) — security comes from the link token and password, not from a user account.
 
-| Mode | `AUTH_PROVIDER` | Dashboard sign-in |
-| :--- | :--- | :--- |
-| **Production** | `workos` | WorkOS AuthKit (`GET /api/auth/login`) |
-| **Local / dev** | `dev` | Email + Mailpit verification (`POST /api/auth/dev/request-login`) |
+### 10.1 Integrator (API Key)
 
-Both modes issue the same **`vellum_session`** HTTP-only cookie (HS256 JWT, 7-day TTL). Dev mode also supports `X-Dev-User-Email` on API `fetch` calls from the SPA.
+Middleware: `apiKeyAuth` on `/api/upload/*`. Header: `Authorization: Bearer {API_KEY}`.
 
-| User Type | Auth Method | Can Download Directly? |
-| :--- | :--- | :--- |
-| **Uploader** | API Key | N/A (uploads only) |
-| **Guest Recipient** | Email Link + File Password | Yes (via Path A) |
-| **Dashboard User** | Session cookie (WorkOS or dev) | No (triggers Path A via email) |
-| **Admin** | Session cookie + `UserKind.ADMIN` | No for files; yes for `/docs/` |
+### 10.2 Dashboard Session
 
-### 8.2 WorkOS Callback Handler
+Middleware: `dashboardAuth` on `/api/documents/*` (except revoke).
 
-```typescript
-// GET /api/auth/callback
-router.get("/callback", async (req, res) => {
-  const { code, state } = req.query;
+Cookie `vellum_session` (HS256 JWT). Dev mode also accepts `X-Dev-User-Email` header for API calls (not full-page routes like `/docs/`).
 
-  const { user } = await workos.userManagement.authenticateWithCode({
-    code: code as string,
-    clientId: process.env.WORKOS_CLIENT_ID,
-  });
+### 10.3 Admin
 
-  // upsert user, enforce email verification for consumers, ...
+Middleware: `adminAuth` on `/api/admin/*`, `/api/studio/*`, `/api/dev/*`. Requires `users.kind === ADMIN`.
 
-  const token = await createSessionToken({ id: user.id, email: user.email });
-  setSessionCookie(res, token);
+Revoke accepts **either** API key or admin session via `integratorOrAdminAuth`.
 
-  const returnTo = safeReturnTo(state); // e.g. /docs/ when opened from API docs
-  res.redirect(returnTo);
-});
-```
+### 10.4 WorkOS Flow
 
-### 8.3 Dev sign-in
+1. `GET /api/auth/login` → WorkOS AuthKit
+2. Callback upserts user, checks `emailVerified`
+3. Unverified non-admins → `/login/email-verification`
+4. Sets session cookie, logs `USER_LOGIN`
 
-1. User submits email at `/login` → `POST /api/auth/dev/request-login`.
-2. If unverified, Mailpit delivers `GET /api/auth/verify-email?token=…`.
-3. When verified, the API sets `vellum_session` and the browser redirects to `/dashboard` or `returnTo` (e.g. `/docs/`).
+### 10.5 Dev Auth Flow
 
-### 8.4 Dashboard Security Model
-
-1. User authenticates (WorkOS or dev) and receives `vellum_session`.
-2. Dashboard calls `GET /api/documents`. Backend queries Prisma `WHERE recipientEmail = user.email`.
-3. User sees a list of documents addressed to them.
-4. Clicking "Get Access Link" calls `POST /api/documents/:id/request-link`.
-5. A new token is generated, emailed to the user — then the user must complete **Path A**.
-
-The user cannot download any file directly from the dashboard. The email inbox acts as a mandatory security checkpoint on every retrieval.
+1. `POST /api/auth/dev/request-login` with email
+2. Mailpit link → `GET /api/auth/verify-email`
+3. Return to `/login`, sign in → session cookie
 
 ---
 
-## 9. Document Lifecycle Management
+## 11. Frontend Application
 
-### 9.1 The Three-Tier Lifecycle
+> **Plain language:** The website has separate areas: **login and dashboard** for recipients, **verify pages** for anyone with an email link (no account needed), and **admin** pages for internal staff. Status badges on the dashboard show at a glance whether a link is still valid and how many downloads remain.
 
-| Tier | Field | Controls | Set By |
-| :--- | :--- | :--- | :--- |
-| **Link TTL** | `linkExpiresAt` | How long the emailed token is valid | Uploader at upload time |
-| **File TTL** | `fileExpiresAt` | When the S3/MinIO file is permanently purged | Uploader at upload time |
-| **Record TTL** | `recordExpiresAt` | When the Postgres row is deleted | System config (default: 5 years) |
+### 11.1 Stack and Routing
 
-### 9.2 File Lifecycle State Machine
+- **TanStack Router** file-based routes under `src/routes/`
+- Pages in `src/pages/`
+- shadcn/ui components in `src/components/`
 
-```text
-[Uploaded] → [Email Sent] → [Link Active]
-    ↓                            ↓
-[File Expired]           [Downloaded (isUsed=true)]
-    ↓                            ↓
-[File Scrubbed]          [Link Expired]
-    ↓                            ↓
-[Record Active]          [Path B: New Link]
-    ↓
-[Record Purged (5yr)]
-```
+### 11.2 Key Routes
 
-### 9.3 Example Lifecycle
+| Route | Audience | Purpose |
+|-------|----------|---------|
+| `/login`, `/login/email-verification` | All | Sign-in |
+| `/dashboard` | Recipient | Document list, status badges, request link |
+| `/verify/$token` | Public | Password + captcha + OTP entry |
+| `/verify/$token/complete` | Public | Download + SHA-256 display |
+| `/admin` | Admin | Table overview tiles |
+| `/admin/document-files`, `/admin/documents` | Admin | File and link browsers; **revoke** on link detail |
+| `/admin/audit-logs`, … | Admin | All DB tables read-only |
+| `/admin/webhook-deliveries` | Admin | Webhook delivery log |
+| `/dev/webhooks` | Admin (dev) | Native webhook inspector |
+| `/docs/` | Admin | TypeDoc API reference |
 
-| Event | Timing | System State |
-| :--- | :--- | :--- |
-| File Uploaded | Day 0, 10:00 | `s3Key` set, `downloadToken` set, `isUsed = false` |
-| Initial Email Sent | Day 0, 10:01 | `EMAIL_INITIAL_SENT` logged |
-| Recipient Downloads | Day 1, 14:00 | `isUsed = true`, `FILE_DOWNLOAD_SUCCESS` logged |
-| Link Expires | Day 2, 10:00 | Verify endpoint returns 410 |
-| User Logs In (Path B) | Day 2, 11:00 | `USER_LOGIN` logged |
-| New Link Generated | Day 2, 11:01 | New `downloadToken`, `linkExpiresAt` updated |
-| Regeneration Email Sent | Day 2, 11:01 | `EMAIL_REGENERATE_SENT` logged |
-| Recipient Downloads Again | Day 2, 11:05 | `isUsed = true` again |
-| File Scrubbed from S3 | Day 7, 00:00 | `s3Key = null`, `deletedAt` set, `FILE_SCRUBBED` logged |
-| Postgres Record Purged | Year 5 | Full record and associated audit logs deleted |
+### 11.3 Status Badges
 
-### 9.4 Constraint Enforcement
+`DocumentStatusBadges` shows whether the link is active, expired, or revoked; whether the file is available or scrubbed; and download usage (for example, "1 of 2 downloads used").
 
-The system enforces the following rules:
+### 11.4 Data Tables
 
-- **At Upload:** `linkTtl` must be `<= fileTtl` (enforced by Zod).
-- **At Regeneration:** New `linkExpiresAt` is capped at `fileExpiresAt` (enforced in the route handler).
-- **At Verify:** If `s3Key` is null (file already scrubbed), the system returns a 410 before attempting presigned URL generation.
+Admin list pages use shared `DataTable` with a column registry in `src/lib/data-table-db-schema.ts` — it maps Prisma models to filterable, sortable columns. Secrets (tokens, password hashes, and S3 keys) are excluded.
 
 ---
 
-## 10. Email System
+## 12. Email and White-Label Branding
 
-### 10.1 Email Provider Interface (Strategy Pattern)
+> **Plain language:** Download-link emails can look like your organization's product — logo, colors, and wording — not a generic system message. Emails include both plain text (for accessibility) and HTML (for branding). The file password is **never** included in these emails by design.
 
-An interface-driven design allows the email provider to be swapped between local development and AWS SES production via a single environment variable, with no application code changes.
+### 12.1 Email Types
 
-```typescript
-// src/lib/email/IEmailProvider.ts
-export interface EmailPayload {
-  to: string;
-  subject: string;
-  body: string;
-}
+| Job | Template key | Trigger |
+|-----|--------------|---------|
+| `send-initial-link` | `email.templates.initialLink` | After upload / SFTP ingest |
+| `send-regenerate-link` | `email.templates.regenerateLink` | Dashboard request-link |
+| Dev verification | `email.templates.emailVerification` | Dev auth |
+| Recipient OTP | `email.templates.recipientOtp` | Verify password step |
 
-export interface IEmailProvider {
-  send(payload: EmailPayload): Promise<void>;
-}
-```
+### 12.2 Multipart Delivery
 
-### 10.2 Local Development Provider (Mailpit)
+Plain text + **branded HTML** via `render-html-email.ts`. HTML uses preset logo URL, primary color, footer from `src/lib/brand/presets.ts`.
 
-```typescript
-// src/lib/email/providers/LocalEmailProvider.ts
-import nodemailer from "nodemailer";
-import { IEmailProvider, EmailPayload } from "../IEmailProvider";
+### 12.3 Brand Presets
 
-export class LocalEmailProvider implements IEmailProvider {
-  private transporter = nodemailer.createTransport({
-    host: process.env.MAILPIT_HOST,
-    port: Number(process.env.MAILPIT_PORT),
-  });
-
-  async send(payload: EmailPayload): Promise<void> {
-    await this.transporter.sendMail({
-      from: "noreply@vellum.local",
-      ...payload,
-    });
-  }
-}
-```
-
-### 10.3 Production Provider (AWS SES)
-
-```typescript
-// src/lib/email/providers/SesEmailProvider.ts
-import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
-import { IEmailProvider, EmailPayload } from "../IEmailProvider";
-
-export class SesEmailProvider implements IEmailProvider {
-  private client = new SESClient({ region: process.env.AWS_SES_REGION });
-
-  async send(payload: EmailPayload): Promise<void> {
-    await this.client.send(
-      new SendEmailCommand({
-        Destination: { ToAddresses: [payload.to] },
-        Message: {
-          Subject: { Data: payload.subject },
-          Body: { Text: { Data: payload.body } },
-        },
-        Source: "noreply@vellum.app",
-      })
-    );
-  }
-}
-```
-
-### 10.4 Email Service Factory
-
-```typescript
-// src/lib/email/EmailService.ts
-import { IEmailProvider } from "./IEmailProvider";
-import { LocalEmailProvider } from "./providers/LocalEmailProvider";
-import { SesEmailProvider } from "./providers/SesEmailProvider";
-
-export class EmailService {
-  private provider: IEmailProvider;
-
-  constructor() {
-    this.provider =
-      process.env.EMAIL_PROVIDER === "ses"
-        ? new SesEmailProvider()
-        : new LocalEmailProvider();
-  }
-
-  async sendDownloadLink(
-    to: string,
-    token: string,
-    fileName: string
-  ): Promise<void> {
-    const url = `${process.env.APP_URL}/verify/${token}`;
-    await this.provider.send({
-      to,
-      subject: `Secure Document Ready: ${fileName}`,
-      body: `Your document is ready for collection.\n\nVisit the link below and enter your file password to download:\n\n${url}\n\nThis link will expire as scheduled. Do not share this link.`,
-    });
-  }
-}
-```
+Build-time (`VITE_BRAND_PRESET`) and runtime (`BRAND_PRESET`) preset ids. Assets under `public/brands/{id}/`. SMS/WhatsApp OTP copy in `sms.templates.recipientOtp` and `whatsapp.templates.recipientOtp`.
 
 ---
 
-## 11. Background Job Processing
+## 13. Recipient OTP and hCaptcha
 
-### 11.1 Queue Architecture
+> **Plain language:** Optional extra steps after the file password: a **captcha** blocks automated guessing, and **OTP** sends a one-time code (by email, text, WhatsApp, or authenticator app). These are off by default and turned on via environment configuration when policy requires them.
 
-All non-critical operations are offloaded to BullMQ. This decouples the HTTP request/response cycle from I/O-heavy tasks, ensures fault tolerance through Redis persistence, and allows workers to catch up after a database outage without data loss.
+### 13.1 OTP Channels
 
-| Queue | Workers | Trigger |
-| :--- | :--- | :--- |
-| `email-queue` | `emailWorker` | Upload complete, Link regeneration |
-| `audit-queue` | `auditWorker` | Any loggable event in the app |
-| `cleanup-queue` | `fileScrubWorker`, `recordScrubWorker` | Recurring cron schedule |
+| Channel | Delivery | Notes |
+|---------|----------|-------|
+| `email` | Email worker | Same branded templates |
+| `sms` | Twilio SMS | Requires `recipientPhone` |
+| `whatsapp` | Twilio WhatsApp | Requires `recipientPhone` |
+| `authenticator` | TOTP | Returns `totpProvisioningUri` at upload; secret encrypted in DB |
 
-### 11.2 The `logEvent` Helper
+Master switch: `RECIPIENT_OTP_ENABLED`. A link must also have `otpChannel` set at upload (or in the SFTP manifest) for OTP to apply — both must be true (`isRecipientOtpRequired()` in code). Session state is stored in Redis with TTL `OTP_TTL_SECONDS`, max attempts `OTP_MAX_ATTEMPTS`, and max resends `OTP_MAX_RESENDS`.
 
-All audit logging throughout the application calls this single helper. It is intentionally fire-and-forget: the calling code does not block waiting for the log to be written.
+### 13.2 hCaptcha
 
-```typescript
-// src/server/queues/auditQueue.ts
-import { Queue } from "bullmq";
-import { connection } from "../lib/redis";
+When `CAPTCHA_PROVIDER=hcaptcha`, the verify page loads the site key from `GET /api/meta`. The password submit request includes `hcaptchaToken` in the JSON body. The server verifies it via the hCaptcha siteverify API. Failures emit `CAPTCHA_FAILED`.
 
-export const auditQueue = new Queue("audit-queue", { connection });
+> **Plain language:** Captcha is an optional "prove you're human" checkbox before the password field — useful if bots are guessing passwords against public links.
 
-export const logEvent = (data: {
-  eventType: string;
-  documentId?: string;
-  userId?: string;
-  metadata?: Record<string, unknown>;
-  ip?: string;
-  userAgent?: string;
-}): void => {
-  // Not awaited: true fire-and-forget
-  auditQueue.add("log-event", data).catch((err) => {
-    // Fallback: surface the error without crashing the request
-    console.error("[AuditQueue] Failed to enqueue audit event:", err);
-  });
-};
-```
-
-### 11.3 Email Worker
-
-```typescript
-// src/server/workers/emailWorker.ts
-import { Worker } from "bullmq";
-import { prisma } from "../lib/prisma";
-import { EmailService } from "../lib/email/EmailService";
-import { auditQueue } from "../queues/auditQueue";
-import { connection } from "../lib/redis";
-
-const emailService = new EmailService();
-
-export const emailWorker = new Worker(
-  "email-queue",
-  async (job) => {
-    const { docId, type } = job.data; // type: 'INITIAL' | 'REGENERATE'
-
-    const doc = await prisma.document.findUnique({ where: { id: docId } });
-    if (!doc) throw new Error(`Document ${docId} not found`);
-
-    await emailService.sendDownloadLink(
-      doc.recipientEmail,
-      doc.downloadToken,
-      doc.fileName
-    );
-
-    await auditQueue.add("log-event", {
-      eventType:
-        type === "INITIAL" ? "EMAIL_INITIAL_SENT" : "EMAIL_REGENERATE_SENT",
-      documentId: docId,
-      metadata: { type },
-    });
-  },
-  { connection }
-);
-```
-
-### 11.4 Audit Worker
-
-```typescript
-// src/server/workers/auditWorker.ts
-import { Worker } from "bullmq";
-import { prisma } from "../lib/prisma";
-import { addYears } from "date-fns";
-import { connection } from "../lib/redis";
-
-export const auditWorker = new Worker(
-  "audit-queue",
-  async (job) => {
-    const { eventType, documentId, userId, metadata, ip, userAgent } = job.data;
-
-    await prisma.auditLog.create({
-      data: {
-        eventType,
-        documentId,
-        userId,
-        metadata,
-        ipAddress: ip,
-        userAgent,
-        expiresAt: addYears(
-          new Date(),
-          Number(process.env.REPORTING_LIFETIME_YEARS)
-        ),
-      },
-    });
-  },
-  { connection }
-);
-```
-
-### 11.5 File Scrub Worker (Recurring: Every Hour)
-
-Deletes files from MinIO that have exceeded their `fileExpiresAt` timestamp.
-
-```typescript
-// src/server/workers/fileScrubWorker.ts
-import { Worker } from "bullmq";
-import { prisma } from "../lib/prisma";
-import { s3Client } from "../lib/storage/s3Client";
-import { DeleteObjectCommand } from "@aws-sdk/client-s3";
-import { auditQueue } from "../queues/auditQueue";
-import { connection } from "../lib/redis";
-
-export const fileScrubWorker = new Worker(
-  "cleanup-queue",
-  async (job) => {
-    if (job.name !== "scrub-files") return;
-
-    const expiredDocs = await prisma.document.findMany({
-      where: {
-        fileExpiresAt: { lt: new Date() },
-        s3Key: { not: null },
-      },
-    });
-
-    for (const doc of expiredDocs) {
-      await s3Client.send(
-        new DeleteObjectCommand({
-          Bucket: process.env.MINIO_BUCKET_NAME,
-          Key: doc.s3Key!,
-        })
-      );
-
-      await prisma.document.update({
-        where: { id: doc.id },
-        data: { s3Key: null, deletedAt: new Date() },
-      });
-
-      await auditQueue.add("log-event", {
-        eventType: "FILE_SCRUBBED",
-        documentId: doc.id,
-        metadata: { originalS3Key: doc.s3Key },
-      });
-    }
-  },
-  { connection }
-);
-```
-
-### 11.6 Record Scrub Worker (Recurring: Monthly)
-
-Purges Postgres rows that have exceeded their `recordExpiresAt` timestamp.
-
-```typescript
-// src/server/workers/recordScrubWorker.ts
-export const recordScrubWorker = new Worker(
-  "cleanup-queue",
-  async (job) => {
-    if (job.name !== "scrub-records") return;
-
-    const now = new Date();
-
-    await prisma.auditLog.deleteMany({
-      where: { expiresAt: { lt: now } },
-    });
-
-    await prisma.document.deleteMany({
-      where: { recordExpiresAt: { lt: now } },
-    });
-  },
-  { connection }
-);
-```
-
-### 11.7 Operation Classification Summary
-
-| Operation | Handling | Examples |
-| :--- | :--- | :--- |
-| **Core Path** | Synchronous (Awaited) | DB lookups, Password verification, Presigned URL generation |
-| **Communication** | `email-queue` | Initial link, Regeneration link |
-| **Compliance** | `audit-queue` | Login, Download success/fail, File scrub |
-| **Cleanup** | `cleanup-queue` (Cron) | S3 file deletion, Postgres record purge |
+Dev bypass: `SKIP_CAPTCHA=true` (non-production only).
 
 ---
 
-## 12. Audit & Compliance
+## 14. Background Job Processing
 
-### 12.1 Audit Event Reference
+> **Plain language:** Slow or non-critical work happens **in the background** so the API responds quickly. Sending email, writing audit rows, delivering webhooks, and deleting expired files are all queued jobs processed by separate worker processes — not during the user's HTTP request.
 
-| Event | Trigger Point | Key Metadata |
-| :--- | :--- | :--- |
-| `USER_LOGIN` | WorkOS callback | `email`, `userId`, `provider` |
-| `EMAIL_INITIAL_SENT` | Email worker | `documentId`, `type` |
-| `EMAIL_REGENERATE_SENT` | Email worker | `documentId`, `requestedBy` |
-| `FILE_DOWNLOAD_SUCCESS` | `/api/verify` | `documentId`, `ip`, `userAgent` |
-| `FILE_DOWNLOAD_FAILED` | `/api/verify` | `documentId`, `ip`, `reason` |
-| `FILE_SCRUBBED` | File scrub worker | `documentId`, `originalS3Key` |
+### 14.1 Queues
 
-### 12.2 Document Event Timeline (Example)
+| Queue | Producer | Consumer | Purpose |
+|-------|----------|----------|---------|
+| `email-queue` | upload, documents, SFTP | `emailWorker` | Send emails |
+| `audit-queue` | routes, workers | `auditWorker` | Persist audit + enqueue webhooks |
+| `webhook-queue` | `auditWorker` | `webhookWorker` | HTTP POST to integrator URLs |
+| `process-errors-queue` | `errorHandler`, workers | `processErrorWorker` | Persist ProcessError |
+| `cleanup-queue` | cron schedulers | scrub/reconcile workers | Lifecycle maintenance |
 
-This timeline view is the basis for an admin compliance report for any given document.
+### 14.2 Workers
 
-```text
-Day 0  10:00  Document Uploaded
-Day 0  10:01  EMAIL_INITIAL_SENT
-Day 1  14:00  FILE_DOWNLOAD_SUCCESS (IP: 1.2.3.4)
-Day 2  09:00  USER_LOGIN (WorkOS, user@example.com)
-Day 2  09:05  EMAIL_REGENERATE_SENT
-Day 2  09:10  FILE_DOWNLOAD_SUCCESS (IP: 1.2.3.4)
-Day 7  00:00  FILE_SCRUBBED (Automated)
-Year 5 00:00  Postgres record and associated audit logs purged
-```
+| Worker | File | Role |
+|--------|------|------|
+| `emailWorker` | `emailWorker.ts` | Nodemailer send; audit email events |
+| `auditWorker` | `auditWorker.ts` | Insert AuditLog; enqueue webhook jobs |
+| `webhookWorker` | `webhookWorker.ts` | Signed POST; WebhookDelivery rows |
+| `fileScrubWorker` | `fileScrubWorker.ts` | Delete expired S3 objects |
+| `recordScrubWorker` | `recordScrubWorker.ts` | Purge expired DB rows |
+| `processErrorWorker` | `processErrorWorker.ts` | ProcessError persistence + linking |
+| `orphanReconciliationWorker` | `orphanReconciliationWorker.ts` | Optional daily orphan cleanup |
 
-### 12.3 Compliance Notes by Industry
+### 14.3 Cron Schedules (via cleanup-queue)
 
-- **Banking (SOX / Basel III):** Every document dispatch, access, and deletion is logged with IP and timestamp, providing a legally defensible chain of custody.
-- **Insurance:** Full chain of custody is preserved from upload through final deletion. Even if an agent uploads to the wrong email, the file password acts as a second barrier.
-- **GDPR:** Files are scrubbed at TTL expiry. Records are purged at 5 years. No personal data is retained beyond configured limits.
-- **Universities:** The Registrar's office can prove that a transcript was dispatched and accessed, satisfying accreditation audit requirements.
-
----
-
-## 13. AWS Migration Plan
-
-### 13.1 Service Mapping
-
-| Local Component | AWS Managed Service | Migration Effort |
-| :--- | :--- | :--- |
-| **Postgres Container** | AWS RDS (Postgres) | Low — Update `DATABASE_URL` |
-| **MinIO Container** | AWS S3 | Low — AWS SDK supports both |
-| **Redis Container** | AWS ElastiCache (Redis) | Medium — Update connection string, security groups |
-| **Node/React App** | AWS ECS (Fargate) | Medium — Push image to ECR, define task |
-| **Nginx** | AWS ALB (Application Load Balancer) | Medium — Replace Nginx config with ALB listener rules |
-| **Mailpit** | AWS SES | Low — Set `EMAIL_PROVIDER=ses` |
-| **WorkOS** | WorkOS (no change) | None — SaaS, already cloud-hosted |
-| **ClamAV Container** | AWS Lambda (S3 trigger) | High — Rewrite as Lambda function |
-
-### 13.2 Migration Steps
-
-1. **Secrets:** Move all `.env` values to **AWS Secrets Manager**. Update ECS task definitions to read from Secrets Manager.
-2. **Storage:** Sync files from MinIO to S3:
-
-    ```bash
-    aws s3 sync s3://vellum-documents s3://vellum-production \
-      --source-region us-east-1
-    ```
-
-3. **Database:** Migrate from local Postgres to RDS:
-
-    ```bash
-    pg_dump $LOCAL_DATABASE_URL | psql $RDS_DATABASE_URL
-    ```
-
-4. **Networking:** Create a **VPC** with private subnets for RDS and ElastiCache. The ECS tasks run in public subnets behind the ALB.
-5. **Containers:** Build and push Docker images to **ECR**. Define an ECS Fargate service and task definition.
-6. **Proxy:** Replace Nginx with an **AWS Application Load Balancer**. Use **AWS Certificate Manager** for SSL.
-7. **Email:** No code changes required. Set `EMAIL_PROVIDER=ses` in Secrets Manager.
-8. **Virus Scanning:** Replace the ClamAV container with an **AWS Lambda** function triggered by S3 `PutObject` events to scan files asynchronously after upload.
-
-### 13.3 Zero Code Change Principle
-
-By using the AWS SDK for both MinIO (`forcePathStyle: true`) and S3, and by using the Strategy Pattern for email providers, the application code requires **no changes** for the migration. All differences are contained in environment variables.
+| Job | Pattern | Action |
+|-----|---------|--------|
+| `scrub-files` | `0 * * * *` (hourly) | File scrub |
+| `scrub-records` | `0 0 1 * *` (monthly) | Record purge |
+| `reconcile-orphans` | `ORPHAN_RECONCILE_CRON` | Optional orphan reconciliation |
 
 ---
 
-## Appendix A: Project Naming
+## 15. SFTP Ingestion
 
-**Vellum** was selected from a large pool of candidates evaluated across four categories:
+> **Plain language:** For partners who cannot use the HTTP API, Vellum watches an SFTP folder (like a shared mailbox). They upload a file plus a small JSON "label" describing the recipient and password. The same virus scan, storage, email, and audit steps run automatically.
 
-| Category | Candidates |
-| :--- | :--- |
-| **Professional & Functional** | RelayLink, FileParcel, DirectDispatch, SendVault |
-| **Modern & Minimalist** | DropPoint, Beam, Fetch, AeroSend |
-| **Creative & Playful** | PaperKite, CloudCarrier, SwiftDrop, LinkLoom |
-| **Infrastructure-Focused** | DocPort, RelayNode, DocNexus, CoreBridge |
-| **Industry-Neutral** | DocRelay, FileTransit, FolioTransfer, VerityPost |
+Partners drop `{filename}` plus a `{filename}{SFTP_MANIFEST_SUFFIX}` manifest (default: `{filename}.json`) into the SFTP inbox. The worker polls every `SFTP_POLL_INTERVAL_MS`, waits for a stable file size (`SFTP_STABLE_FILE_MS`), then runs the same ingest pipeline as HTTP upload.
 
-**Vellum** was selected for:
-
-- Premium and trustworthy connotations (historically used for legal deeds and academic charters).
-- Industry neutrality — carries no specific sector personality.
-- Ease of branding for banks, universities, insurance companies, and fax services.
-- Short, memorable, and typeable.
-
----
-
-## Appendix B: Industry Use Cases
-
-### B.1 Banking
-
-- **File TTL:** 7 days for sensitive mortgage offer letters.
-- **Link TTL:** 24–48 hours.
-- **Password Strategy:** The file password is a value both the bank and the customer already know (e.g., last 4 digits of account number), removing the need for a separate password communication channel.
-- **Compliance Benefit:** Proof-of-dispatch records satisfy SOX audit requirements even after the file is scrubbed.
-
-### B.2 Insurance
-
-- **File TTL:** 30 days for claims-related documents.
-- **Record TTL:** 5 years to satisfy legal discovery requirements.
-- **Security Benefit:** Even if an agent uploads to the wrong email address, the file password acts as a second barrier preventing unauthorized access.
-
-### B.3 Fax-to-Email Services
-
-- Uploads are automated (machine-to-machine) via the POST API.
-- The password is generated programmatically and is a mutually known value (e.g., Tax ID suffix).
-- No human interaction is required during upload. The recipient receives the Vellum email and uses the pre-shared password.
-
-### B.4 Universities
-
-- **File TTL:** 30 days for transcript delivery.
-- **Link TTL:** 48 hours to prevent links sitting in public-computer inboxes.
-- **Dashboard Benefit:** WorkOS SSO allows students to log in with their institutional identity and request a new link without calling the Registrar's office.
-
----
-
-## Appendix C: Known Issues & Recommendations
-
-### C.1 Brute Force Risk on `/api/verify`
-
-**Issue:** The password verification endpoint has no rate limiting. A malicious actor with valid token in hand could brute-force the file password.
-**Recommendation:** Add `express-rate-limit` middleware scoped to the token value. Limit to 5 failed attempts per token per 15 minutes.
-
-```typescript
-import rateLimit from "express-rate-limit";
-
-const verifyLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
-  keyGenerator: (req) => req.body.token ?? req.ip,
-  message: { error: "Too many attempts. Please try again later." },
-});
-
-router.post("/verify", verifyLimiter, async (req, res) => { ... });
-```
-
-### C.2 ClamAV Startup Delay
-
-**Issue:** ClamAV downloads virus definitions on container startup. This can take 2–5 minutes. During this window, the application container may be ready before ClamAV is, allowing uploads to bypass scanning.
-**Recommendation:** Use Docker Compose `healthcheck` on the ClamAV container and set `condition: service_healthy` in the app's `depends_on`. The application should refuse uploads if ClamAV is unreachable rather than silently skipping the scan.
-
-```yaml
-clamav:
-  healthcheck:
-    test: ["CMD", "clamdcheck.sh"]
-    interval: 30s
-    retries: 10
-    start_period: 120s
-
-app:
-  depends_on:
-    clamav:
-      condition: service_healthy
-```
-
-### C.3 Presigned URL Race Condition
-
-**Issue:** The `isUsed = true` flag is set at the moment the presigned URL is generated, not when the download completes. If the user's browser crashes or the connection drops in the 30-second window, the user is locked out and must use Path B to regenerate.
-**Recommendation:** This is an acceptable UX trade-off given the security model. Document this behavior clearly in the user-facing UI (e.g., *"If your download did not start, please log in to request a new link."*). Optionally, allow up to 3 re-verifications per token within a 5-minute window before setting `isUsed = true` permanently.
-
-### C.4 File Password Delivery Channel
-
-**Issue:** The API specification does not document that the file password **must** be communicated to the recipient via a separate, out-of-band channel. If an integrating party (e.g., the bank) includes the password in the same email as the download link, the two-key security model is completely defeated.
-**Recommendation:** Include an explicit warning in the API documentation and the upload endpoint response:
+### 15.1 Manifest Schema
 
 ```json
 {
-  "id": "doc_uuid",
-  "warning": "The file password must be communicated to the recipient via a separate channel (e.g., SMS, phone call). Do not include it in the same email as the download link."
+  "recipientEmail": "recipient@example.com",
+  "password": "download-secret",
+  "linkTtl": 86400,
+  "fileTtl": 604800,
+  "maxDownloads": 1,
+  "otpChannel": "email"
 }
 ```
 
-### C.5 Silent Audit Event Loss
+### 15.2 Pipeline Audit Events
 
-**Issue:** `logEvent` is fire-and-forget. If Redis is temporarily unavailable, audit events are dropped. A `console.error` is emitted but no recovery occurs.
-**Recommendation:**
+| Step | Event |
+|------|-------|
+| File detected | `SFTP_FILE_RECEIVED` |
+| Manifest valid | `SFTP_METADATA_VALIDATED` |
+| ClamAV clean | `SFTP_VIRUS_SCAN_PASSED` |
+| S3 stored | `SFTP_STORAGE_UPLOADED` |
+| Link created | `SFTP_DOCUMENT_CREATED` |
+| Email queued | `SFTP_EMAIL_QUEUED` |
+| Archived | `SFTP_INGESTION_COMPLETED` |
+| Failure | `SFTP_INGESTION_FAILED` |
 
-1. Enable Redis persistence in Docker Compose (`appendonly yes`) to prevent queue data loss on restart.
-2. For production on AWS, use **ElastiCache with Multi-AZ** to minimize Redis downtime.
-3. Consider a fallback where failed queue additions are written synchronously to a `FailedAuditLog` Postgres table for later reconciliation.
+Success → `SFTP_ARCHIVE_PATH`; failure → `SFTP_FAILED_PATH` with `.error.json` sidecar.
 
-### C.6 `linkTtl > fileTtl` Constraint
+See [SFTP_INGESTION.md](./SFTP_INGESTION.md).
 
-**Issue:** Without enforcement at the API layer, an uploader could set `linkTtl > fileTtl`, meaning the email link would still be valid even after the file has been deleted from S3. The verify endpoint would then return an unhelpful error.
-**Recommendation:** This is already addressed in Section 7.2 with a Zod `.refine()` check. Ensure this constraint is also documented in the external API specification so integrating parties are aware of it.
+---
+
+## 16. Audit, Compliance, and Webhooks
+
+> **Plain language:** Every important action leaves a **permanent journal entry** — who logged in, who downloaded, whether a password was wrong, when a link was revoked, each step of SFTP processing, etc. These entries can be **exported to CSV** for auditors or **pushed automatically** to your own systems via webhooks. The journal outlives the file itself.
+
+### 16.1 Emit API
 
 ```typescript
-.refine((data) => data.linkTtl <= data.fileTtl, {
-  message: "linkTtl cannot exceed fileTtl",
+logEvent({
+  eventType: 'FILE_DOWNLOAD_SUCCESS',
+  documentId: link.id,
+  ip: req.ip,
+  userAgent: req.headers['user-agent'],
+  metadata: { downloadCount, maxDownloads, isFinalConsumption },
 });
 ```
+
+Enqueued to `audit-queue` — it never blocks the HTTP response on a DB write.
+
+### 16.2 Webhook Pipeline
+
+After `auditWorker` inserts a row, if `WEBHOOKS_ENABLED` and the matching `WEBHOOK_URL_{EVENT_TYPE}` is set, it enqueues a `webhook-queue` job.
+
+> **Plain language:** Webhooks are **automatic phone calls** from Vellum to your system: "Hey, a download just succeeded" or "A link was revoked." Each event type can go to a different URL. Payloads are cryptographically signed so you can trust they came from Vellum.
+
+**Headers:** `X-Vellum-Event-Type`, `X-Vellum-Delivery-Id`, `X-Vellum-Signature`
+
+**Retries:** Up to `WEBHOOK_MAX_RETRIES`; final failure → `FailedWebhookDelivery`.
+
+Full catalog: [EVENTS_AND_WEBHOOKS.md](./EVENTS_AND_WEBHOOKS.md).
+
+### 16.3 Retention
+
+`AuditLog.expiresAt` = now + `REPORTING_LIFETIME_YEARS`. Export API excludes expired rows unless `includeExpired=true`.
+
+> **Plain language:** Audit records default to **five years** of retention (configurable). After that they can be purged by the monthly cleanup job — export before purge if your policy requires longer archival elsewhere.
+
+### 16.4 Webhook Payload Shape
+
+```json
+{
+  "deliveryId": "550e8400-e29b-41d4-a716-446655440000",
+  "eventType": "FILE_DOWNLOAD_SUCCESS",
+  "timestamp": "2026-06-07T12:00:00.000Z",
+  "auditLogId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "documentId": "link-uuid",
+  "userId": null,
+  "ipAddress": "203.0.113.10",
+  "userAgent": "Mozilla/5.0 …",
+  "metadata": {
+    "downloadCount": 1,
+    "maxDownloads": 1,
+    "isFinalConsumption": true,
+    "reverifyAttempt": 3
+  }
+}
+```
+
+Built by `buildWebhookPayload()`; signed over the **raw** JSON string body.
+
+### 16.5 Planned Audit Events (Not Yet in Schema)
+
+Documented for a future release — see [EVENTS_AND_WEBHOOKS.md](./EVENTS_AND_WEBHOOKS.md#planned-event-types). These event types are **not** in the Prisma enum today:
+
+| Event | Intended trigger |
+|-------|------------------|
+| `DOCUMENT_UPLOADED` | Successful HTTP or SFTP upload committed |
+| `UPLOAD_REJECTED` | Virus scan, validation, or extension rejection |
+| `LINK_REGENERATION_REQUESTED` | Dashboard request-link before the email worker runs |
+| `USER_EMAIL_VERIFIED` | Dev or WorkOS email verification consumed |
+
+All SFTP and OTP events listed in [Appendix A](#appendix-a-audit-event-catalog) are already in the enum and are emitted when the corresponding action occurs.
+
+---
+
+## 17. Error Handling and Compensation
+
+> **Plain language:** When something goes wrong, users see a clear, consistent error message (not a stack trace). The system also records the failure internally for support and compliance. Multi-step operations (like upload) **roll back** partial changes if a later step fails — so you never get a database record without a file, or vice versa.
+
+### 17.1 AppError
+
+Single operational error class with factories (`badRequest`, `unauthorized`, `notFound`, `gone`, `unprocessableContent`, `tooManyRequests`, etc.). Routes throw `AppError`; global `errorHandler` converts to Problem Details.
+
+### 17.2 Triple-Write Pipeline
+
+Every handled error:
+1. NDJSON log in `{LOG_DIR}/process-errors.ndjson`
+2. Enqueued to `process-errors-queue` → `ProcessError` table
+3. Returned as Problem Details on HTTP
+
+### 17.3 Compensation Stacks
+
+Multi-step mutations use LIFO undo:
+
+| Flow | Undo on failure |
+|------|-----------------|
+| Upload | LIFO undo of registered steps: new `DocumentUserLink` row; **if not deduped**, new `DocumentFile` row + S3 object |
+| Request link | Revert token/expiry state |
+| File scrub | Restore s3Key in DB |
+
+Partial failure returns `compensationFailed` extension.
+
+### 17.4 Audit ↔ Process-Error Correlation
+
+The wrong-password verify flow demonstrates cross-pipeline linking:
+
+1. Route generates `correlationId` (UUID).
+2. `logEvent({ metadata: { correlationId, reason: 'Incorrect password' } })` enqueues audit.
+3. `AppError.unauthorized` thrown; `errorHandler` calls `recordProcessError({ correlationId, documentId })`.
+4. Whichever worker completes second links `AuditLog.processErrorId` ↔ `ProcessError.auditLogId` via shared `correlationId`.
+
+This enables SIEM queries that join compliance events with operational error rows for the same incident.
+
+---
+
+## 18. Admin and Development Tools
+
+> **Plain language:** Administrators get a **mostly read-only control panel** inside the web app — every database table as a searchable list, plus CSV export of audit logs. They see statuses and timestamps, not file contents or passwords. In development mode, extra shortcuts (an email inbox viewer, a storage console, and a webhook debugger) appear in the sidebar.
+
+### 18.1 Admin Data Browser
+
+Read-only paginated lists for every Postgres table. Detail pages exist for document files and document links. The only mutating admin UI action is **Revoke link** on `/admin/documents/:id` (which calls `POST /api/documents/:id/revoke` with an admin session). Revocation invalidates the link only — shared storage is retained when other links reference the same file (§7.5). *Note:* The confirm dialog text mentions deleting the file; backend behavior matches §7.5 (link revoked, shared file kept).
+
+Integrators revoke via API key; recipients use **Request new link** on the dashboard instead of revoke.
+
+### 18.2 Admin API Endpoints
+
+All under `/api/admin`, admin session required:
+
+| Method | Path | Returns |
+|--------|------|---------|
+| `GET` | `/documents` | Paginated `DocumentUserLink` list |
+| `GET` | `/documents/:id` | Link detail + file metadata |
+| `GET` | `/document-files` | Paginated `DocumentFile` list |
+| `GET` | `/document-files/:id` | File detail + linked recipients |
+| `GET` | `/users` | User list |
+| `GET` | `/audit-logs` | Audit export (JSON/CSV, cursor) |
+| `GET` | `/failed-audit-logs` | Dead-letter audit queue |
+| `GET` | `/process-errors` | Operational errors |
+| `GET` | `/failed-process-errors` | Dead-letter process errors |
+| `GET` | `/webhook-deliveries` | Outbound webhook attempts |
+| `GET` | `/failed-webhook-deliveries` | Exhausted webhook retries |
+
+### 18.3 Dev Sidebar
+
+Non-production admins see the **Development** section: Mailpit, MinIO console (embedded proxy), Prisma Studio, Adminer, API docs, and the webhook inspector.
+
+### 18.4 Webhook Inspector
+
+The `/dev/webhooks` page lists `WebhookDelivery` rows. Compose includes `webhook-tester` on :8090 for capturing POST bodies during local integration.
+
+### 18.5 TypeDoc API Reference
+
+`npm run docs:api` generates HTML under `docs/api/html/`. Served at `/docs/` for admins only.
+
+---
+
+## 19. Configuration Reference
+
+All variables documented in [CONFIG.md](./CONFIG.md). Critical groups:
+
+| Group | Key variables |
+|-------|---------------|
+| Core | `DATABASE_URL`, `REDIS_URL`, `API_KEY`, `APP_URL` |
+| Storage | `MINIO_*`, `AWS_REGION` |
+| Lifecycle | `REPORTING_LIFETIME_YEARS`, `DEFAULT_MAX_DOWNLOADS`, per-upload `linkTtl` / `fileTtl` |
+| Security | `SESSION_SECRET`, `WORKOS_*`, `CAPTCHA_*`, `RECIPIENT_OTP_*`, `TOTP_ENCRYPTION_KEY` |
+| Webhooks | `WEBHOOKS_ENABLED`, `WEBHOOK_SECRET`, `WEBHOOK_URL_*` per event |
+| SFTP | `SFTP_ENABLED`, `SFTP_*` paths and poll intervals |
+| Brand | `VITE_BRAND_PRESET`, `BRAND_PRESET`, `BRAND_LOGO_URL` |
+
+---
+
+## 20. Testing Strategy
+
+| Layer | Tool | Command |
+|-------|------|---------|
+| Unit | Vitest | `npm test` (157+ tests) |
+| API | Bruno | `npm run test:api`, `npm run test:api:smoke` |
+| E2E | Puppeteer | `npm run test:e2e` |
+| Build | tsc + Vite | `npm run build` |
+| Lint | ESLint | `npm run lint` |
+| Docs | TypeDoc | `npm run docs:api`, `npm run docs:coverage` |
+
+Bruno collections under `bruno/collections/vellum-api/` cover health, upload (single + batch), auth, documents, verify (password + OTP), request-link, revoke, admin export, webhooks.
+
+E2E seed: `npm run test:e2e:seed` creates test documents via upload API.
+
+---
+
+## 21. Source Layout
+
+```text
+/apps/vellum
+├── prisma/
+│   ├── schema.prisma          # Data model (source of truth)
+│   └── migrations/            # Versioned SQL migrations
+├── src/
+│   ├── server.ts              # Production HTTP entry
+│   ├── api-server.ts          # Dev API entry
+│   ├── server/
+│   │   ├── create-app.ts      # Express factory
+│   │   ├── routes/            # HTTP handlers
+│   │   ├── middleware/        # Auth, error handling
+│   │   ├── queues/            # BullMQ queue definitions
+│   │   ├── workers/           # BullMQ consumers
+│   │   └── sftp/              # SFTP ingestion pipeline
+│   ├── lib/
+│   │   ├── documents/         # Ingest, dedup, link creation
+│   │   ├── recipient-otp/     # OTP service, TOTP encryption
+│   │   ├── captcha/           # hCaptcha verification
+│   │   ├── webhooks/          # Payload build, sign, URL registry
+│   │   ├── brand/             # Presets, HTML email render
+│   │   ├── email/             # EmailService, providers
+│   │   ├── errors/            # AppError, Problem Details
+│   │   ├── compensation/      # Undo stacks
+│   │   └── env.ts             # Typed configuration
+│   ├── pages/                 # Route page components
+│   ├── routes/                # TanStack Router tree
+│   └── components/            # Shared UI
+├── docs/                      # Operator and design documentation
+├── bruno/                     # API test collections
+├── docker-compose.yml         # Full stack definition
+└── e2e/                       # Puppeteer tests
+```
+
+---
+
+## 22. AWS Production Migration
+
+> **Plain language:** The same application code runs locally (with MinIO and Mailpit) and in AWS (with S3 and SES). Moving to production is mainly **configuration and infrastructure** — new database and storage URLs, TLS certificates, and container hosting — not a rewrite.
+
+Summary from [AWS_MIGRATION.md](./AWS_MIGRATION.md). The codebase targets **no application code changes** — production differs by environment configuration only.
+
+| Local (Compose) | AWS target | Notes |
+|-----------------|------------|-------|
+| Postgres container | RDS PostgreSQL | Update `DATABASE_URL` |
+| MinIO | S3 | Same AWS SDK; disable `forcePathStyle` as needed |
+| Redis | ElastiCache | Update `REDIS_URL`, VPC security groups |
+| app + worker images | ECS Fargate + ECR | Split processes already match task boundaries |
+| nginx | ALB + ACM | TLS termination |
+| Mailpit | SES | `EMAIL_PROVIDER=ses` |
+| ClamAV container | Lambda on S3 PutObject | Async scan — higher effort |
+| WorkOS | Unchanged | Same env vars |
+
+Migration order: Secrets Manager → S3 sync → DB dump/restore → VPC → ECR push → Fargate services → ALB → SES → optional Lambda AV.
+
+---
+
+## 23. Future Work (Out of Scope for Current Release)
+
+Deferred enhancements documented in [Nice-To-Have.md](./Nice-To-Have.md):
+
+- Uploader download notification email
+- Chunked/resumable large-file uploads (Tus / multipart)
+- Inbound file-request links
+- SMTP secure gateway (fax-to-email)
+- Scheduled audit archival to S3
+- Secondary malware scan (VirusTotal)
+- Client-side encryption layer
+- DLP hooks, watermarking, ABAC
+
+The **11-item feature roadmap is complete**; these items are competitive analysis backlog only.
+
+---
+
+## 24. Recreation Checklist
+
+To rebuild Vellum v2.1 from this document alone:
+
+1. **Bootstrap repo:** Node 24+, TypeScript ESM, Vite + React, Express, Prisma, BullMQ, Zod, Argon2, AWS SDK S3.
+2. **Implement schema:** All models in §6; run migrations in order listed in §6.9.
+3. **Core lib:** `env.ts`, `AppError` + Problem Details, `CompensationStack`, S3 client (dual endpoint), ClamAV INSTREAM, `ingestDocumentFile`, `createDocumentUserLink`, `verify-consumption`, `revoke-document`.
+4. **API routes:** Mount order per `create-app.ts` (§9); implement upload, verify (+ OTP + captcha), documents, revoke, admin export, auth, health, meta.
+5. **Queues/workers:** email, audit (+ webhook enqueue), webhook, process-error, file/record scrub, optional orphan reconcile.
+6. **SFTP:** inbox watcher, manifest parser, ingest pipeline with audit events (§15).
+7. **Frontend:** TanStack Router pages for verify flow, dashboard, admin tables, dev webhooks.
+8. **Branding:** Presets, HTML email renderer, SMS/WhatsApp templates.
+9. **Compose stack:** All services in §5.1 including sftp and webhook-tester.
+10. **Verify:** `npm test`, `npm run build`, Bruno smoke, E2E seed + verify flow.
+11. **Configure:** Copy `.env.docker.example`; set `API_KEY`, `SESSION_SECRET`, `WEBHOOK_SECRET` for production.
+
+---
+
+## Appendix A: Audit Event Catalog
+
+All values below exist in the Prisma `AuditEventType` enum. Each is emitted when the corresponding action occurs — not on every installation or on every upload.
+
+| Event | Description | Typical `documentId` |
+|-------|-------------|----------------------|
+| `USER_LOGIN` | Dashboard sign-in | — (uses `userId`) |
+| `EMAIL_INITIAL_SENT` | First download-link email sent | Link id |
+| `EMAIL_REGENERATE_SENT` | Regenerated link email sent | Link id |
+| `FILE_DOWNLOAD_SUCCESS` | Password (+ OTP) verified; presigned URL issued | Link id |
+| `FILE_DOWNLOAD_FAILED` | Verify failure (see `metadata.reason`) | Link id when known |
+| `FILE_SCRUBBED` | Object removed from storage | — (uses `metadata.fileId`) |
+| `LINK_REVOKED` | Manual link revocation | Link id |
+| `CAPTCHA_FAILED` | hCaptcha verification failed | Optional link id |
+| `RECIPIENT_OTP_SENT` | OTP code sent | Link id |
+| `RECIPIENT_OTP_RESENT` | OTP resent | Link id |
+| `RECIPIENT_OTP_FAILED` | Wrong/expired/max-attempt OTP | Link id |
+| `RECIPIENT_OTP_VERIFIED` | OTP accepted | Link id |
+| `SFTP_FILE_RECEIVED` | SFTP inbox file detected | — |
+| `SFTP_METADATA_VALIDATED` | Manifest parsed | — |
+| `SFTP_VIRUS_SCAN_PASSED` | ClamAV clean | — |
+| `SFTP_STORAGE_UPLOADED` | Object stored | — |
+| `SFTP_DOCUMENT_CREATED` | Link row created | Link id |
+| `SFTP_EMAIL_QUEUED` | Initial-link email job enqueued | Link id |
+| `SFTP_INGESTION_COMPLETED` | SFTP pipeline success | — |
+| `SFTP_INGESTION_FAILED` | SFTP pipeline failure | — |
+
+Each event maps to an optional `WEBHOOK_URL_{EVENT}` — see [EVENTS_AND_WEBHOOKS.md](./EVENTS_AND_WEBHOOKS.md).
+
+> **Plain language:** This table is the **master list of things Vellum can journal**. If your compliance framework asks "Can you prove X happened?", find the matching row — that event is what auditors and webhooks rely on.
+
+---
+
+## Appendix B: Evolution from v1.0
+
+| v1.0 (May 2026) | v2.1 (Current) |
+|-----------------|----------------|
+| Monolithic `Document` model | `DocumentFile` + `DocumentUserLink` split |
+| Single download (`isUsed` immediately) | Download limits + re-verify grace window |
+| No revocation API | `POST /api/documents/:id/revoke` + `LINK_REVOKED` |
+| No audit export | Admin JSON/CSV export with cursor pagination |
+| Password only | Optional recipient OTP (4 channels) + hCaptcha |
+| Plain text email | Branded multipart HTML email |
+| Single upload only | Batch upload + SHA-256 dedup |
+| No checksum UI | SHA-256 on verify complete page |
+| HTTP upload only | SFTP MFT ingestion pipeline |
+| Audit only | Outbound signed webhooks + delivery log |
+| Basic admin UI | Full read-only admin for all tables, plus a dev webhook inspector |
+
+---
+
+## Appendix C: Frequently asked questions (non-technical)
+
+| Question | Answer |
+|----------|--------|
+| Can Vellum read our files? | Operators see metadata (filename, dates, status) — not file contents. Downloads use direct storage URLs; bytes do not stream through the app server. |
+| Is the password in the email? | **No.** By design. The sender must communicate it separately. |
+| Can an admin download without the password? | **No** (unless they know the password and use the public verify link like anyone else). |
+| What happens when a link expires? | The recipient can sign in to the dashboard with the **same email address** the document was sent to and request a new link — if the underlying file has not yet been scrubbed. |
+| What happens when the file is deleted? | The audit history remains (for years, by default). Recipients cannot download again. |
+| Can one file go to 50 people? | Yes, via batch upload (up to `MAX_BATCH_RECIPIENTS`, default 50). Each person gets their own link and password. |
+| How do we know the file was not tampered with? | A SHA-256 checksum is shown after successful verify; the recipient compares it locally using `sha256sum`. |
+| How do we integrate with our SIEM? | Enable webhooks and/or export audit logs to CSV from the admin API. |
+| Does "Revoke link" delete the file? | **No** — revocation stops that recipient's link. The stored file remains if other recipients or links still reference it (see §7.5). |
+
+---
+
+## Appendix D: Document maintenance
+
+| Item | Value |
+|------|-------|
+| **Version** | 2.1 |
+| **Last verified against codebase** | June 2026 (`main`, roadmap items 1–11 merged) |
+| **Source of truth for schema** | `prisma/schema.prisma` |
+| **Source of truth for env vars** | `src/lib/env.ts` + [CONFIG.md](./CONFIG.md) |
+| **When to update this doc** | After schema changes, new audit event types, or material API/UX changes |
+
+**Completeness checklist (both audiences):**
+
+| Non-technical coverage | Technical coverage |
+|------------------------|------------------|
+| Executive summary and glossary | Full Prisma model field tables |
+| Personas and typical journey | Sequence diagrams and mount order |
+| Plain-language blocks in §§1–2, 4–18, 22, Appendices A & C | API endpoint catalog and request schemas |
+| FAQ (Appendix C) | Worker/queue tables, SFTP pipeline |
+| Audit event plain summary (Appendix A) | Recreation checklist (§24), source layout (§21) |
+
+---
+
+*Document maintained as the architectural source of truth for Vellum v2.1. For day-to-day usage see [USAGE.md](./USAGE.md). For environment tuning see [CONFIG.md](./CONFIG.md).*

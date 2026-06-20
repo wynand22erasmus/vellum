@@ -304,4 +304,4 @@ Extended test matrix: [e2e-test-plan.md](./e2e-test-plan.md).
 | [EVENTS_AND_WEBHOOKS.md](./EVENTS_AND_WEBHOOKS.md) | Audit events and webhook specification |
 | [e2e-test-plan.md](./e2e-test-plan.md) | Automated test coverage by area |
 | [bruno/README.md](../bruno/README.md) | API collection and CLI usage |
-| [Vellum_Comprehensive_Design_Document.md](./Vellum_Comprehensive_Design_Document.md) | Architecture and security model |
+| [Vellum_Comprehensive_Design_Document.md](./Vellum_Comprehensive_Design_Document.md) | Architecture and security model (v2.1 — current system) |
