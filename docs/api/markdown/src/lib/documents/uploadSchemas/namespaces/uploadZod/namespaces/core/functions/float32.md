@@ -1,0 +1,51 @@
+# Function: \_float32()
+
+> **\_float32**\<`T`\>(`Class`, `params?`): `T`
+
+Defined in: node\_modules/zod/v4/core/api.d.cts:134
+
+## Type Parameters
+
+### T
+
+`T` *extends* [`$ZodNumberFormat`](../interfaces/$ZodNumberFormat.md)
+
+## Parameters
+
+### Class
+
+[`SchemaClass`](../../util/type-aliases/SchemaClass.md)\<`T`\>
+
+### params?
+
+`string` \| \{ `abort?`: `boolean`; `error?`: `string` \| [`$ZodErrorMap`](../interfaces/$ZodErrorMap.md)\<`NonNullable`\<[`$ZodIssueInvalidType`](../interfaces/$ZodIssueInvalidType.md)\<`unknown`\> \| [`$ZodIssueTooBig`](../interfaces/$ZodIssueTooBig.md)\<`"number"`\> \| [`$ZodIssueTooSmall`](../interfaces/$ZodIssueTooSmall.md)\<`"number"`\>\>\>; `message?`: `string`; \}
+
+`string`
+
+***
+
+#### Type Literal
+
+\{ `abort?`: `boolean`; `error?`: `string` \| [`$ZodErrorMap`](../interfaces/$ZodErrorMap.md)\<`NonNullable`\<[`$ZodIssueInvalidType`](../interfaces/$ZodIssueInvalidType.md)\<`unknown`\> \| [`$ZodIssueTooBig`](../interfaces/$ZodIssueTooBig.md)\<`"number"`\> \| [`$ZodIssueTooSmall`](../interfaces/$ZodIssueTooSmall.md)\<`"number"`\>\>\>; `message?`: `string`; \}
+
+##### abort?
+
+`boolean`
+
+If true, no later checks will be executed if this check fails. Default `false`.
+
+##### error?
+
+`string` \| [`$ZodErrorMap`](../interfaces/$ZodErrorMap.md)\<`NonNullable`\<[`$ZodIssueInvalidType`](../interfaces/$ZodIssueInvalidType.md)\<`unknown`\> \| [`$ZodIssueTooBig`](../interfaces/$ZodIssueTooBig.md)\<`"number"`\> \| [`$ZodIssueTooSmall`](../interfaces/$ZodIssueTooSmall.md)\<`"number"`\>\>\>
+
+##### message?
+
+`string`
+
+**Deprecated**
+
+This parameter is deprecated. Use `error` instead.
+
+## Returns
+
+`T`

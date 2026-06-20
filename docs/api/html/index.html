@@ -1,0 +1,216 @@
+<!DOCTYPE html><html class="default" lang="en" data-base="./"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>Vellum API</title><meta name="description" content="Documentation for Vellum API"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="assets/style.css"/><link rel="stylesheet" href="assets/highlight.css"/><link rel="stylesheet" href="assets/custom.css"/><script defer src="assets/main.js"></script><script defer src="assets/custom.js"></script><script async src="assets/icons.js" id="tsd-icons-script"></script><script async src="assets/search.js" id="tsd-search-script"></script><script async src="assets/navigation.js" id="tsd-nav-script"></script><script async src="assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar"><div class="tsd-toolbar-contents container"><a href="index.html" class="title">Vellum API</a><div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/><ul role="listbox" id="tsd-search-results"></ul><div id="tsd-search-status" aria-live="polite" aria-atomic="true"><div>Preparing search index...</div></div></dialog><a href="#" class="tsd-widget menu" id="tsd-toolbar-menu-trigger" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-menu"></use></svg></a></div></header><div class="container container-main"><div class="col-content"><div class="tsd-page-title"><h1>Vellum API</h1></div><div class="tsd-panel tsd-typography"><h1 id="vellum" class="tsd-anchor-link">Vellum<a href="#vellum" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h1>
+<p>Secure, API-first document transfer platform. Every download requires both an email link (possession) and a file password (knowledge).</p>
+<p><strong>Using the app (post-install):</strong> <a href="media/USAGE.md">docs/USAGE.md</a> — integrator upload, recipient download, admin audit export.</p>
+<h2 id="stack" class="tsd-anchor-link">Stack<a href="#stack" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<ul>
+<li><strong>Frontend:</strong> Vite + React + Tailwind</li>
+<li><strong>API:</strong> Express (<code>dev:api</code> on :5173) + Vite dev UI (<code>dev</code> on :5174); nginx :8080 in compose</li>
+<li><strong>Database:</strong> PostgreSQL + Prisma</li>
+<li><strong>Storage:</strong> MinIO (dev) / S3 (prod)</li>
+<li><strong>Jobs:</strong> BullMQ + Redis</li>
+<li><strong>Virus scan:</strong> ClamAV</li>
+<li><strong>Email:</strong> Mailpit (dev) / SES (prod)</li>
+<li><strong>Auth:</strong> API key (upload); session cookie + dev mock or WorkOS (dashboard); admin-only TypeDoc at <code>/docs/</code> and read-only <strong>Data browser</strong> at <code>/admin</code></li>
+</ul>
+<h2 id="quick-start-containerized-recommended" class="tsd-anchor-link">Quick start (containerized — recommended)<a href="#quick-start-containerized-recommended" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>The web app, API, and background worker run in containers. Compose works with <strong>Docker</strong> or <strong>Podman</strong> (see <code>scripts/compose.sh</code>).</p>
+<h3 id="1-environment" class="tsd-anchor-link">1. Environment<a href="#1-environment" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<pre><code class="bash"><span class="hl-0">cp</span><span class="hl-1"> </span><span class="hl-2">.env.docker.example</span><span class="hl-1"> </span><span class="hl-2">.env</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Use <code>.env.docker.example</code> so service hostnames (<code>postgres</code>, <code>redis</code>, <code>minio</code>, etc.) resolve inside the stack. For local-only development without containers, use <code>.env.example</code> instead.</p>
+<p>Set <strong><code>VELLUM_HOST</code></strong> to your public domain (for example <code>devman.wtfgang.win</code>). The app derives email links and OAuth callbacks from <code>VELLUM_HOST</code>, <code>VELLUM_PUBLIC_SCHEME</code>, and <code>VELLUM_PUBLIC_PORT</code>, or you can set <strong><code>APP_URL</code></strong> explicitly to override. Nginx uses the same hostname for <code>server_name</code>.</p>
+<p><strong>Container images</strong> are tagged from <code>.env</code> using <strong><code>VELLUM_PROJECT</code></strong> (default <code>vellum</code>) and <strong><code>VELLUM_ENV</code></strong> (<code>development</code> or <code>production</code>). Examples: <code>vellum-app:development</code>, <code>vellum-worker:development</code>. For a production stack, set <code>VELLUM_ENV=production</code> and <code>NODE_ENV=production</code> before <code>npm run up</code> (build target <code>production</code> is selected automatically). See <a href="media/CONFIG.md">docs/CONFIG.md</a>.</p>
+<h3 id="2-start-the-full-stack" class="tsd-anchor-link">2. Start the full stack<a href="#2-start-the-full-stack" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<pre><code class="bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">up</span>
+</code><button type="button">Copy</button></pre>
+
+<p>This builds and starts the app, worker, nginx, Postgres (with Prisma Studio and Adminer), Redis, MinIO, ClamAV, and Mailpit. Migrations run automatically on app startup.</p>
+<p>Wait for ClamAV to become healthy on first start (2–5 minutes). Follow progress:</p>
+<pre><code class="bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">up:logs</span>
+</code><button type="button">Copy</button></pre>
+
+<h3 id="3-access" class="tsd-anchor-link">3. Access<a href="#3-access" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<table>
+<thead>
+<tr>
+<th>Service</th>
+<th>URL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Web UI (via nginx)</strong></td>
+<td><code>http://$VELLUM_HOST:8080</code> (default host: <code>localhost</code>)</td>
+</tr>
+<tr>
+<td>Web UI (direct)</td>
+<td><code>http://$VELLUM_HOST:5174</code></td>
+</tr>
+<tr>
+<td>API (direct)</td>
+<td><code>http://$VELLUM_HOST:5173/api/…</code></td>
+</tr>
+<tr>
+<td>API docs (admin)</td>
+<td><code>/docs/</code> after <code>npm run docs:api</code> — sign in as an admin first</td>
+</tr>
+<tr>
+<td>Data browser (admin)</td>
+<td><code>/admin</code> — read-only lists for documents, users, audit logs (session + <code>ADMIN</code> role)</td>
+</tr>
+<tr>
+<td>Prisma Studio</td>
+<td><code>http://$VELLUM_HOST:5555</code> (runs in <strong>postgres</strong> container)</td>
+</tr>
+<tr>
+<td>DB Admin (Adminer)</td>
+<td><code>http://$VELLUM_HOST:8081</code> (runs in <strong>postgres</strong> container; user <code>vellum</code>, password <code>password</code>)</td>
+</tr>
+<tr>
+<td>Mailpit</td>
+<td><code>http://$VELLUM_HOST:8025</code></td>
+</tr>
+<tr>
+<td>MinIO console</td>
+<td><code>http://$VELLUM_HOST:9001</code></td>
+</tr>
+</tbody>
+</table>
+<p>In non-production, admins see a <strong>Development</strong> section in the left sidebar for Mailpit, MinIO, API docs, Prisma Studio, and related tools.</p>
+<pre><code class="bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">down</span><span class="hl-1">    </span><span class="hl-3"># stop all services</span>
+</code><button type="button">Copy</button></pre>
+
+<h2 id="local-development-optional" class="tsd-anchor-link">Local development (optional)<a href="#local-development-optional" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>Run backing services in containers and the app on the host (requires Node.js 24 LTS+):</p>
+<pre><code class="bash"><span class="hl-0">cp</span><span class="hl-1"> </span><span class="hl-2">.env.example</span><span class="hl-1"> </span><span class="hl-2">.env</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">infra:up</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">install</span><span class="hl-1"> &amp;&amp; </span><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">db:generate</span><span class="hl-1"> &amp;&amp; </span><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">db:migrate:deploy</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">dev:stack</span><span class="hl-1">   </span><span class="hl-3"># terminal 1: API :5173 + Vite :5174</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">worker</span><span class="hl-1">      </span><span class="hl-3"># terminal 2</span><br/><span class="hl-3"># optional: npm run db:studio</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Compose helper detection order: <code>docker compose</code> → <code>podman compose</code> → <code>docker-compose</code> → <code>podman-compose</code>.</p>
+<p>The web UI uses TanStack Router at <code>/</code> (<code>src/routes/</code>, <code>src/pages/</code>, <code>src/components/</code>). The Express backend lives under <code>src/server/</code> (<code>create-app.ts</code>, <code>routes/</code>, <code>middleware/</code>, <code>queues/</code>, <code>workers/</code>). Shared hooks and helpers are in <code>src/hooks/</code> and <code>src/lib/</code>.</p>
+<h3 id="backend-entrypoints" class="tsd-anchor-link">Backend entrypoints<a href="#backend-entrypoints" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>src/server.ts</code></td>
+<td>Production HTTP server (container CMD). Listens on <code>env.port</code> (default 3000), serves the built SPA from <code>dist/</code> when <code>NODE_ENV=production</code>.</td>
+</tr>
+<tr>
+<td><code>src/api-server.ts</code></td>
+<td>Development API-only server on <code>PORT</code> (default 5173). Used by <code>npm run dev:api</code> and the dev stack; no Vite UI.</td>
+</tr>
+<tr>
+<td><code>src/server/workers/index.ts</code></td>
+<td>BullMQ worker process (<code>npm run worker</code>). Registers cron schedulers and loads email, audit, scrub, and reconciliation workers.</td>
+</tr>
+<tr>
+<td><code>src/server/create-app.ts</code></td>
+<td>Shared Express factory: middleware, API routers, and production SPA fallback. Imported by both server entrypoints.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="deploying" class="tsd-anchor-link">Deploying<a href="#deploying" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>After pulling changes that touch the API, SPA build, or envelope format, rebuild and restart the app container so <code>create-app.ts</code> serves the current <code>dist/</code> bundle and API responses:</p>
+<pre><code class="bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">up</span><span class="hl-1">          </span><span class="hl-3"># rebuild + restart app, worker, nginx (compose)</span><br/><span class="hl-3"># or, for a running stack:</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">compose</span><span class="hl-1"> </span><span class="hl-4">--</span><span class="hl-1"> </span><span class="hl-2">up</span><span class="hl-1"> </span><span class="hl-4">-d</span><span class="hl-1"> </span><span class="hl-4">--build</span><span class="hl-1"> </span><span class="hl-2">app</span><span class="hl-1"> </span><span class="hl-2">worker</span>
+</code><button type="button">Copy</button></pre>
+
+<p>The worker container should be restarted when queue handlers or <code>src/server/workers/</code> change. Nginx proxies to the app container; a stale app process will serve an old SPA or omit new API routes until restarted.</p>
+<h2 id="api-usage" class="tsd-anchor-link">API usage<a href="#api-usage" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<h3 id="upload-machine-to-machine" class="tsd-anchor-link">Upload (machine-to-machine)<a href="#upload-machine-to-machine" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<pre><code class="bash"><span class="hl-0">curl</span><span class="hl-1"> </span><span class="hl-4">-X</span><span class="hl-1"> </span><span class="hl-2">POST</span><span class="hl-1"> </span><span class="hl-2">http://localhost:5173/api/upload</span><span class="hl-1"> </span><span class="hl-5">\</span><br/><span class="hl-1">  </span><span class="hl-4">-H</span><span class="hl-1"> </span><span class="hl-2">&quot;Authorization: Bearer dev-api-key-change-in-production&quot;</span><span class="hl-1"> </span><span class="hl-5">\</span><br/><span class="hl-1">  </span><span class="hl-4">-F</span><span class="hl-1"> </span><span class="hl-2">&quot;file=@document.pdf&quot;</span><span class="hl-1"> </span><span class="hl-5">\</span><br/><span class="hl-1">  </span><span class="hl-4">-F</span><span class="hl-1"> </span><span class="hl-2">&quot;recipientEmail=recipient@example.com&quot;</span><span class="hl-1"> </span><span class="hl-5">\</span><br/><span class="hl-1">  </span><span class="hl-4">-F</span><span class="hl-1"> </span><span class="hl-2">&quot;password=securepass123&quot;</span><span class="hl-1"> </span><span class="hl-5">\</span><br/><span class="hl-1">  </span><span class="hl-4">-F</span><span class="hl-1"> </span><span class="hl-2">&quot;linkTtl=86400&quot;</span><span class="hl-1"> </span><span class="hl-5">\</span><br/><span class="hl-1">  </span><span class="hl-4">-F</span><span class="hl-1"> </span><span class="hl-2">&quot;fileTtl=604800&quot;</span>
+</code><button type="button">Copy</button></pre>
+
+<p>The response includes a warning: communicate the file password via a <strong>separate channel</strong> (not the same email as the download link).</p>
+<p>Allowed file types come from <code>ALLOWED_UPLOAD_EXTENSIONS</code> (JSON array of extensions without dots; see <a href="media/CONFIG.md">docs/CONFIG.md</a>). The server strips misleading trailing extensions such as <code>.pdf.exe</code> from the stored filename, then checks the remaining extension.</p>
+<h3 id="download-recipient" class="tsd-anchor-link">Download (recipient)<a href="#download-recipient" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<ol>
+<li>Open the link from email: <code>/verify/{token}</code></li>
+<li>Enter the file password</li>
+<li>Download starts; the tab shows a completion screen (<code>/verify/{token}/complete</code>)</li>
+</ol>
+<h3 id="dashboard-sign-in" class="tsd-anchor-link">Dashboard sign-in<a href="#dashboard-sign-in" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<p>Dashboard routes use a <strong><code>vellum_session</code> HTTP-only cookie</strong> (7-day JWT). In dev mode, the SPA also stores your email in <code>localStorage</code> and sends <code>X-Dev-User-Email</code> on <code>fetch</code> calls for backward compatibility.</p>
+<h4 id="dev-auth-default" class="tsd-anchor-link">Dev auth (<code>AUTH_PROVIDER=dev</code>, default)<a href="#dev-auth-default" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4>
+<ol>
+<li>Visit <code>/login</code> and enter your email.</li>
+<li>If the address is not verified, open the link in <strong>Mailpit</strong> (<code>GET /api/auth/verify-email</code>), then sign in again.</li>
+<li>On success you receive a session cookie and land on <code>/dashboard</code> (or the page you were trying to open).</li>
+<li>Use <strong>Send access link</strong> to regenerate a download email (download still requires the email link + file password).</li>
+</ol>
+<p><strong>Admins</strong> (emails in <code>DEFAULT_ADMIN_EMAILS</code>) may sign in without email verification. For automated E2E only, set <code>SKIP_EMAIL_VERIFICATION=true</code> in non-production (see <code>.env.docker.example</code>).</p>
+<h4 id="workos-" class="tsd-anchor-link">WorkOS (<code>AUTH_PROVIDER=workos</code>)<a href="#workos-" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h4>
+<p>Set in <code>.env</code>:</p>
+<pre><code class="bash"><span class="hl-6">AUTH_PROVIDER</span><span class="hl-1">=</span><span class="hl-2">workos</span><br/><span class="hl-6">WORKOS_API_KEY</span><span class="hl-1">=</span><span class="hl-2">sk_...</span><br/><span class="hl-6">WORKOS_CLIENT_ID</span><span class="hl-1">=</span><span class="hl-2">client_...</span><br/><span class="hl-6">WORKOS_REDIRECT_URI</span><span class="hl-1">=</span><span class="hl-2">https://your-domain/api/auth/callback</span><br/><span class="hl-6">SESSION_SECRET</span><span class="hl-1">=</span><span class="hl-2">...</span><span class="hl-1">   </span><span class="hl-3"># 32+ random characters</span>
+</code><button type="button">Copy</button></pre>
+
+<ul>
+<li>Sign in: <code>GET /api/auth/login</code> (or follow the redirect when opening a protected page such as <code>/docs/</code>).</li>
+<li>Callback: <code>GET /api/auth/callback</code> sets <code>vellum_session</code> and redirects to <code>/dashboard</code>, or to a same-origin <code>returnTo</code> path passed through OAuth <code>state</code>.</li>
+<li>Unverified consumers are sent to <code>/login/email-verification</code> until they confirm email (admins may sign in without verification).</li>
+</ul>
+<h2 id="health-check" class="tsd-anchor-link">Health check<a href="#health-check" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<pre><code class="bash"><span class="hl-0">curl</span><span class="hl-1"> </span><span class="hl-2">http://localhost:5173/api/health</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Success responses use the VellumResult envelope (<code>Content-Type: application/vnd.vellum.result+json</code>). Read dependency status from <code>data.status</code> and <code>data.checks</code> (not top-level fields). See <a href="media/ERROR_HANDLING.md">docs/ERROR_HANDLING.md</a>.</p>
+<h2 id="e2e-tests-bruno-puppeteer" class="tsd-anchor-link">E2E tests (Bruno + Puppeteer)<a href="#e2e-tests-bruno-puppeteer" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>Requires the stack to be up and ClamAV healthy. See <a href="media/e2e-test-plan.md">docs/e2e-test-plan.md</a> for coverage matrix.</p>
+<p>On a new machine, install Puppeteer’s Chrome once before browser tests:</p>
+<pre><code class="bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">test:e2e:prepare</span><span class="hl-1">   </span><span class="hl-3"># first time only — Chrome → .cache/puppeteer</span>
+</code><button type="button">Copy</button></pre>
+
+<pre><code class="bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">test:e2e:seed</span><span class="hl-1">    </span><span class="hl-3"># seed document (upload or DB fallback)</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">test:api</span><span class="hl-1">         </span><span class="hl-3"># Bruno API collection (needs seed)</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">test:api:smoke</span><span class="hl-1">   </span><span class="hl-3"># Bruno smoke tests (no seed)</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">test:api:remote</span><span class="hl-1">  </span><span class="hl-3"># Bruno full suite using Remote env (edit bruno/…/Remote.bru)</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">test:e2e</span><span class="hl-1">         </span><span class="hl-3"># Puppeteer browser tests (needs seed; uses http://localhost:5174)</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">test:e2e:smoke</span><span class="hl-1">   </span><span class="hl-3"># Puppeteer smoke (no seed)</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">test:e2e:all</span><span class="hl-1">     </span><span class="hl-3"># seed + API + UI</span>
+</code><button type="button">Copy</button></pre>
+
+<p>Bruno workspace: <a href="media/README.md">bruno/README.md</a>. Set <code>SKIP_VIRUS_SCAN=true</code> in <code>.env</code> for reliable uploads during E2E (see <code>.env.docker.example</code>). Optional: <code>E2E_BASE_URL</code> (UI default <code>http://localhost:5174</code>), <code>E2E_HEADLESS=false</code>.</p>
+<h2 id="api-reference-typedoc" class="tsd-anchor-link">API reference (TypeDoc)<a href="#api-reference-typedoc" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>Generate HTML and Markdown API docs from TSDoc comments:</p>
+<pre><code class="bash"><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">docs:api</span><span class="hl-1">          </span><span class="hl-3"># docs/api/html + docs/api/markdown</span><br/><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-2">run</span><span class="hl-1"> </span><span class="hl-2">docs:coverage</span><span class="hl-1">     </span><span class="hl-3"># coverage gate + docs/doc-inventory.json</span>
+</code><button type="button">Copy</button></pre>
+
+<p><strong>Viewing HTML docs</strong></p>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Generate</td>
+<td>Run <code>npm run docs:api</code> once (creates <code>docs/api/html/</code>)</td>
+</tr>
+<tr>
+<td>Role</td>
+<td><code>ADMIN</code> only (<code>DEFAULT_ADMIN_EMAILS</code> on first sign-in)</td>
+</tr>
+<tr>
+<td>URL</td>
+<td><strong><code>/docs/</code></strong> (admin-only; uses the same <code>vellum_session</code> cookie as the dashboard)</td>
+</tr>
+<tr>
+<td>Discover</td>
+<td>Sidebar when signed in as admin; <strong>Development</strong> section in non-production</td>
+</tr>
+</tbody>
+</table>
+<p>If you open <code>/docs/</code> without a session, you are redirected to sign in and then returned to <code>/docs/</code>. If HTML has not been generated, the server responds with <code>503</code> and instructions to run <code>docs:api</code>.</p>
+<p>Standards: <a href="media/DOCUMENTATION.md">docs/DOCUMENTATION.md</a>. Environment reference: <a href="media/CONFIG.md">docs/CONFIG.md</a>. Audit events and webhooks: <a href="media/EVENTS_AND_WEBHOOKS.md">docs/EVENTS_AND_WEBHOOKS.md</a>.</p>
+<h2 id="dashboard-users" class="tsd-anchor-link">Dashboard users<a href="#dashboard-users" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>Sign-in (WorkOS or dev) upserts rows in Postgres (<code>users</code> table) with <code>emailVerified</code> and <code>kind</code> (<code>ADMIN</code> or <code>CONSUMER</code>). Set default admins via JSON in <code>.env</code>:</p>
+<pre><code class="bash"><span class="hl-6">DEFAULT_ADMIN_EMAILS</span><span class="hl-1">=</span><span class="hl-2">[&quot;admin@example.com&quot;</span><span class="hl-1">]</span>
+</code><button type="button">Copy</button></pre>
+
+<p>See <a href="media/CONFIG.md">docs/CONFIG.md</a> for verification rules and session settings.</p>
+<h2 id="design-document" class="tsd-anchor-link">Design document<a href="#design-document" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>See <a href="media/Vellum_Comprehensive_Design_Document.md">Vellum_Comprehensive_Design_Document.md</a> for full architecture.</p>
+<h2 id="aws-migration" class="tsd-anchor-link">AWS migration<a href="#aws-migration" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="assets/icons.svg#icon-anchor"></use></svg></a></h2>
+<p>See <a href="media/AWS_MIGRATION.md">docs/AWS_MIGRATION.md</a>.</p>
+</div></div><div class="col-sidebar"><div class="page-menu"><div class="tsd-navigation settings"><details class="tsd-accordion"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-chevronDown"></use></svg><h3>Settings</h3></summary><div class="tsd-accordion-details"><div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span><ul id="tsd-filter-options"><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-protected" name="protected"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Protected</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li><li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></div><div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div><details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="assets/icons.svg#icon-chevronDown"></use></svg><h3>On This Page</h3></summary><div class="tsd-accordion-details"><a href="#vellum"><span>Vellum</span></a><ul><li><a href="#stack"><span>Stack</span></a></li><li><a href="#quick-start-containerized-recommended"><span>Quick start (containerized — recommended)</span></a></li><li><ul><li><a href="#1-environment"><span>1. <wbr/>Environment</span></a></li><li><a href="#2-start-the-full-stack"><span>2. <wbr/>Start the full stack</span></a></li><li><a href="#3-access"><span>3. <wbr/>Access</span></a></li></ul></li><li><a href="#local-development-optional"><span>Local development (optional)</span></a></li><li><ul><li><a href="#backend-entrypoints"><span>Backend entrypoints</span></a></li></ul></li><li><a href="#deploying"><span>Deploying</span></a></li><li><a href="#api-usage"><span>API usage</span></a></li><li><ul><li><a href="#upload-machine-to-machine"><span>Upload (machine-<wbr/>to-<wbr/>machine)</span></a></li><li><a href="#download-recipient"><span>Download (recipient)</span></a></li><li><a href="#dashboard-sign-in"><span>Dashboard sign-<wbr/>in</span></a></li><li><ul><li><a href="#dev-auth-default"><span>Dev auth (, default)</span></a></li><li><a href="#workos-"><span>Work<wbr/>OS ()</span></a></li></ul></li></ul></li><li><a href="#health-check"><span>Health check</span></a></li><li><a href="#e2e-tests-bruno-puppeteer"><span>E2<wbr/>E tests (<wbr/>Bruno + <wbr/>Puppeteer)</span></a></li><li><a href="#api-reference-typedoc"><span>API reference (<wbr/>Type<wbr/>Doc)</span></a></li><li><a href="#dashboard-users"><span>Dashboard users</span></a></li><li><a href="#design-document"><span>Design document</span></a></li><li><a href="#aws-migration"><span>AWS migration</span></a></li></ul></div></details></div><div class="site-menu"><nav class="tsd-navigation"><a href="modules.html">Vellum API</a><ul class="tsd-small-nested-navigation" id="tsd-nav-container"><li>Loading...</li></ul></nav></div></div></div><footer><p class="tsd-generator">Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></footer><div class="overlay"></div></body></html>
