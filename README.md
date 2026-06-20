@@ -7,7 +7,7 @@ Secure, API-first document transfer platform. Every download requires both an em
 ## Stack
 
 - **Frontend:** Vite + React + Tailwind
-- **API:** Express (`dev:api` on :5173) + Vite dev UI (`dev` on :5174); nginx :8080 in compose
+- **API:** Express (`dev:api` on :8573) + Vite dev UI (`dev` on :8574); host nginx on :8580/:8680/:8780 (`nginx/vellum-host.conf`)
 - **Database:** PostgreSQL + Prisma
 - **Storage:** MinIO (dev) / S3 (prod)
 - **Jobs:** BullMQ + Redis
@@ -27,17 +27,38 @@ cp .env.docker.example .env
 
 Use `.env.docker.example` so service hostnames (`postgres`, `redis`, `minio`, etc.) resolve inside the stack. For local-only development without containers, use `.env.example` instead.
 
-Set **`VELLUM_HOST`** to your public domain (for example `devman.wtfgang.win`). The app derives email links and OAuth callbacks from `VELLUM_HOST`, `VELLUM_PUBLIC_SCHEME`, and `VELLUM_PUBLIC_PORT`, or you can set **`APP_URL`** explicitly to override. Nginx uses the same hostname for `server_name`.
+Set **`VELLUM_HOST`** to your public domain (for example `devman.wtfgang.win`). The app derives email links and OAuth callbacks from `VELLUM_HOST`, `VELLUM_PUBLIC_SCHEME`, and `VELLUM_PUBLIC_PORT`, or you can set **`APP_URL`** explicitly to override. Set **`VELLUM_STAGE`** to `dev`, `test`, or `live` to pick the host port block (**85** / **86** / **87**); see `scripts/host-ports.env`. Set the same hostname as `server_name` in `nginx/vellum-host.conf` on the dev host.
 
 **Container images** are tagged from `.env` using **`VELLUM_PROJECT`** (default `vellum`) and **`VELLUM_ENV`** (`development` or `production`). Examples: `vellum-app:development`, `vellum-worker:development`. For a production stack, set `VELLUM_ENV=production` and `NODE_ENV=production` before `npm run up` (build target `production` is selected automatically). See [docs/CONFIG.md](./docs/CONFIG.md).
 
-### 2. Start the full stack
+### 2. Nginx on the dev host
+
+Install the reverse proxy once on the machine that runs the stack (not in Compose):
+
+```bash
+sudo cp nginx/vellum-host.conf /etc/nginx/sites-available/vellum-host
+sudo ln -sf /etc/nginx/sites-available/vellum-host /etc/nginx/sites-enabled/
+# Edit server_name to match VELLUM_HOST, then:
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+This defines three entry points on the dev host:
+
+| Stage | Nginx entry | API (direct) | Web UI (direct) |
+|-------|-------------|--------------|-------------------|
+| **dev** (`VELLUM_STAGE=dev`) | `:8580` | `:8573` | `:8574` |
+| **test** | `:8680` | `:8673` | `:8674` |
+| **live** | `:8780` | `:8773` | `:8774` |
+
+Backing services use the same prefix (dev **85** example): Postgres `:8532`, Redis `:8579`, MinIO `:8500` / console `:8501`, Mailpit `:8525`, Prisma Studio `:8555`, Adminer `:8581`, SFTP `:8522`, webhooks `:8590`.
+
+### 3. Start the full stack
 
 ```bash
 npm run up
 ```
 
-This builds and starts the app, worker, nginx, Postgres (with Prisma Studio and Adminer), Redis, MinIO, ClamAV, and Mailpit. Migrations run automatically on app startup.
+This builds and starts the app, worker, Postgres (with Prisma Studio and Adminer), Redis, MinIO, ClamAV, and Mailpit. Migrations run automatically on app startup.
 
 Wait for ClamAV to become healthy on first start (2–5 minutes). Follow progress:
 
@@ -45,19 +66,19 @@ Wait for ClamAV to become healthy on first start (2–5 minutes). Follow progres
 npm run up:logs
 ```
 
-### 3. Access
+### 4. Access
 
-| Service | URL |
+| Service | URL (dev **85** ports; test/live use **86** / **87**) |
 |---------|-----|
-| **Web UI (via nginx)** | `http://$VELLUM_HOST:8080` (default host: `localhost`) |
-| Web UI (direct) | `http://$VELLUM_HOST:5174` |
-| API (direct) | `http://$VELLUM_HOST:5173/api/…` |
+| **Web UI (via nginx)** | `http://$VELLUM_HOST:8580` |
+| Web UI (direct) | `http://$VELLUM_HOST:8574` |
+| API (direct) | `http://$VELLUM_HOST:8573/api/…` |
 | API docs (admin) | `/docs/` after `npm run docs:api` — sign in as an admin first |
 | Data browser (admin) | `/admin` — read-only lists for documents, users, audit logs (session + `ADMIN` role) |
-| Prisma Studio | `http://$VELLUM_HOST:5555` (runs in **postgres** container) |
-| DB Admin (Adminer) | `http://$VELLUM_HOST:8081` (runs in **postgres** container; user `vellum`, password `password`) |
-| Mailpit | `http://$VELLUM_HOST:8025` |
-| MinIO console | `http://$VELLUM_HOST:9001` |
+| Prisma Studio | `http://$VELLUM_HOST:8555` (runs in **postgres** container) |
+| DB Admin (Adminer) | `http://$VELLUM_HOST:8581` (runs in **postgres** container; user `vellum`, password `password`) |
+| Mailpit | `http://$VELLUM_HOST:8525` |
+| MinIO console | `http://$VELLUM_HOST:8501` |
 
 In non-production, admins see a **Development** section in the left sidebar for Mailpit, MinIO, API docs, Prisma Studio, and related tools.
 
@@ -73,7 +94,8 @@ Run backing services in containers and the app on the host (requires Node.js 24 
 cp .env.example .env
 npm run infra:up
 npm install && npm run db:generate && npm run db:migrate:deploy
-npm run dev:stack   # terminal 1: API :5173 + Vite :5174
+# Install host nginx once (see step 2 above), then:
+npm run dev:stack   # terminal 1: API :8573 + Vite :8574
 npm run worker      # terminal 2
 # optional: npm run db:studio
 ```
@@ -87,7 +109,7 @@ The web UI uses TanStack Router at `/` (`src/routes/`, `src/pages/`, `src/compon
 | File | Role |
 |------|------|
 | `src/server.ts` | Production HTTP server (container CMD). Listens on `env.port` (default 3000), serves the built SPA from `dist/` when `NODE_ENV=production`. |
-| `src/api-server.ts` | Development API-only server on `PORT` (default 5173). Used by `npm run dev:api` and the dev stack; no Vite UI. |
+| `src/api-server.ts` | Development API-only server on `PORT` / `APP_HOST_PORT` (default 8573). Used by `npm run dev:api` and the dev stack; no Vite UI. |
 | `src/server/workers/index.ts` | BullMQ worker process (`npm run worker`). Registers cron schedulers and loads email, audit, scrub, and reconciliation workers. |
 | `src/server/create-app.ts` | Shared Express factory: middleware, API routers, and production SPA fallback. Imported by both server entrypoints. |
 
@@ -96,19 +118,19 @@ The web UI uses TanStack Router at `/` (`src/routes/`, `src/pages/`, `src/compon
 After pulling changes that touch the API, SPA build, or envelope format, rebuild and restart the app container so `create-app.ts` serves the current `dist/` bundle and API responses:
 
 ```bash
-npm run up          # rebuild + restart app, worker, nginx (compose)
+npm run up          # rebuild + restart app, worker (compose)
 # or, for a running stack:
 npm run compose -- up -d --build app worker
 ```
 
-The worker container should be restarted when queue handlers or `src/server/workers/` change. Nginx proxies to the app container; a stale app process will serve an old SPA or omit new API routes until restarted.
+The worker container should be restarted when queue handlers or `src/server/workers/` change. Host nginx proxies to published ports on the dev machine; restart the app container after API or SPA changes so it serves the current bundle and routes.
 
 ## API usage
 
 ### Upload (machine-to-machine)
 
 ```bash
-curl -X POST http://localhost:5173/api/upload \
+curl -X POST http://localhost:8573/api/upload \
   -H "Authorization: Bearer dev-api-key-change-in-production" \
   -F "file=@document.pdf" \
   -F "recipientEmail=recipient@example.com" \
@@ -159,7 +181,7 @@ SESSION_SECRET=...   # 32+ random characters
 ## Health check
 
 ```bash
-curl http://localhost:5173/api/health
+curl http://localhost:8573/api/health
 ```
 
 Success responses use the VellumResult envelope (`Content-Type: application/vnd.vellum.result+json`). Read dependency status from `data.status` and `data.checks` (not top-level fields). See [docs/ERROR_HANDLING.md](./docs/ERROR_HANDLING.md).
@@ -179,12 +201,12 @@ npm run test:e2e:seed    # seed document (upload or DB fallback)
 npm run test:api         # Bruno API collection (needs seed)
 npm run test:api:smoke   # Bruno smoke tests (no seed)
 npm run test:api:remote  # Bruno full suite using Remote env (edit bruno/…/Remote.bru)
-npm run test:e2e         # Puppeteer browser tests (needs seed; uses http://localhost:5174)
+npm run test:e2e         # Puppeteer browser tests (needs seed; uses http://localhost:8574)
 npm run test:e2e:smoke   # Puppeteer smoke (no seed)
 npm run test:e2e:all     # seed + API + UI
 ```
 
-Bruno workspace: [bruno/README.md](./bruno/README.md). Set `SKIP_VIRUS_SCAN=true` in `.env` for reliable uploads during E2E (see `.env.docker.example`). Optional: `E2E_BASE_URL` (UI default `http://localhost:5174`), `E2E_HEADLESS=false`.
+Bruno workspace: [bruno/README.md](./bruno/README.md). Set `SKIP_VIRUS_SCAN=true` in `.env` for reliable uploads during E2E (see `.env.docker.example`). Optional: `E2E_BASE_URL` (UI default `http://localhost:8574`), `E2E_HEADLESS=false`.
 
 ## API reference (TypeDoc)
 

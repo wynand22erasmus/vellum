@@ -15,20 +15,28 @@ export default defineConfig(({ mode }) => {
   const allowedHosts = vellumHost
     ? [vellumHost, 'localhost', '127.0.0.1']
     : true;
-  const apiTarget = process.env.VELLUM_API_URL ?? 'http://127.0.0.1:5173';
+  const apiPort = env.APP_HOST_PORT ?? process.env.APP_HOST_PORT ?? '8573';
+  const webPort = Number(env.WEB_HOST_PORT ?? process.env.WEB_HOST_PORT ?? 8574);
+  const apiTarget = process.env.VELLUM_API_URL ?? `http://127.0.0.1:${apiPort}`;
   const inCompose = apiTarget.includes('app:5173');
   const devHost = vellumHost ?? 'localhost';
+  const mailpitUiPort = env.MAILPIT_UI_HOST_PORT ?? process.env.MAILPIT_UI_HOST_PORT ?? '8525';
+  const minioConsolePort =
+    env.MINIO_CONSOLE_HOST_PORT ?? process.env.MINIO_CONSOLE_HOST_PORT ?? '8501';
+  const prismaStudioPort = env.PRISMA_STUDIO_PORT ?? process.env.PRISMA_STUDIO_PORT ?? '8555';
+  const dbAdminPort = env.DB_ADMIN_PORT ?? process.env.DB_ADMIN_PORT ?? '8581';
   const mailpitTarget =
-    process.env.DEV_PROXY_MAILPIT ?? (inCompose ? 'http://mailpit:8025' : `http://${devHost}:8025`);
+    process.env.DEV_PROXY_MAILPIT ??
+    (inCompose ? 'http://mailpit:8025' : `http://${devHost}:${mailpitUiPort}`);
   const minioConsoleTarget =
     process.env.DEV_PROXY_MINIO_CONSOLE ??
-    (inCompose ? 'http://minio:9001' : `http://${devHost}:9001`);
+    (inCompose ? 'http://minio:9001' : `http://${devHost}:${minioConsolePort}`);
   const prismaStudioTarget =
     process.env.DEV_PROXY_PRISMA_STUDIO ??
-    (inCompose ? 'http://postgres:5555' : `http://${devHost}:5555`);
+    (inCompose ? 'http://postgres:5555' : `http://${devHost}:${prismaStudioPort}`);
   const dbAdminTarget =
     process.env.DEV_PROXY_DB_ADMIN ??
-    (inCompose ? 'http://postgres:8081' : `http://${devHost}:8081`);
+    (inCompose ? 'http://postgres:8081' : `http://${devHost}:${dbAdminPort}`);
 
   return {
     root: repoRoot,
@@ -43,7 +51,7 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       host: '0.0.0.0',
-      port: 5174,
+      port: webPort,
       strictPort: true,
       allowedHosts,
       fs: {

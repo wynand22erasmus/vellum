@@ -8,7 +8,7 @@ import { createApp } from './server/create-app.ts';
 import { recordProcessError } from './lib/errors/record-process-error.ts';
 import { problemFromError } from './lib/errors/problem-from-error.ts';
 
-const port = Number(process.env.PORT ?? 5173);
+const port = Number(process.env.PORT ?? process.env.APP_HOST_PORT ?? 8573);
 const host = '0.0.0.0';
 
 process.on('unhandledRejection', (reason) => {

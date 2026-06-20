@@ -22,7 +22,7 @@ export function buildPublicUrl(): string {
   const port = process.env.VELLUM_PUBLIC_PORT?.trim();
 
   const implicitPort =
-    port ?? (host === 'localhost' || host === '127.0.0.1' ? '5174' : '');
+    port ?? (host === 'localhost' || host === '127.0.0.1' ? '8580' : '');
 
   const standardPort = scheme === 'https' ? '443' : '80';
   const base = `${scheme}://${host}`;
@@ -50,7 +50,9 @@ export function buildMinioPublicEndpoint(): string {
     const url = new URL(internal);
     if (url.hostname === 'minio') {
       const host = process.env.VELLUM_HOST?.trim() || 'localhost';
+      const minioPort = process.env.MINIO_HOST_PORT?.trim() || '8500';
       url.hostname = host;
+      url.port = minioPort;
       return url.toString().replace(/\/$/, '');
     }
   } catch {
