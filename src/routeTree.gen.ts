@@ -25,13 +25,17 @@ import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as VerifyTokenCompleteRouteImport } from './routes/verify/$token/complete'
 import { Route as AuthenticatedDevServiceIdRouteImport } from './routes/_authenticated/dev/$serviceId'
+import { Route as AuthenticatedAdminWebhookDeliveriesIndexRouteImport } from './routes/_authenticated/admin/webhook-deliveries/index'
 import { Route as AuthenticatedAdminUsersIndexRouteImport } from './routes/_authenticated/admin/users/index'
 import { Route as AuthenticatedAdminProcessErrorsIndexRouteImport } from './routes/_authenticated/admin/process-errors/index'
+import { Route as AuthenticatedAdminFailedWebhookDeliveriesIndexRouteImport } from './routes/_authenticated/admin/failed-webhook-deliveries/index'
 import { Route as AuthenticatedAdminFailedProcessErrorsIndexRouteImport } from './routes/_authenticated/admin/failed-process-errors/index'
 import { Route as AuthenticatedAdminFailedAuditLogsIndexRouteImport } from './routes/_authenticated/admin/failed-audit-logs/index'
 import { Route as AuthenticatedAdminDocumentsIndexRouteImport } from './routes/_authenticated/admin/documents/index'
+import { Route as AuthenticatedAdminDocumentFilesIndexRouteImport } from './routes/_authenticated/admin/document-files/index'
 import { Route as AuthenticatedAdminAuditLogsIndexRouteImport } from './routes/_authenticated/admin/audit-logs/index'
 import { Route as AuthenticatedAdminDocumentsIdRouteImport } from './routes/_authenticated/admin/documents/$id'
+import { Route as AuthenticatedAdminDocumentFilesIdRouteImport } from './routes/_authenticated/admin/document-files/$id'
 
 const SplatRoute = SplatRouteImport.update({
   id: '/$',
@@ -114,6 +118,12 @@ const AuthenticatedDevServiceIdRoute =
     path: '/$serviceId',
     getParentRoute: () => AuthenticatedDevRouteRoute,
   } as any)
+const AuthenticatedAdminWebhookDeliveriesIndexRoute =
+  AuthenticatedAdminWebhookDeliveriesIndexRouteImport.update({
+    id: '/webhook-deliveries/',
+    path: '/webhook-deliveries/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminUsersIndexRoute =
   AuthenticatedAdminUsersIndexRouteImport.update({
     id: '/users/',
@@ -124,6 +134,12 @@ const AuthenticatedAdminProcessErrorsIndexRoute =
   AuthenticatedAdminProcessErrorsIndexRouteImport.update({
     id: '/process-errors/',
     path: '/process-errors/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminFailedWebhookDeliveriesIndexRoute =
+  AuthenticatedAdminFailedWebhookDeliveriesIndexRouteImport.update({
+    id: '/failed-webhook-deliveries/',
+    path: '/failed-webhook-deliveries/',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminFailedProcessErrorsIndexRoute =
@@ -144,6 +160,12 @@ const AuthenticatedAdminDocumentsIndexRoute =
     path: '/documents/',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminDocumentFilesIndexRoute =
+  AuthenticatedAdminDocumentFilesIndexRouteImport.update({
+    id: '/document-files/',
+    path: '/document-files/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminAuditLogsIndexRoute =
   AuthenticatedAdminAuditLogsIndexRouteImport.update({
     id: '/audit-logs/',
@@ -154,6 +176,12 @@ const AuthenticatedAdminDocumentsIdRoute =
   AuthenticatedAdminDocumentsIdRouteImport.update({
     id: '/documents/$id',
     path: '/documents/$id',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminDocumentFilesIdRoute =
+  AuthenticatedAdminDocumentFilesIdRouteImport.update({
+    id: '/document-files/$id',
+    path: '/document-files/$id',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 
@@ -173,13 +201,17 @@ export interface FileRoutesByFullPath {
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/dev/': typeof AuthenticatedDevIndexRoute
   '/verify/$token/': typeof VerifyTokenIndexRoute
+  '/admin/document-files/$id': typeof AuthenticatedAdminDocumentFilesIdRoute
   '/admin/documents/$id': typeof AuthenticatedAdminDocumentsIdRoute
   '/admin/audit-logs/': typeof AuthenticatedAdminAuditLogsIndexRoute
+  '/admin/document-files/': typeof AuthenticatedAdminDocumentFilesIndexRoute
   '/admin/documents/': typeof AuthenticatedAdminDocumentsIndexRoute
   '/admin/failed-audit-logs/': typeof AuthenticatedAdminFailedAuditLogsIndexRoute
   '/admin/failed-process-errors/': typeof AuthenticatedAdminFailedProcessErrorsIndexRoute
+  '/admin/failed-webhook-deliveries/': typeof AuthenticatedAdminFailedWebhookDeliveriesIndexRoute
   '/admin/process-errors/': typeof AuthenticatedAdminProcessErrorsIndexRoute
   '/admin/users/': typeof AuthenticatedAdminUsersIndexRoute
+  '/admin/webhook-deliveries/': typeof AuthenticatedAdminWebhookDeliveriesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -193,13 +225,17 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/dev': typeof AuthenticatedDevIndexRoute
   '/verify/$token': typeof VerifyTokenIndexRoute
+  '/admin/document-files/$id': typeof AuthenticatedAdminDocumentFilesIdRoute
   '/admin/documents/$id': typeof AuthenticatedAdminDocumentsIdRoute
   '/admin/audit-logs': typeof AuthenticatedAdminAuditLogsIndexRoute
+  '/admin/document-files': typeof AuthenticatedAdminDocumentFilesIndexRoute
   '/admin/documents': typeof AuthenticatedAdminDocumentsIndexRoute
   '/admin/failed-audit-logs': typeof AuthenticatedAdminFailedAuditLogsIndexRoute
   '/admin/failed-process-errors': typeof AuthenticatedAdminFailedProcessErrorsIndexRoute
+  '/admin/failed-webhook-deliveries': typeof AuthenticatedAdminFailedWebhookDeliveriesIndexRoute
   '/admin/process-errors': typeof AuthenticatedAdminProcessErrorsIndexRoute
   '/admin/users': typeof AuthenticatedAdminUsersIndexRoute
+  '/admin/webhook-deliveries': typeof AuthenticatedAdminWebhookDeliveriesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -219,13 +255,17 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/_authenticated/dev/': typeof AuthenticatedDevIndexRoute
   '/verify/$token/': typeof VerifyTokenIndexRoute
+  '/_authenticated/admin/document-files/$id': typeof AuthenticatedAdminDocumentFilesIdRoute
   '/_authenticated/admin/documents/$id': typeof AuthenticatedAdminDocumentsIdRoute
   '/_authenticated/admin/audit-logs/': typeof AuthenticatedAdminAuditLogsIndexRoute
+  '/_authenticated/admin/document-files/': typeof AuthenticatedAdminDocumentFilesIndexRoute
   '/_authenticated/admin/documents/': typeof AuthenticatedAdminDocumentsIndexRoute
   '/_authenticated/admin/failed-audit-logs/': typeof AuthenticatedAdminFailedAuditLogsIndexRoute
   '/_authenticated/admin/failed-process-errors/': typeof AuthenticatedAdminFailedProcessErrorsIndexRoute
+  '/_authenticated/admin/failed-webhook-deliveries/': typeof AuthenticatedAdminFailedWebhookDeliveriesIndexRoute
   '/_authenticated/admin/process-errors/': typeof AuthenticatedAdminProcessErrorsIndexRoute
   '/_authenticated/admin/users/': typeof AuthenticatedAdminUsersIndexRoute
+  '/_authenticated/admin/webhook-deliveries/': typeof AuthenticatedAdminWebhookDeliveriesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -245,13 +285,17 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/dev/'
     | '/verify/$token/'
+    | '/admin/document-files/$id'
     | '/admin/documents/$id'
     | '/admin/audit-logs/'
+    | '/admin/document-files/'
     | '/admin/documents/'
     | '/admin/failed-audit-logs/'
     | '/admin/failed-process-errors/'
+    | '/admin/failed-webhook-deliveries/'
     | '/admin/process-errors/'
     | '/admin/users/'
+    | '/admin/webhook-deliveries/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -265,13 +309,17 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/dev'
     | '/verify/$token'
+    | '/admin/document-files/$id'
     | '/admin/documents/$id'
     | '/admin/audit-logs'
+    | '/admin/document-files'
     | '/admin/documents'
     | '/admin/failed-audit-logs'
     | '/admin/failed-process-errors'
+    | '/admin/failed-webhook-deliveries'
     | '/admin/process-errors'
     | '/admin/users'
+    | '/admin/webhook-deliveries'
   id:
     | '__root__'
     | '/'
@@ -290,13 +338,17 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/'
     | '/_authenticated/dev/'
     | '/verify/$token/'
+    | '/_authenticated/admin/document-files/$id'
     | '/_authenticated/admin/documents/$id'
     | '/_authenticated/admin/audit-logs/'
+    | '/_authenticated/admin/document-files/'
     | '/_authenticated/admin/documents/'
     | '/_authenticated/admin/failed-audit-logs/'
     | '/_authenticated/admin/failed-process-errors/'
+    | '/_authenticated/admin/failed-webhook-deliveries/'
     | '/_authenticated/admin/process-errors/'
     | '/_authenticated/admin/users/'
+    | '/_authenticated/admin/webhook-deliveries/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -421,6 +473,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDevServiceIdRouteImport
       parentRoute: typeof AuthenticatedDevRouteRoute
     }
+    '/_authenticated/admin/webhook-deliveries/': {
+      id: '/_authenticated/admin/webhook-deliveries/'
+      path: '/webhook-deliveries'
+      fullPath: '/admin/webhook-deliveries/'
+      preLoaderRoute: typeof AuthenticatedAdminWebhookDeliveriesIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/users/': {
       id: '/_authenticated/admin/users/'
       path: '/users'
@@ -433,6 +492,13 @@ declare module '@tanstack/react-router' {
       path: '/process-errors'
       fullPath: '/admin/process-errors/'
       preLoaderRoute: typeof AuthenticatedAdminProcessErrorsIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/failed-webhook-deliveries/': {
+      id: '/_authenticated/admin/failed-webhook-deliveries/'
+      path: '/failed-webhook-deliveries'
+      fullPath: '/admin/failed-webhook-deliveries/'
+      preLoaderRoute: typeof AuthenticatedAdminFailedWebhookDeliveriesIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/failed-process-errors/': {
@@ -456,6 +522,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDocumentsIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/document-files/': {
+      id: '/_authenticated/admin/document-files/'
+      path: '/document-files'
+      fullPath: '/admin/document-files/'
+      preLoaderRoute: typeof AuthenticatedAdminDocumentFilesIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/admin/audit-logs/': {
       id: '/_authenticated/admin/audit-logs/'
       path: '/audit-logs'
@@ -470,35 +543,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDocumentsIdRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/document-files/$id': {
+      id: '/_authenticated/admin/document-files/$id'
+      path: '/document-files/$id'
+      fullPath: '/admin/document-files/$id'
+      preLoaderRoute: typeof AuthenticatedAdminDocumentFilesIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
   }
 }
 
 interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedAdminDocumentFilesIdRoute: typeof AuthenticatedAdminDocumentFilesIdRoute
   AuthenticatedAdminDocumentsIdRoute: typeof AuthenticatedAdminDocumentsIdRoute
   AuthenticatedAdminAuditLogsIndexRoute: typeof AuthenticatedAdminAuditLogsIndexRoute
+  AuthenticatedAdminDocumentFilesIndexRoute: typeof AuthenticatedAdminDocumentFilesIndexRoute
   AuthenticatedAdminDocumentsIndexRoute: typeof AuthenticatedAdminDocumentsIndexRoute
   AuthenticatedAdminFailedAuditLogsIndexRoute: typeof AuthenticatedAdminFailedAuditLogsIndexRoute
   AuthenticatedAdminFailedProcessErrorsIndexRoute: typeof AuthenticatedAdminFailedProcessErrorsIndexRoute
+  AuthenticatedAdminFailedWebhookDeliveriesIndexRoute: typeof AuthenticatedAdminFailedWebhookDeliveriesIndexRoute
   AuthenticatedAdminProcessErrorsIndexRoute: typeof AuthenticatedAdminProcessErrorsIndexRoute
   AuthenticatedAdminUsersIndexRoute: typeof AuthenticatedAdminUsersIndexRoute
+  AuthenticatedAdminWebhookDeliveriesIndexRoute: typeof AuthenticatedAdminWebhookDeliveriesIndexRoute
 }
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
   {
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+    AuthenticatedAdminDocumentFilesIdRoute:
+      AuthenticatedAdminDocumentFilesIdRoute,
     AuthenticatedAdminDocumentsIdRoute: AuthenticatedAdminDocumentsIdRoute,
     AuthenticatedAdminAuditLogsIndexRoute:
       AuthenticatedAdminAuditLogsIndexRoute,
+    AuthenticatedAdminDocumentFilesIndexRoute:
+      AuthenticatedAdminDocumentFilesIndexRoute,
     AuthenticatedAdminDocumentsIndexRoute:
       AuthenticatedAdminDocumentsIndexRoute,
     AuthenticatedAdminFailedAuditLogsIndexRoute:
       AuthenticatedAdminFailedAuditLogsIndexRoute,
     AuthenticatedAdminFailedProcessErrorsIndexRoute:
       AuthenticatedAdminFailedProcessErrorsIndexRoute,
+    AuthenticatedAdminFailedWebhookDeliveriesIndexRoute:
+      AuthenticatedAdminFailedWebhookDeliveriesIndexRoute,
     AuthenticatedAdminProcessErrorsIndexRoute:
       AuthenticatedAdminProcessErrorsIndexRoute,
     AuthenticatedAdminUsersIndexRoute: AuthenticatedAdminUsersIndexRoute,
+    AuthenticatedAdminWebhookDeliveriesIndexRoute:
+      AuthenticatedAdminWebhookDeliveriesIndexRoute,
   }
 
 const AuthenticatedAdminRouteRouteWithChildren =

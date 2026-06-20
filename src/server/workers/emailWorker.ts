@@ -5,6 +5,10 @@
  */
 
 import { Worker } from 'bullmq';
+import {
+  documentUserLinkWithFileInclude,
+  toDocumentContext,
+} from '../../lib/documents/types.ts';
 import { prisma } from '../../lib/prisma.ts';
 import { EmailService } from '../../lib/email/EmailService.ts';
 import { AppError } from '../../lib/errors/app-error.ts';
@@ -28,12 +32,17 @@ export const emailWorker = new Worker(
       requestedBy?: string;
     };
 
-    const doc = await prisma.document.findUnique({ where: { id: docId } });
-    if (!doc) {
+    const link = await prisma.documentUserLink.findUnique({
+      where: { id: docId },
+      include: documentUserLinkWithFileInclude,
+    });
+    if (!link) {
       throw AppError.notFound(
-        `Document ${docId} was not found while processing the email queue job.`,
+        `Document link ${docId} was not found while processing the email queue job.`,
       );
     }
+
+    const doc = toDocumentContext(link);
 
     await emailService.sendDownloadLink(
       doc.recipientEmail,

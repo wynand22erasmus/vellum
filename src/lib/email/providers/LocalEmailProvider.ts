@@ -25,6 +25,7 @@ export class LocalEmailProvider implements IEmailProvider {
       to: payload.to,
       subject: payload.subject,
       text: payload.body,
+      ...(payload.html ? { html: payload.html } : {}),
     });
   }
 }

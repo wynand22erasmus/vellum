@@ -83,6 +83,11 @@ export function buildSidebarNav(options: {
       href: path(PAGE_LABELS.admin.href!),
       children: [
         {
+          id: 'admin-document-files',
+          label: PAGE_LABELS.adminDocumentFiles.nav,
+          href: path(PAGE_LABELS.adminDocumentFiles.href!),
+        },
+        {
           id: 'admin-documents',
           label: PAGE_LABELS.adminDocuments.nav,
           href: path(PAGE_LABELS.adminDocuments.href!),
@@ -111,6 +116,16 @@ export function buildSidebarNav(options: {
           id: 'admin-failed-process-errors',
           label: PAGE_LABELS.adminFailedProcessErrors.nav,
           href: path(PAGE_LABELS.adminFailedProcessErrors.href!),
+        },
+        {
+          id: 'admin-webhook-deliveries',
+          label: PAGE_LABELS.adminWebhookDeliveries.nav,
+          href: path(PAGE_LABELS.adminWebhookDeliveries.href!),
+        },
+        {
+          id: 'admin-failed-webhook-deliveries',
+          label: PAGE_LABELS.adminFailedWebhookDeliveries.nav,
+          href: path(PAGE_LABELS.adminFailedWebhookDeliveries.href!),
         },
       ],
     });

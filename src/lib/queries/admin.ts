@@ -4,7 +4,7 @@
  * @packageDocumentation
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchJson } from '@/lib/api-client';
 import { fetchAdminListPage } from '@/lib/queries/fetch-json';
 import {
@@ -25,6 +25,35 @@ export type AdminUserRow = {
   createdAt: string;
 };
 
+/** Admin document files table row from `/api/admin/document-files`. */
+export type AdminDocumentFileRow = {
+  id: string;
+  sha256: string;
+  fileName: string;
+  fileExpiresAt: string;
+  recordExpiresAt: string;
+  deletedAt: string | null;
+  createdAt: string;
+  byteSize: number | null;
+  storageAttached: boolean;
+  fileAvailable: boolean;
+  linkCount: number;
+};
+
+/** Document file detail including linked recipient rows. */
+export type AdminDocumentFileDetail = AdminDocumentFileRow & {
+  userLinks: Array<{
+    id: string;
+    recipientEmail: string;
+    linkExpiresAt: string;
+    isUsed: boolean;
+    maxDownloads: number;
+    downloadCount: number;
+    revokedAt: string | null;
+    createdAt: string;
+  }>;
+};
+
 /** Admin documents table row from `/api/admin/documents`. */
 export type AdminDocumentRow = {
   id: string;
@@ -34,6 +63,10 @@ export type AdminDocumentRow = {
   linkExpiresAt: string;
   fileExpiresAt: string;
   isUsed: boolean;
+  maxDownloads: number;
+  downloadCount: number;
+  downloadsRemaining: number;
+  revokedAt: string | null;
   deletedAt: string | null;
   linkActive: boolean;
   fileAvailable: boolean;
@@ -41,6 +74,7 @@ export type AdminDocumentRow = {
 
 /** Single document detail including audit log entries. */
 export type AdminDocumentDetail = AdminDocumentRow & {
+  sha256: string;
   auditLogs: Array<{
     id: string;
     eventType: string;
@@ -74,6 +108,33 @@ export function useAdminUsersQuery(params: AdminListParams = defaultListParams) 
   });
 }
 
+/** Load paginated admin document files. */
+export function useAdminDocumentFilesQuery(params: AdminListParams = defaultListParams) {
+  return useQuery({
+    queryKey: queryKeys.admin.documentFiles(params),
+    queryFn: () =>
+      fetchAdminListPage<AdminDocumentFileRow>(
+        '/api/admin/document-files',
+        'documentFiles',
+        params,
+      ),
+  });
+}
+
+/** Load a single document file with linked recipient rows. */
+export function useAdminDocumentFileQuery(id: string) {
+  return useQuery({
+    queryKey: queryKeys.admin.documentFile(id),
+    queryFn: async () => {
+      const data = await fetchJson<{ documentFile: AdminDocumentFileDetail }>(
+        `/api/admin/document-files/${id}`,
+      );
+      return data.documentFile;
+    },
+    enabled: Boolean(id),
+  });
+}
+
 /** Load paginated admin documents. */
 export function useAdminDocumentsQuery(params: AdminListParams = defaultListParams) {
   return useQuery({
@@ -92,5 +153,23 @@ export function useAdminDocumentQuery(id: string) {
       return data.document;
     },
     enabled: Boolean(id),
+  });
+}
+
+/** Revoke a document link (admin session). */
+export function useRevokeDocumentMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const data = await fetchJson<{ message?: string }>(`/api/documents/${id}/revoke`, {
+        method: 'POST',
+      });
+      return data.message ?? 'Link revoked.';
+    },
+    onSuccess: (_message, id) => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.document(id) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.admin.all });
+    },
   });
 }

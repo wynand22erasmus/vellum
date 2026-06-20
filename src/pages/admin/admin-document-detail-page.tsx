@@ -1,5 +1,5 @@
 /**
- * Admin document detail.
+ * Admin document detail with revoke action.
  *
  * @packageDocumentation
  */
@@ -7,7 +7,9 @@
 import { useMemo } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Link, useParams } from '@tanstack/react-router';
+import { toast } from 'sonner';
 import { DocumentStatusBadges } from '@/components/features/document-status-badges';
+import { FileSha256Display } from '@/components/features/file-sha256-display';
 import { PAGE_LABELS } from '@/lib/page-labels';
 import { dbColumn } from '@/components/data-table/column-helpers';
 import { DataTable } from '@/components/data-table/data-table';
@@ -16,7 +18,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { normalizeAppPath } from '@/lib/sidebar-nav';
-import { useAdminDocumentQuery } from '@/lib/queries/admin';
+import { useAdminDocumentQuery, useRevokeDocumentMutation } from '@/lib/queries/admin';
 
 type AuditLogRow = {
   id: string;
@@ -29,6 +31,7 @@ type AuditLogRow = {
 export function AdminDocumentDetailPage() {
   const { id } = useParams({ strict: false }) as { id: string };
   const { data: doc, isLoading, error } = useAdminDocumentQuery(id);
+  const revoke = useRevokeDocumentMutation();
 
   const auditColumns = useMemo<ColumnDef<AuditLogRow>[]>(
     () => [
@@ -40,6 +43,19 @@ export function AdminDocumentDetailPage() {
     ],
     [],
   );
+
+  async function handleRevoke() {
+    if (!doc || doc.revokedAt) return;
+    if (!window.confirm('Revoke this link and delete the file from storage immediately?')) {
+      return;
+    }
+    try {
+      const message = await revoke.mutateAsync(doc.id);
+      toast.success(message);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Revoke failed');
+    }
+  }
 
   if (isLoading) {
     return (
@@ -65,9 +81,21 @@ export function AdminDocumentDetailPage() {
       description={PAGE_LABELS.adminDocumentDetail.description}
       variant="wide"
       actions={
-        <Button variant="outline" size="sm" asChild>
-          <Link to={normalizeAppPath('/admin/documents')}>Back to list</Link>
-        </Button>
+        <div className="flex gap-2">
+          {!doc.revokedAt && doc.fileAvailable ? (
+            <Button
+              variant="destructive"
+              size="sm"
+              disabled={revoke.isPending}
+              onClick={() => void handleRevoke()}
+            >
+              Revoke link
+            </Button>
+          ) : null}
+          <Button variant="outline" size="sm" asChild>
+            <Link to={normalizeAppPath('/admin/documents')}>Back to list</Link>
+          </Button>
+        </div>
       }
     >
       <dl className="mb-8 grid gap-4 sm:grid-cols-2">
@@ -86,9 +114,16 @@ export function AdminDocumentDetailPage() {
               linkActive={doc.linkActive}
               fileAvailable={doc.fileAvailable}
               isUsed={doc.isUsed}
+              maxDownloads={doc.maxDownloads}
+              downloadCount={doc.downloadCount}
+              downloadsRemaining={doc.downloadsRemaining}
+              revokedAt={doc.revokedAt}
               deletedAt={doc.deletedAt}
             />
           </dd>
+        </div>
+        <div className="sm:col-span-2">
+          <FileSha256Display sha256={doc.sha256} fileName={doc.fileName} />
         </div>
       </dl>
 

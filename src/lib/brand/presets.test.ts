@@ -21,4 +21,13 @@ describe('getBrandPreset', () => {
   it('registers all expected presets', () => {
     expect(Object.keys(brandPresets).sort()).toEqual(['client-example', 'vellum']);
   });
+
+  it('defines SMS and WhatsApp recipient OTP templates on every preset', () => {
+    for (const preset of Object.values(brandPresets)) {
+      expect(preset.sms.templates.recipientOtp.length).toBeGreaterThan(0);
+      expect(preset.whatsapp.templates.recipientOtp.length).toBeGreaterThan(0);
+      expect(preset.sms.templates.recipientOtp).toContain('{{code}}');
+      expect(preset.whatsapp.templates.recipientOtp).toContain('{{fileName}}');
+    }
+  });
 });

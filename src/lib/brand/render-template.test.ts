@@ -28,4 +28,19 @@ describe('renderBrandTemplate', () => {
       }),
     ).toBe('Visit https://app.example/verify/abc for invoice.pdf from Vellum');
   });
+
+  it('renders recipient OTP SMS template vars', () => {
+    const template =
+      'Your {{displayName}} download code for "{{fileName}}" is {{code}}. It expires in {{expiresMinutes}} minute(s).';
+    expect(
+      renderBrandTemplate(template, {
+        displayName: 'Vellum',
+        fileName: 'report.pdf',
+        code: '123456',
+        expiresMinutes: '10',
+      }),
+    ).toBe(
+      'Your Vellum download code for "report.pdf" is 123456. It expires in 10 minute(s).',
+    );
+  });
 });

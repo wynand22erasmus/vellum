@@ -73,6 +73,10 @@ Every handled error is:
 
 Enqueue failures go to `FailedProcessError`.
 
+## Audit events and webhooks
+
+Full event catalog, `metadata` conventions, logging gaps, and webhook specification: [EVENTS_AND_WEBHOOKS.md](./EVENTS_AND_WEBHOOKS.md).
+
 ## Audit ↔ process-error linking
 
 Cross-table fields tie audit pipeline failures and HTTP/process errors to the same incident:

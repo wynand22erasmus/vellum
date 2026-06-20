@@ -31,9 +31,14 @@ export const PAGE_LABELS = {
     href: '/admin',
   },
   adminDocuments: {
-    nav: 'Documents',
-    description: 'All uploads: lifecycle, recipient, and storage state.',
+    nav: 'Document links',
+    description: 'Per-recipient download links, passwords, and lifecycle state.',
     href: '/admin/documents',
+  },
+  adminDocumentFiles: {
+    nav: 'Document files',
+    description: 'Shared file assets in object storage (deduplicated by SHA-256).',
+    href: '/admin/document-files',
   },
   adminUsers: {
     nav: 'Users',
@@ -60,6 +65,20 @@ export const PAGE_LABELS = {
     description: 'Dead-letter payloads when process-error enqueue fails.',
     href: '/admin/failed-process-errors',
   },
+  adminWebhookDeliveries: {
+    nav: 'Webhook deliveries',
+    description: 'Outbound audit webhook HTTP attempts.',
+    href: '/admin/webhook-deliveries',
+  },
+  adminFailedWebhookDeliveries: {
+    nav: 'Failed webhook deliveries',
+    description: 'Dead-letter payloads when webhook delivery exhausts retries.',
+    href: '/admin/failed-webhook-deliveries',
+  },
+  adminDocumentFileDetail: {
+    nav: 'Document file detail',
+    description: 'Shared file metadata and linked recipient rows.',
+  },
   adminDocumentDetail: {
     nav: 'Document detail',
     description: 'Document metadata and audit trail for this upload.',
@@ -68,6 +87,11 @@ export const PAGE_LABELS = {
     nav: 'Development',
     description: 'Local infrastructure and tooling for debugging and development.',
     href: '/dev',
+  },
+  devWebhooks: {
+    nav: 'Webhook inspector',
+    description: 'Outbound audit webhook delivery attempts (dev only).',
+    href: '/dev/webhooks',
   },
   signIn: {
     nav: 'Sign in',
@@ -110,6 +134,12 @@ export const PAGE_LABELS = {
 /** Admin overview tiles linking to each admin sub-section. */
 export const ADMIN_INDEX_TILES = [
   {
+    id: 'admin-document-files',
+    href: PAGE_LABELS.adminDocumentFiles.href!,
+    label: PAGE_LABELS.adminDocumentFiles.nav,
+    description: PAGE_LABELS.adminDocumentFiles.description,
+  },
+  {
     id: 'admin-documents',
     href: PAGE_LABELS.adminDocuments.href!,
     label: PAGE_LABELS.adminDocuments.nav,
@@ -145,6 +175,18 @@ export const ADMIN_INDEX_TILES = [
     label: PAGE_LABELS.adminFailedProcessErrors.nav,
     description: PAGE_LABELS.adminFailedProcessErrors.description,
   },
+  {
+    id: 'admin-webhook-deliveries',
+    href: PAGE_LABELS.adminWebhookDeliveries.href!,
+    label: PAGE_LABELS.adminWebhookDeliveries.nav,
+    description: PAGE_LABELS.adminWebhookDeliveries.description,
+  },
+  {
+    id: 'admin-failed-webhook-deliveries',
+    href: PAGE_LABELS.adminFailedWebhookDeliveries.href!,
+    label: PAGE_LABELS.adminFailedWebhookDeliveries.nav,
+    description: PAGE_LABELS.adminFailedWebhookDeliveries.description,
+  },
 ] as const;
 
 const PAGE_LABEL_BY_PATH: Record<string, PageLabel> = {
@@ -152,11 +194,14 @@ const PAGE_LABEL_BY_PATH: Record<string, PageLabel> = {
   '/admin': PAGE_LABELS.admin,
   '/dev': PAGE_LABELS.development,
   '/admin/documents': PAGE_LABELS.adminDocuments,
+  '/admin/document-files': PAGE_LABELS.adminDocumentFiles,
   '/admin/users': PAGE_LABELS.adminUsers,
   '/admin/audit-logs': PAGE_LABELS.adminAuditLogs,
   '/admin/failed-audit-logs': PAGE_LABELS.adminFailedAuditLogs,
   '/admin/process-errors': PAGE_LABELS.adminProcessErrors,
   '/admin/failed-process-errors': PAGE_LABELS.adminFailedProcessErrors,
+  '/admin/webhook-deliveries': PAGE_LABELS.adminWebhookDeliveries,
+  '/admin/failed-webhook-deliveries': PAGE_LABELS.adminFailedWebhookDeliveries,
 };
 
 /**

@@ -98,4 +98,68 @@ export const env = {
   orphanReconcileEnabled: optionalEnv('ORPHAN_RECONCILE_ENABLED', 'false') === 'true',
   /** Cron pattern for orphan reconciliation (default: daily 03:00). */
   orphanReconcileCron: optionalEnv('ORPHAN_RECONCILE_CRON', '0 3 * * *'),
+  /** Default max downloads when upload omits `maxDownloads`. */
+  defaultMaxDownloads: Number(optionalEnv('DEFAULT_MAX_DOWNLOADS', '1')),
+  /** Max recipients per batch upload (`POST /api/upload/batch`). */
+  maxBatchRecipients: Number(optionalEnv('MAX_BATCH_RECIPIENTS', '50')),
+  /** When true, the worker watches the SFTP inbox directory for new files. */
+  sftpEnabled: optionalEnv('SFTP_ENABLED', 'false') === 'true',
+  /** Host path watched for SFTP drops (shared with atmoz/sftp upload volume). */
+  sftpInboxPath: optionalEnv('SFTP_INBOX_PATH', '/sftp'),
+  /** Directory for successfully ingested source files and manifests. */
+  sftpArchivePath: optionalEnv('SFTP_ARCHIVE_PATH', '/sftp/archive'),
+  /** Directory for failed ingestions (file, manifest, and error sidecar). */
+  sftpFailedPath: optionalEnv('SFTP_FAILED_PATH', '/sftp/failed'),
+  /** Sidecar manifest suffix appended to the data filename (e.g. `report.pdf.json`). */
+  sftpManifestSuffix: optionalEnv('SFTP_MANIFEST_SUFFIX', '.json'),
+  /** SFTP username label included in audit metadata. */
+  sftpUser: optionalEnv('SFTP_USER', 'partner'),
+  /** Poll interval for the SFTP inbox watcher (milliseconds). */
+  sftpPollIntervalMs: Number(optionalEnv('SFTP_POLL_INTERVAL_MS', '5000')),
+  /** How long a file size must remain unchanged before processing (milliseconds). */
+  sftpStableFileMs: Number(optionalEnv('SFTP_STABLE_FILE_MS', '2000')),
+  /** Re-verify window in ms before a download consumption is finalized. */
+  reverifyWindowMs: Number(optionalEnv('REVERIFY_WINDOW_MS', '300000')),
+  /** Password successes allowed within {@link reverifyWindowMs} before consuming a download. */
+  maxReverifyAttempts: Number(optionalEnv('MAX_REVERIFY_ATTEMPTS', '3')),
+  /** Max rows per admin audit export page. */
+  auditExportMaxLimit: Number(optionalEnv('AUDIT_EXPORT_MAX_LIMIT', '500')),
+  /** Captcha provider for verify page: `off` or `hcaptcha`. */
+  captchaProvider: optionalEnv('CAPTCHA_PROVIDER', 'off') as 'off' | 'hcaptcha',
+  /** hCaptcha site key (exposed to SPA via `/api/meta`). */
+  hcaptchaSiteKey: () => process.env.HCAPTCHA_SITE_KEY,
+  /** hCaptcha secret for server-side siteverify. */
+  hcaptchaSecretKey: () => process.env.HCAPTCHA_SECRET_KEY,
+  /** Dev/E2E only — skip hCaptcha verification (ignored in production). */
+  skipCaptcha:
+    optionalEnv('NODE_ENV', 'development') !== 'production' &&
+    optionalEnv('SKIP_CAPTCHA', 'false') === 'true',
+  /** Master switch for per-upload recipient OTP after password verify. */
+  recipientOtpEnabled: optionalEnv('RECIPIENT_OTP_ENABLED', 'false') === 'true',
+  /** OTP code TTL in seconds (Redis-backed email/SMS/WhatsApp codes). */
+  otpTtlSeconds: Number(optionalEnv('OTP_TTL_SECONDS', '600')),
+  /** Max wrong OTP attempts per session. */
+  otpMaxAttempts: Number(optionalEnv('OTP_MAX_ATTEMPTS', '5')),
+  /** Max OTP resend requests per session. */
+  otpMaxResends: Number(optionalEnv('OTP_MAX_RESENDS', '3')),
+  /** Dev/E2E fixed OTP code when Twilio/Mailpit path is not used. */
+  recipientOtpDevCode: () => process.env.RECIPIENT_OTP_DEV_CODE,
+  twilioAccountSid: () => process.env.TWILIO_ACCOUNT_SID,
+  twilioAuthToken: () => process.env.TWILIO_AUTH_TOKEN,
+  twilioFromNumber: () => process.env.TWILIO_FROM_NUMBER,
+  /** Key for encrypting TOTP secrets at rest (defaults to session secret in dev). */
+  totpEncryptionKey: () =>
+    process.env.TOTP_ENCRYPTION_KEY ??
+    optionalEnv('SESSION_SECRET', 'dev-session-secret-change-in-production'),
+  /** Master switch for outbound audit webhooks. */
+  webhooksEnabled: optionalEnv('WEBHOOKS_ENABLED', 'false') === 'true',
+  /** HMAC secret for `X-Vellum-Signature` (required when webhooks are enabled). */
+  webhookSecret: () => {
+    if (optionalEnv('WEBHOOKS_ENABLED', 'false') !== 'true') {
+      return optionalEnv('WEBHOOK_SECRET', 'dev-webhook-secret-change-me');
+    }
+    return requireEnv('WEBHOOK_SECRET');
+  },
+  /** BullMQ retry attempts per webhook delivery job. */
+  webhookMaxRetries: Number(optionalEnv('WEBHOOK_MAX_RETRIES', '5')),
 };

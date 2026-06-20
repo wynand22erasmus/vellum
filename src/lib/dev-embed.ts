@@ -15,7 +15,7 @@ const PROXY_IFRAME_IDS = new Set(['mailpit', 'minio-console', 'db-admin']);
 const ADMINER_EMBED_QUERY = 'pgsql=127.0.0.1&username=vellum&db=vellum_db';
 
 /** How a dev service is rendered inside the dashboard shell. */
-export type DevEmbedMode = 'native-prisma' | 'same-origin-iframe' | 'proxy-iframe';
+export type DevEmbedMode = 'native-prisma' | 'native-webhooks' | 'same-origin-iframe' | 'proxy-iframe';
 
 /**
  * Returns the in-app route for embedding a dev service.
@@ -47,6 +47,9 @@ export function resolveDevServiceUrl(
 export function devServiceEmbedMode(serviceId: string): DevEmbedMode {
   if (serviceId === 'prisma-studio') {
     return 'native-prisma';
+  }
+  if (serviceId === 'webhooks') {
+    return 'native-webhooks';
   }
   if (serviceId === 'docs') {
     return 'same-origin-iframe';

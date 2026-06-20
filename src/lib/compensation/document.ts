@@ -14,25 +14,37 @@ export interface DocumentLinkSnapshot {
 }
 
 /**
- * Deletes a document row if it exists (idempotent).
+ * Deletes a recipient link row if it exists (idempotent).
  *
- * @param id - Document primary key
+ * @param id - {@link DocumentUserLink} primary key (legacy "document id")
  */
-export async function deleteDocumentIfExists(id: string): Promise<void> {
-  await prisma.document.deleteMany({ where: { id } });
+export async function deleteDocumentUserLinkIfExists(id: string): Promise<void> {
+  await prisma.documentUserLink.deleteMany({ where: { id } });
+}
+
+/** @deprecated Use {@link deleteDocumentUserLinkIfExists}. */
+export const deleteDocumentIfExists = deleteDocumentUserLinkIfExists;
+
+/**
+ * Deletes a shared file row if it exists (idempotent).
+ *
+ * @param id - {@link DocumentFile} primary key
+ */
+export async function deleteDocumentFileIfExists(id: string): Promise<void> {
+  await prisma.documentFile.deleteMany({ where: { id } });
 }
 
 /**
  * Restores link-related fields from a snapshot taken before mutation.
  *
- * @param id - Document primary key
+ * @param id - {@link DocumentUserLink} primary key
  * @param snapshot - Prior token, expiry, and used flag
  */
 export async function revertDocumentLinkState(
   id: string,
   snapshot: DocumentLinkSnapshot,
 ): Promise<void> {
-  await prisma.document.update({
+  await prisma.documentUserLink.update({
     where: { id },
     data: {
       downloadToken: snapshot.downloadToken,

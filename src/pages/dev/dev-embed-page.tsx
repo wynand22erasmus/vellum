@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from '@tanstack/react-router';
 import { EmbeddedPrismaStudio } from '@/components/features/embedded-prisma-studio';
+import { DevWebhooksPage } from '@/pages/dev/dev-webhooks-page';
 import { EmptyState } from '@/components/layout/empty-state';
 import { useTheme } from '@/hooks/use-theme';
 import type { DevServiceLink } from '@/lib/dev-services';
@@ -82,6 +83,14 @@ export function DevEmbedPage() {
     return (
       <div className={EMBED_SHELL_CLASS}>
         <EmbeddedPrismaStudio />
+      </div>
+    );
+  }
+
+  if (mode === 'native-webhooks') {
+    return (
+      <div className={`${EMBED_SHELL_CLASS} overflow-auto p-4`}>
+        <DevWebhooksPage />
       </div>
     );
   }

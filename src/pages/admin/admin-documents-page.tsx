@@ -23,10 +23,10 @@ export function AdminDocumentsPage() {
 
   const columns = useMemo<ColumnDef<AdminDocumentRow>[]>(
     () => [
-      dbColumn<AdminDocumentRow>('Document', 'fileName', 'File'),
-      dbColumn<AdminDocumentRow>('Document', 'recipientEmail', 'Recipient'),
-      dbColumn<AdminDocumentRow>('Document', 'createdAt', 'Created'),
-      dbColumn<AdminDocumentRow>('Document', 'status', 'Status', {
+      dbColumn<AdminDocumentRow>('DocumentFile', 'fileName', 'File'),
+      dbColumn<AdminDocumentRow>('DocumentUserLink', 'recipientEmail', 'Recipient'),
+      dbColumn<AdminDocumentRow>('DocumentUserLink', 'createdAt', 'Created'),
+      dbColumn<AdminDocumentRow>('DocumentUserLink', 'status', 'Status', {
         cell: ({ row }) => (
           <DocumentStatusBadges
             linkActive={row.original.linkActive}

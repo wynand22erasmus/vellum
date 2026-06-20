@@ -82,6 +82,11 @@ services:
     env_file: .env
     environment:
       <<: *app-env
+      SFTP_ENABLED: ${SFTP_ENABLED:-true}
+      SFTP_INBOX_PATH: /sftp
+      SFTP_ARCHIVE_PATH: /sftp/archive
+      SFTP_FAILED_PATH: /sftp/failed
+      SFTP_USER: ${SFTP_USER:-partner}
     depends_on:
       postgres:
         condition: service_healthy
@@ -89,11 +94,27 @@ services:
         condition: service_started
       minio:
         condition: service_started
+      clamav:
+        condition: service_healthy
+      sftp:
+        condition: service_started
     command: ["npm", "run", "worker"]
     volumes:
       - .:/app
       - app_node_modules:/app/node_modules
       - app_logs:/app/logs
+      - sftp_data:/sftp
+
+  sftp:
+    image: atmoz/sftp:alpine
+    labels:
+      <<: *vellum-labels
+      com.vellum.service: sftp
+    ports:
+      - "${SFTP_PORT:-2222}:22"
+    volumes:
+      - sftp_data:/home/partner/upload
+    command: partner:${SFTP_PASSWORD:-devpassword}:1001
 
   postgres:
     image: ${VELLUM_PROJECT:-vellum}-postgres:${VELLUM_ENV:-development}
@@ -179,6 +200,15 @@ services:
       - "8025:8025"
       - "1025:1025"
 
+  webhook-tester:
+    image: ghcr.io/tarampampam/webhook-tester:2
+    labels:
+      <<: *vellum-labels
+      com.vellum.service: webhook-tester
+    command: ["start", "--auto-create-sessions"]
+    ports:
+      - "8090:8080"
+
   web:
     image: ${VELLUM_PROJECT:-vellum}-app:${VELLUM_ENV:-development}
     labels:
@@ -224,3 +254,4 @@ volumes:
   clamav_data:
   app_node_modules:
   app_logs:
+  sftp_data:

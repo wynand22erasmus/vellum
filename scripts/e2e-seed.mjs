@@ -3,7 +3,7 @@
  * Falls back to direct MinIO + Postgres insert when upload fails (e.g. ClamAV timeout).
  * Writes e2e/.state.json and bruno/collections/vellum-api/environments/Seeded.bru
  */
-import { randomBytes, randomUUID } from 'node:crypto';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -94,7 +94,7 @@ async function fetchDownloadToken(documentId) {
   const client = new pg.Client({ connectionString: databaseUrl });
   await client.connect();
   const { rows } = await client.query(
-    'SELECT "downloadToken" FROM "Document" WHERE id = $1',
+    'SELECT "downloadToken" FROM "document_user_links" WHERE id = $1',
     [documentId],
   );
   await client.end();
@@ -153,10 +153,12 @@ async function ensureMinioBucket(s3) {
 async function seedDirect() {
   console.warn('[e2e-seed] Using direct DB + MinIO fallback (upload API unavailable).');
 
-  const documentId = randomUUID();
+  const linkId = randomUUID();
+  const fileId = randomUUID();
   const downloadToken = randomBytes(32).toString('hex');
   const s3Key = `documents/${randomBytes(16).toString('hex')}/${fileName}`;
   const passwordHash = await argon2.hash(password);
+  const sha256 = createHash('sha256').update(fileContent).digest('hex');
   const now = new Date();
   const linkExpiresAt = new Date(now.getTime() + linkTtlSeconds * 1000);
   const fileExpiresAt = new Date(now.getTime() + fileTtlSeconds * 1000);
@@ -183,26 +185,21 @@ async function seedDirect() {
   const client = new pg.Client({ connectionString: databaseUrl });
   await client.connect();
   await client.query(
-    `INSERT INTO "Document" (
-      id, "s3Key", "fileName", "recipientEmail", "passwordHash", "downloadToken",
-      "linkExpiresAt", "fileExpiresAt", "recordExpiresAt", "isUsed", "createdAt"
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, false, $10)`,
-    [
-      documentId,
-      s3Key,
-      fileName,
-      recipientEmail,
-      passwordHash,
-      downloadToken,
-      linkExpiresAt,
-      fileExpiresAt,
-      recordExpiresAt,
-      now,
-    ],
+    `INSERT INTO "document_files" (
+      id, sha256, "s3Key", "fileName", "fileExpiresAt", "recordExpiresAt", "createdAt", "byteSize"
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+    [fileId, sha256, s3Key, fileName, fileExpiresAt, recordExpiresAt, now, fileContent.length],
+  );
+  await client.query(
+    `INSERT INTO "document_user_links" (
+      id, "documentFileId", "recipientEmail", "passwordHash", "downloadToken",
+      "linkExpiresAt", "isUsed", "createdAt"
+    ) VALUES ($1, $2, $3, $4, $5, $6, false, $7)`,
+    [linkId, fileId, recipientEmail, passwordHash, downloadToken, linkExpiresAt, now],
   );
   await client.end();
 
-  return { documentId, downloadToken };
+  return { documentId: linkId, downloadToken };
 }
 
 console.log(`[e2e-seed] Seeding for ${recipientEmail}…`);

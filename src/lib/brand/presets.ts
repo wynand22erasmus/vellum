@@ -21,13 +21,35 @@ export type BrandPreset = {
   email: {
     fromName: string;
     fromAddress: string;
+    /** Hex color for CTA buttons and accent bar (overridable via `BRAND_PRIMARY_COLOR`). */
+    primaryColor?: string;
+    /** Absolute logo URL for HTML emails (defaults to `{APP_URL}{logos.full}`). */
+    logoUrl?: string;
+    /** Support contact shown in the footer (overridable via `BRAND_SUPPORT_EMAIL`). */
+    supportEmail?: string;
+    /** HTML footer fragment (overridable via `BRAND_FOOTER_HTML`). */
+    footerHtml?: string;
     subjects: {
       emailVerification: string;
       downloadLink: string;
+      recipientOtp: string;
     };
     templates: {
       emailVerification: string;
       downloadLink: string;
+      recipientOtp: string;
+    };
+  };
+  /** Twilio SMS body templates (`{{displayName}}`, `{{code}}`, `{{fileName}}`, `{{expiresMinutes}}`). */
+  sms: {
+    templates: {
+      recipientOtp: string;
+    };
+  };
+  /** Twilio WhatsApp body templates (same placeholders as {@link BrandPreset.sms}). */
+  whatsapp: {
+    templates: {
+      recipientOtp: string;
     };
   };
   /** Optional footer links on auth pages. */
@@ -53,9 +75,12 @@ const vellumPreset: BrandPreset = {
   email: {
     fromName: 'Vellum',
     fromAddress: 'noreply@vellum.app',
+    primaryColor: '#2B6CB0',
+    supportEmail: 'support@vellum.app',
     subjects: {
       emailVerification: 'Verify your {{displayName}} email address',
       downloadLink: 'Secure Document Ready: {{fileName}}',
+      recipientOtp: 'Your download verification code — {{fileName}}',
     },
     templates: {
       emailVerification: `Please verify your email address before signing in to the {{displayName}} dashboard.
@@ -74,6 +99,23 @@ Visit the link below and enter your file password to download:
 This link will expire as scheduled. Do not share this link.
 
 If your download did not start, please log in to your {{displayName}} dashboard to request a new link.`,
+      recipientOtp: `Your verification code for "{{fileName}}" is: {{code}}
+
+This code expires in {{expiresMinutes}} minute(s).
+
+Enter this code on the download page to continue.`,
+    },
+  },
+  sms: {
+    templates: {
+      recipientOtp:
+        'Your {{displayName}} download code for "{{fileName}}" is {{code}}. It expires in {{expiresMinutes}} minute(s).',
+    },
+  },
+  whatsapp: {
+    templates: {
+      recipientOtp:
+        'Your {{displayName}} download code for "{{fileName}}" is {{code}}. It expires in {{expiresMinutes}} minute(s).',
     },
   },
   legal: {
@@ -98,9 +140,12 @@ const clientExamplePreset: BrandPreset = {
   email: {
     fromName: 'Acme Secure Transfer',
     fromAddress: 'noreply@acme.example.com',
+    primaryColor: '#C2410C',
+    supportEmail: 'support@acme.example.com',
     subjects: {
       emailVerification: 'Verify your {{displayName}} account',
       downloadLink: '{{displayName}} document ready: {{fileName}}',
+      recipientOtp: '{{displayName}} verification code — {{fileName}}',
     },
     templates: {
       emailVerification: `Welcome to {{displayName}}.
@@ -117,6 +162,23 @@ Open the link below and enter your file password:
 {{verifyUrl}}
 
 Do not share this link.`,
+      recipientOtp: `Your verification code for "{{fileName}}" is: {{code}}
+
+This code expires in {{expiresMinutes}} minute(s).
+
+Enter this code on the download page to continue.`,
+    },
+  },
+  sms: {
+    templates: {
+      recipientOtp:
+        '{{displayName}}: Your download code for "{{fileName}}" is {{code}}. Expires in {{expiresMinutes}} minute(s).',
+    },
+  },
+  whatsapp: {
+    templates: {
+      recipientOtp:
+        '{{displayName}}: Your download code for "{{fileName}}" is {{code}}. Expires in {{expiresMinutes}} minute(s).',
     },
   },
   legal: {

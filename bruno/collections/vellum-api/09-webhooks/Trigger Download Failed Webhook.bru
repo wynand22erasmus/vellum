@@ -1,0 +1,38 @@
+meta {
+  name: Trigger Download Failed Webhook
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/verify
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "token": "{{downloadToken}}",
+    "password": "wrong-password-for-webhook-test"
+  }
+}
+
+tests {
+  test("wrong password returns 401", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+
+  test("audit FILE_DOWNLOAD_FAILED is emitted (check webhook inspector when WEBHOOKS_ENABLED)", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+}
+
+docs {
+  Triggers `FILE_DOWNLOAD_FAILED` when password is wrong. With `WEBHOOKS_ENABLED=true` and
+  `WEBHOOK_URL_FILE_DOWNLOAD_FAILED` set, the audit worker enqueues webhook delivery.
+  Inspect results at `/dev/webhooks` or `GET /api/dev/webhook-deliveries`.
+}

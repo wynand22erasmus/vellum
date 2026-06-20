@@ -13,7 +13,8 @@ import { PageContainer } from '@/components/layout/page-container';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { AdminListResult } from '@/lib/queries/fetch-json';
 
-type AdminListPageProps<T> = {
+/** Props for {@link AdminListPage}. */
+export type AdminListPageProps<T> = {
   title: string;
   description: string;
   query: UseQueryResult<AdminListResult<T>, Error>;

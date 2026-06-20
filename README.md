@@ -2,6 +2,8 @@
 
 Secure, API-first document transfer platform. Every download requires both an email link (possession) and a file password (knowledge).
 
+**Using the app (post-install):** [docs/USAGE.md](./docs/USAGE.md) — integrator upload, recipient download, admin audit export.
+
 ## Stack
 
 - **Frontend:** Vite + React + Tailwind
@@ -204,7 +206,7 @@ npm run docs:coverage     # coverage gate + docs/doc-inventory.json
 
 If you open `/docs/` without a session, you are redirected to sign in and then returned to `/docs/`. If HTML has not been generated, the server responds with `503` and instructions to run `docs:api`.
 
-Standards: [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md). Environment reference: [docs/CONFIG.md](./docs/CONFIG.md).
+Standards: [docs/DOCUMENTATION.md](./docs/DOCUMENTATION.md). Environment reference: [docs/CONFIG.md](./docs/CONFIG.md). Audit events and webhooks: [docs/EVENTS_AND_WEBHOOKS.md](./docs/EVENTS_AND_WEBHOOKS.md).
 
 ## Dashboard users
 

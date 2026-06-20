@@ -28,5 +28,6 @@ tests {
     const body = res.getBody();
     expect(body.data.downloadUrl).to.be.a("string").and.not.empty;
     expect(body.data.fileName).to.equal(bru.getEnvVar("fileName"));
+    expect(body.data.sha256).to.match(/^[a-f0-9]{64}$/);
   });
 }

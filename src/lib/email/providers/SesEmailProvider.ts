@@ -19,12 +19,18 @@ export class SesEmailProvider implements IEmailProvider {
   /** @inheritdoc */
   async send(payload: EmailPayload): Promise<void> {
     const preset = getBrandPresetFromEnv();
+    const body: { Text: { Data: string }; Html?: { Data: string } } = {
+      Text: { Data: payload.body },
+    };
+    if (payload.html) {
+      body.Html = { Data: payload.html };
+    }
     await this.client.send(
       new SendEmailCommand({
         Destination: { ToAddresses: [payload.to] },
         Message: {
           Subject: { Data: payload.subject },
-          Body: { Text: { Data: payload.body } },
+          Body: body,
         },
         Source: payload.from ?? `${preset.email.fromName} <${preset.email.fromAddress}>`,
       }),

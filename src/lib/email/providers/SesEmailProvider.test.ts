@@ -56,4 +56,20 @@ describe('SesEmailProvider branding', () => {
     const command = sendMock.mock.calls[0]?.[0] as { input: { Source: string } };
     expect(command.input.Source).toBe('Acme Secure Transfer <noreply@acme.example.com>');
   });
+
+  it('includes Html body when html payload is provided', async () => {
+    const provider = new SesEmailProvider();
+    await provider.send({
+      to: 'user@example.com',
+      subject: 'Test',
+      body: 'Plain text',
+      html: '<p>HTML version</p>',
+    });
+
+    const command = sendMock.mock.calls[0]?.[0] as {
+      input: { Message: { Body: { Text: { Data: string }; Html?: { Data: string } } } };
+    };
+    expect(command.input.Message.Body.Text.Data).toBe('Plain text');
+    expect(command.input.Message.Body.Html?.Data).toBe('<p>HTML version</p>');
+  });
 });

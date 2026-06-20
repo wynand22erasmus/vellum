@@ -37,14 +37,17 @@ export function DashboardPage() {
 
   const columns = useMemo<ColumnDef<DocumentRow>[]>(
     () => [
-      dbColumn<DocumentRow>('Document', 'fileName', 'File'),
-      dbColumn<DocumentRow>('Document', 'createdAt', 'Received'),
-      dbColumn<DocumentRow>('Document', 'status', 'Status', {
+      dbColumn<DocumentRow>('DocumentFile', 'fileName', 'File'),
+      dbColumn<DocumentRow>('DocumentUserLink', 'createdAt', 'Received'),
+      dbColumn<DocumentRow>('DocumentUserLink', 'status', 'Status', {
         cell: ({ row }) => (
           <DocumentStatusBadges
             linkActive={row.original.linkActive}
             fileAvailable={row.original.fileAvailable}
             isUsed={row.original.isUsed}
+            maxDownloads={row.original.maxDownloads}
+            downloadCount={row.original.downloadCount}
+            downloadsRemaining={row.original.downloadsRemaining}
           />
         ),
       }),
