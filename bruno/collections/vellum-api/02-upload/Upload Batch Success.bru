@@ -1,0 +1,40 @@
+meta {
+  name: Upload Batch Success
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/upload/batch
+  body: multipartForm
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{apiKey}}
+}
+
+body:multipart-form {
+  file: @file(./fixtures/{{fileName}})
+  recipients: [{"recipientEmail":"batch-a@example.com","password":"batchPass1!","linkTtl":86400,"fileTtl":604800,"maxDownloads":1},{"recipientEmail":"batch-b@example.com","password":"batchPass2!","linkTtl":86400,"fileTtl":604800,"maxDownloads":2}]
+}
+
+tests {
+  test("creates batch links with shared file when scanner available", function () {
+    if (res.getStatus() === 503) {
+      expect(res.getBody().detail).to.match(/scanner|Virus/i);
+      return;
+    }
+    expect(res.getStatus()).to.equal(201);
+    expect(res.getHeader("content-type")).to.contain("application/vnd.vellum.result+json");
+    const body = res.getBody();
+    expect(body.data.batchId).to.be.a("string").and.not.empty;
+    expect(body.data.fileId).to.be.a("string").and.not.empty;
+    expect(body.data.sha256).to.match(/^[a-f0-9]{64}$/);
+    expect(body.data.links).to.be.an("array").with.lengthOf(2);
+    expect(body.data.links[0].recipientEmail).to.equal("batch-a@example.com");
+    expect(body.data.links[1].recipientEmail).to.equal("batch-b@example.com");
+    expect(body.data.warning).to.contain("separate channel");
+    bru.setVar("documentId", body.data.links[0].id);
+  });
+}
