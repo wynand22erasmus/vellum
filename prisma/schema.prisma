@@ -29,6 +29,42 @@ enum AuditEventType {
   FILE_DOWNLOAD_FAILED
   /// File removed from object storage by the scrub worker.
   FILE_SCRUBBED
+  /// Download link manually revoked before natural expiry.
+  LINK_REVOKED
+  /// hCaptcha verification failed on download verify.
+  CAPTCHA_FAILED
+  /// One-time recipient code sent (email, SMS, or WhatsApp).
+  RECIPIENT_OTP_SENT
+  /// Recipient requested a new OTP code.
+  RECIPIENT_OTP_RESENT
+  /// Wrong, expired, or max-attempt recipient OTP.
+  RECIPIENT_OTP_FAILED
+  /// Recipient OTP accepted; presigned URL issued.
+  RECIPIENT_OTP_VERIFIED
+  /// SFTP inbox received a new data file.
+  SFTP_FILE_RECEIVED
+  /// SFTP sidecar manifest parsed and validated.
+  SFTP_METADATA_VALIDATED
+  /// SFTP file passed ClamAV scan.
+  SFTP_VIRUS_SCAN_PASSED
+  /// SFTP pipeline created a recipient download link.
+  SFTP_DOCUMENT_CREATED
+  /// SFTP file stored in object storage.
+  SFTP_STORAGE_UPLOADED
+  /// SFTP initial-link email job enqueued.
+  SFTP_EMAIL_QUEUED
+  /// SFTP source file archived after successful ingest.
+  SFTP_INGESTION_COMPLETED
+  /// SFTP ingest failed at any pipeline step.
+  SFTP_INGESTION_FAILED
+}
+
+/// Recipient OTP delivery channel configured per document upload.
+enum RecipientOtpChannel {
+  email
+  sms
+  whatsapp
+  authenticator
 }
 
 /// Local copy of dashboard users (WorkOS or dev login).
@@ -49,12 +85,32 @@ model User {
   @@map("users")
 }
 
-/// Uploaded file metadata, credentials, and lifecycle timestamps.
-model Document {
+/// Shared file asset stored once in S3 (deduplicated by sha256).
+model DocumentFile {
   id              String    @id @default(uuid())
-  /// S3/MinIO object key; null until upload completes and scan passes.
+  /// SHA-256 hex digest (64 chars) — deduplication key.
+  sha256          String    @unique
+  /// S3/MinIO object key; null after scrub or before upload completes.
   s3Key           String?
   fileName        String
+  /// When the object may be deleted from storage.
+  fileExpiresAt   DateTime
+  /// When the database row (and linked recipient rows) may be purged.
+  recordExpiresAt DateTime
+  deletedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  byteSize        Int?
+
+  userLinks DocumentUserLink[]
+
+  @@map("document_files")
+}
+
+/// Per-recipient download link and credentials for a shared {@link DocumentFile}.
+model DocumentUserLink {
+  id              String    @id @default(uuid())
+  documentFileId  String
+  documentFile    DocumentFile @relation(fields: [documentFileId], references: [id], onDelete: Cascade)
   recipientEmail  String
   /// Argon2 hash of the per-file download password (knowledge factor).
   passwordHash    String
@@ -63,18 +119,33 @@ model Document {
 
   /// When the email verify link stops working.
   linkExpiresAt   DateTime
-  /// When the object may be deleted from storage.
-  fileExpiresAt   DateTime
-  /// When the database row may be purged.
-  recordExpiresAt DateTime
-
+  /// Maximum successful download consumptions allowed (see verify flow).
+  maxDownloads    Int       @default(1)
+  /// Successful download consumptions consumed so far.
+  downloadCount   Int       @default(0)
+  /// Re-verify attempts in the current download window.
+  verifySuccessCount Int    @default(0)
+  /// Start of the current re-verify window (`null` when idle).
+  lastVerifiedAt  DateTime?
   isUsed          Boolean   @default(false)
-  deletedAt       DateTime?
+  /// Set when an admin or integrator revokes the link.
+  revokedAt       DateTime?
+  /// Optional second factor channel when `RECIPIENT_OTP_ENABLED=true`.
+  otpChannel      RecipientOtpChannel?
+  /// E.164 phone for SMS/WhatsApp OTP (required when otpChannel is sms or whatsapp).
+  recipientPhone  String?
+  /// AES-256-GCM encrypted TOTP secret when otpChannel is authenticator.
+  totpSecretEnc   String?
+  /// Groups links created in a single batch upload request.
+  batchId         String?
   createdAt       DateTime  @default(now())
 
-  auditLogs       AuditLog[]
+  auditLogs AuditLog[]
 
   @@index([recipientEmail])
+  @@index([documentFileId])
+  @@index([batchId])
+  @@map("document_user_links")
 }
 
 /// Immutable audit events tied to documents and users.
@@ -84,8 +155,9 @@ model AuditLog {
   timestamp   DateTime       @default(now())
 
   userId      String?
+  /// References {@link DocumentUserLink.id} (legacy column name for API compatibility).
   documentId  String?
-  document    Document?      @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  documentUserLink DocumentUserLink? @relation(fields: [documentId], references: [id], onDelete: SetNull)
 
   ipAddress   String?
   userAgent   String?
@@ -146,6 +218,37 @@ model ProcessError {
 
 /// Dead-letter store when process-error queue processing fails.
 model FailedProcessError {
+  id        String   @id @default(uuid())
+  payload   Json
+  error     String
+  createdAt DateTime @default(now())
+  retried   Boolean  @default(false)
+}
+
+/// Outbound webhook delivery attempt (one row per HTTP try).
+model WebhookDelivery {
+  id             String         @id @default(uuid())
+  /// Same id as `X-Vellum-Delivery-Id` header.
+  deliveryId     String         @unique
+  auditLogId     String
+  eventType      AuditEventType
+  targetUrl      String
+  payload        Json
+  responseStatus Int?
+  /// Truncated response body from the target.
+  responseBody   String?
+  success        Boolean
+  /// Attempt number (1-based).
+  attempt        Int
+  createdAt      DateTime       @default(now())
+
+  @@index([auditLogId])
+  @@index([eventType])
+  @@index([createdAt])
+}
+
+/// Dead-letter store when webhook delivery exhausts retries.
+model FailedWebhookDelivery {
   id        String   @id @default(uuid())
   payload   Json
   error     String

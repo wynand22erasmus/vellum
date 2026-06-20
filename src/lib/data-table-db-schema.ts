@@ -10,6 +10,7 @@
 import { DOCUMENT_STATUS_FILTER_OPTIONS } from './document-status-filter-options.ts';
 import {
   AUDIT_EVENT_TYPE_FILTER_OPTIONS,
+  RECIPIENT_OTP_CHANNEL_FILTER_OPTIONS,
   USER_KIND_FILTER_OPTIONS,
 } from './data-table-enum-options.ts';
 import type { DataTableColumnDataType, DataTableFilterOption } from './data-table-types.ts';
@@ -17,11 +18,14 @@ import type { DataTableColumnDataType, DataTableFilterOption } from './data-tabl
 /** Prisma models exposed in admin/dashboard tables. */
 export const DB_MODEL_NAMES = [
   'User',
-  'Document',
+  'DocumentFile',
+  'DocumentUserLink',
   'AuditLog',
   'FailedAuditLog',
   'ProcessError',
   'FailedProcessError',
+  'WebhookDelivery',
+  'FailedWebhookDelivery',
 ] as const;
 
 /** Prisma model name registered in {@link DB_COLUMN_DESCRIPTORS}. */
@@ -75,22 +79,45 @@ export const DB_COLUMN_DESCRIPTORS: Record<DbModelName, Record<string, DbColumnD
     createdAt: col('User', 'createdAt', 'DateTime', 'datetime'),
     updatedAt: col('User', 'updatedAt', 'DateTime', 'datetime'),
   },
-  Document: {
-    id: col('Document', 'id', 'String', 'text', { unique: true }),
-    s3Key: col('Document', 's3Key', 'String', 'text', { nullable: true }),
-    fileName: col('Document', 'fileName', 'String', 'text'),
-    recipientEmail: col('Document', 'recipientEmail', 'String', 'email', { indexed: true }),
-    passwordHash: col('Document', 'passwordHash', 'String', 'text'),
-    downloadToken: col('Document', 'downloadToken', 'String', 'text', { unique: true }),
-    linkExpiresAt: col('Document', 'linkExpiresAt', 'DateTime', 'datetime'),
-    fileExpiresAt: col('Document', 'fileExpiresAt', 'DateTime', 'datetime'),
-    recordExpiresAt: col('Document', 'recordExpiresAt', 'DateTime', 'datetime'),
-    isUsed: col('Document', 'isUsed', 'Boolean', 'boolean'),
-    deletedAt: col('Document', 'deletedAt', 'DateTime', 'datetime', {
+  DocumentFile: {
+    id: col('DocumentFile', 'id', 'String', 'text', { unique: true }),
+    sha256: col('DocumentFile', 'sha256', 'String', 'text', { unique: true }),
+    s3Key: col('DocumentFile', 's3Key', 'String', 'text', { nullable: true }),
+    fileName: col('DocumentFile', 'fileName', 'String', 'text'),
+    fileExpiresAt: col('DocumentFile', 'fileExpiresAt', 'DateTime', 'datetime'),
+    recordExpiresAt: col('DocumentFile', 'recordExpiresAt', 'DateTime', 'datetime'),
+    deletedAt: col('DocumentFile', 'deletedAt', 'DateTime', 'datetime', {
       nullable: true,
       filterAs: 'nullable-presence',
     }),
-    createdAt: col('Document', 'createdAt', 'DateTime', 'datetime'),
+    createdAt: col('DocumentFile', 'createdAt', 'DateTime', 'datetime'),
+    byteSize: col('DocumentFile', 'byteSize', 'Int', 'number', { nullable: true }),
+  },
+  DocumentUserLink: {
+    id: col('DocumentUserLink', 'id', 'String', 'text', { unique: true }),
+    documentFileId: col('DocumentUserLink', 'documentFileId', 'String', 'text', { indexed: true }),
+    recipientEmail: col('DocumentUserLink', 'recipientEmail', 'String', 'email', { indexed: true }),
+    passwordHash: col('DocumentUserLink', 'passwordHash', 'String', 'text'),
+    downloadToken: col('DocumentUserLink', 'downloadToken', 'String', 'text', { unique: true }),
+    otpChannel: col('DocumentUserLink', 'otpChannel', 'Enum', 'enum', {
+      prismaEnum: 'RecipientOtpChannel',
+      nullable: true,
+      enumOptions: RECIPIENT_OTP_CHANNEL_FILTER_OPTIONS,
+    }),
+    recipientPhone: col('DocumentUserLink', 'recipientPhone', 'String', 'text', { nullable: true }),
+    totpSecretEnc: col('DocumentUserLink', 'totpSecretEnc', 'String', 'text', {
+      nullable: true,
+      filterAs: 'nullable-presence',
+    }),
+    linkExpiresAt: col('DocumentUserLink', 'linkExpiresAt', 'DateTime', 'datetime'),
+    maxDownloads: col('DocumentUserLink', 'maxDownloads', 'Int', 'number'),
+    downloadCount: col('DocumentUserLink', 'downloadCount', 'Int', 'number'),
+    verifySuccessCount: col('DocumentUserLink', 'verifySuccessCount', 'Int', 'number'),
+    lastVerifiedAt: col('DocumentUserLink', 'lastVerifiedAt', 'DateTime', 'datetime', { nullable: true }),
+    isUsed: col('DocumentUserLink', 'isUsed', 'Boolean', 'boolean'),
+    revokedAt: col('DocumentUserLink', 'revokedAt', 'DateTime', 'datetime', { nullable: true }),
+    batchId: col('DocumentUserLink', 'batchId', 'String', 'text', { nullable: true, indexed: true }),
+    createdAt: col('DocumentUserLink', 'createdAt', 'DateTime', 'datetime'),
   },
   AuditLog: {
     id: col('AuditLog', 'id', 'String', 'text', { unique: true }),
@@ -145,6 +172,29 @@ export const DB_COLUMN_DESCRIPTORS: Record<DbModelName, Record<string, DbColumnD
     createdAt: col('FailedProcessError', 'createdAt', 'DateTime', 'datetime'),
     retried: col('FailedProcessError', 'retried', 'Boolean', 'boolean'),
   },
+  WebhookDelivery: {
+    id: col('WebhookDelivery', 'id', 'String', 'text', { unique: true }),
+    deliveryId: col('WebhookDelivery', 'deliveryId', 'String', 'text', { unique: true }),
+    auditLogId: col('WebhookDelivery', 'auditLogId', 'String', 'text', { indexed: true }),
+    eventType: col('WebhookDelivery', 'eventType', 'Enum', 'enum', {
+      prismaEnum: 'AuditEventType',
+      enumOptions: AUDIT_EVENT_TYPE_FILTER_OPTIONS,
+    }),
+    targetUrl: col('WebhookDelivery', 'targetUrl', 'String', 'text'),
+    payload: col('WebhookDelivery', 'payload', 'Json', 'text'),
+    responseStatus: col('WebhookDelivery', 'responseStatus', 'Int', 'number', { nullable: true }),
+    responseBody: col('WebhookDelivery', 'responseBody', 'String', 'text', { nullable: true }),
+    success: col('WebhookDelivery', 'success', 'Boolean', 'boolean'),
+    attempt: col('WebhookDelivery', 'attempt', 'Int', 'number'),
+    createdAt: col('WebhookDelivery', 'createdAt', 'DateTime', 'datetime', { indexed: true }),
+  },
+  FailedWebhookDelivery: {
+    id: col('FailedWebhookDelivery', 'id', 'String', 'text', { unique: true }),
+    payload: col('FailedWebhookDelivery', 'payload', 'Json', 'text'),
+    error: col('FailedWebhookDelivery', 'error', 'String', 'text'),
+    createdAt: col('FailedWebhookDelivery', 'createdAt', 'DateTime', 'datetime'),
+    retried: col('FailedWebhookDelivery', 'retried', 'Boolean', 'boolean'),
+  },
 };
 
 /**
@@ -157,47 +207,57 @@ export type DerivedColumnDescriptor = DbColumnDescriptor & {
 /** Registry of API-computed table columns (not direct Prisma fields). */
 export const DERIVED_COLUMN_DESCRIPTORS: Record<string, DerivedColumnDescriptor> = {
   linkActive: {
-    model: 'Document',
+    model: 'DocumentUserLink',
     field: 'linkActive',
     scalar: 'Boolean',
     dataType: 'boolean',
-    models: ['Document'],
+    models: ['DocumentUserLink'],
   },
   fileAvailable: {
-    model: 'Document',
+    model: 'DocumentUserLink',
     field: 'fileAvailable',
     scalar: 'Boolean',
     dataType: 'boolean',
-    models: ['Document'],
+    models: ['DocumentUserLink', 'DocumentFile'],
   },
   storageAttached: {
-    model: 'Document',
+    model: 'DocumentUserLink',
     field: 'storageAttached',
     scalar: 'Boolean',
     dataType: 'boolean',
-    models: ['Document'],
+    models: ['DocumentUserLink', 'DocumentFile'],
+  },
+  linkCount: {
+    model: 'DocumentFile',
+    field: 'linkCount',
+    scalar: 'Int',
+    dataType: 'number',
+    models: ['DocumentFile'],
   },
   status: {
-    model: 'Document',
+    model: 'DocumentUserLink',
     field: 'status',
     scalar: 'Enum',
     dataType: 'enum',
     filterAs: 'document-status-facet',
     enumOptions: DOCUMENT_STATUS_FILTER_OPTIONS,
-    models: ['Document'],
+    models: ['DocumentUserLink'],
   },
 };
 
 /** Maps frontend row type names to their primary Prisma model. */
 export const TABLE_ROW_DB_MODEL = {
   AdminUserRow: 'User',
-  AdminDocumentRow: 'Document',
-  DocumentRow: 'Document',
+  AdminDocumentRow: 'DocumentUserLink',
+  AdminDocumentFileRow: 'DocumentFile',
+  DocumentRow: 'DocumentUserLink',
   AuditLogRow: 'AuditLog',
   AuditRow: 'AuditLog',
   FailedAuditLogRow: 'FailedAuditLog',
   ProcessErrorRow: 'ProcessError',
   FailedProcessErrorRow: 'FailedProcessError',
+  WebhookDeliveryRow: 'WebhookDelivery',
+  FailedWebhookDeliveryRow: 'FailedWebhookDelivery',
 } as const satisfies Record<string, DbModelName>;
 
 /** Frontend table row type name for registry lookup. */

@@ -5,6 +5,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { AUDIT_EVENT_TYPE_FILTER_OPTIONS } from './data-table-enum-options';
 import { DB_MODEL_NAMES } from './data-table-db-schema';
 import {
   getDbColumnDescriptor,
@@ -17,11 +18,14 @@ describe('data-table-db-column-registry', () => {
   it('registers every Prisma model', () => {
     expect(DB_MODEL_NAMES).toEqual([
       'User',
-      'Document',
+      'DocumentFile',
+      'DocumentUserLink',
       'AuditLog',
       'FailedAuditLog',
       'ProcessError',
       'FailedProcessError',
+      'WebhookDelivery',
+      'FailedWebhookDelivery',
     ]);
   });
 
@@ -40,7 +44,7 @@ describe('data-table-db-column-registry', () => {
   it('maps AuditLog.eventType to audit enum options', () => {
     const meta = resolveDbColumnMeta('eventType', undefined, 'AuditLog');
     expect(meta?.dataType).toBe('enum');
-    expect(meta?.enumOptions).toHaveLength(6);
+    expect(meta?.enumOptions).toHaveLength(AUDIT_EVENT_TYPE_FILTER_OPTIONS.length);
   });
 
   it('maps ProcessError.status to number filter type', () => {
@@ -56,7 +60,7 @@ describe('data-table-db-column-registry', () => {
   });
 
   it('maps derived document status facet', () => {
-    const meta = resolveDbColumnMeta('status', undefined, 'Document');
+    const meta = resolveDbColumnMeta('status', undefined, 'DocumentUserLink');
     expect(meta?.dataType).toBe('enum');
     expect(meta?.filterAs).toBe('document-status-facet');
   });
@@ -67,7 +71,7 @@ describe('data-table-db-column-registry', () => {
   });
 
   it('mergeColumnMetaWithDb fills from registry when dataType omitted', () => {
-    const merged = mergeColumnMetaWithDb('recipientEmail', { dbModel: 'Document' }, undefined);
+    const merged = mergeColumnMetaWithDb('recipientEmail', { dbModel: 'DocumentUserLink' }, undefined);
     expect(merged.dataType).toBe('email');
     expect(merged.dbField).toBe('recipientEmail');
   });
