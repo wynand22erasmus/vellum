@@ -8,11 +8,9 @@ import type { OrphanedResource } from './orphan.ts';
 import { compensationFailedError } from './orphan.ts';
 import { AppError } from '../errors/app-error.ts';
 
-type UndoFn = () => Promise<void>;
-
 interface UndoEntry {
   label: string;
-  fn: UndoFn;
+  fn: () => Promise<void>;
   orphanOnFail?: () => OrphanedResource | OrphanedResource[];
 }
 
@@ -31,7 +29,7 @@ export class CompensationStack {
    */
   registerUndo(
     label: string,
-    fn: UndoFn,
+    fn: () => Promise<void>,
     orphanOnFail?: () => OrphanedResource | OrphanedResource[],
   ): void {
     this.undos.push({ label, fn, orphanOnFail });

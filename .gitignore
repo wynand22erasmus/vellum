@@ -33,8 +33,7 @@ prisma/*.db-journal
 npm-debug.log*
 logs/
 
-# Generated API reference (built via npm run docs:api)
-docs/api/
+# API reference (regenerate with npm run docs:api; tracked under docs/api/)
 
 # Test
 coverage/

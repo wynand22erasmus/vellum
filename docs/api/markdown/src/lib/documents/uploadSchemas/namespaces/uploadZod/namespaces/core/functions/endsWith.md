@@ -1,0 +1,45 @@
+# Function: \_endsWith()
+
+> **\_endsWith**(`suffix`, `params?`): [`$ZodCheckEndsWith`](../interfaces/$ZodCheckEndsWith.md)
+
+Defined in: node\_modules/zod/v4/core/api.d.cts:208
+
+## Parameters
+
+### suffix
+
+`string`
+
+### params?
+
+`string` \| \{ `abort?`: `boolean`; `error?`: `string` \| [`$ZodErrorMap`](../interfaces/$ZodErrorMap.md)\<[`$ZodIssueInvalidStringFormat`](../interfaces/$ZodIssueInvalidStringFormat.md)\>; `message?`: `string`; \}
+
+`string`
+
+***
+
+#### Type Literal
+
+\{ `abort?`: `boolean`; `error?`: `string` \| [`$ZodErrorMap`](../interfaces/$ZodErrorMap.md)\<[`$ZodIssueInvalidStringFormat`](../interfaces/$ZodIssueInvalidStringFormat.md)\>; `message?`: `string`; \}
+
+##### abort?
+
+`boolean`
+
+If true, no later checks will be executed if this check fails. Default `false`.
+
+##### error?
+
+`string` \| [`$ZodErrorMap`](../interfaces/$ZodErrorMap.md)\<[`$ZodIssueInvalidStringFormat`](../interfaces/$ZodIssueInvalidStringFormat.md)\>
+
+##### message?
+
+`string`
+
+**Deprecated**
+
+This parameter is deprecated. Use `error` instead.
+
+## Returns
+
+[`$ZodCheckEndsWith`](../interfaces/$ZodCheckEndsWith.md)

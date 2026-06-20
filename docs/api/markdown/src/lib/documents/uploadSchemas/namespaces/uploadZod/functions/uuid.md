@@ -1,0 +1,45 @@
+# Function: uuid()
+
+> **uuid**(`params?`): [`ZodUUID`](../interfaces/ZodUUID.md)
+
+Defined in: node\_modules/zod/v4/classic/schemas.d.cts:189
+
+## Parameters
+
+### params?
+
+`string` \| \{ `abort?`: `boolean`; `error?`: `string` \| [`$ZodErrorMap`](../namespaces/core/interfaces/$ZodErrorMap.md)\<`NonNullable`\<[`$ZodIssueInvalidStringFormat`](../namespaces/core/interfaces/$ZodIssueInvalidStringFormat.md) \| [`$ZodIssueInvalidType`](../namespaces/core/interfaces/$ZodIssueInvalidType.md)\<`unknown`\>\>\>; `message?`: `string`; `version?`: `"v1"` \| `"v2"` \| `"v3"` \| `"v4"` \| `"v5"` \| `"v6"` \| `"v7"` \| `"v8"`; \}
+
+`string`
+
+***
+
+#### Type Literal
+
+\{ `abort?`: `boolean`; `error?`: `string` \| [`$ZodErrorMap`](../namespaces/core/interfaces/$ZodErrorMap.md)\<`NonNullable`\<[`$ZodIssueInvalidStringFormat`](../namespaces/core/interfaces/$ZodIssueInvalidStringFormat.md) \| [`$ZodIssueInvalidType`](../namespaces/core/interfaces/$ZodIssueInvalidType.md)\<`unknown`\>\>\>; `message?`: `string`; `version?`: `"v1"` \| `"v2"` \| `"v3"` \| `"v4"` \| `"v5"` \| `"v6"` \| `"v7"` \| `"v8"`; \}
+
+##### abort?
+
+`boolean`
+
+If true, no later checks will be executed if this check fails. Default `false`.
+
+##### error?
+
+`string` \| [`$ZodErrorMap`](../namespaces/core/interfaces/$ZodErrorMap.md)\<`NonNullable`\<[`$ZodIssueInvalidStringFormat`](../namespaces/core/interfaces/$ZodIssueInvalidStringFormat.md) \| [`$ZodIssueInvalidType`](../namespaces/core/interfaces/$ZodIssueInvalidType.md)\<`unknown`\>\>\>
+
+##### message?
+
+`string`
+
+**Deprecated**
+
+This parameter is deprecated. Use `error` instead.
+
+##### version?
+
+`"v1"` \| `"v2"` \| `"v3"` \| `"v4"` \| `"v5"` \| `"v6"` \| `"v7"` \| `"v8"`
+
+## Returns
+
+[`ZodUUID`](../interfaces/ZodUUID.md)

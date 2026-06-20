@@ -11,17 +11,6 @@ import type { Pool } from 'pg';
 import pg from 'pg';
 import { AppError } from './errors/app-error.ts';
 
-type StudioQuery = {
-  sql: string;
-  parameters: readonly unknown[];
-};
-
-type ExecuteOptions = {
-  abortSignal?: AbortSignal;
-};
-
-type QueryResult = Record<string, unknown>[];
-
 let pool: Pool | undefined;
 
 function getPool(): Pool {
@@ -35,8 +24,8 @@ function getPool(): Pool {
   return pool;
 }
 
-function asRows(result: pg.QueryResult): QueryResult {
-  return result.rows as QueryResult;
+function asRows(result: pg.QueryResult): Record<string, unknown>[] {
+  return result.rows as Record<string, unknown>[];
 }
 
 /**
@@ -45,9 +34,9 @@ function asRows(result: pg.QueryResult): QueryResult {
 export function createPgStudioExecutor(db: Pool = getPool()) {
   return {
     async execute(
-      query: StudioQuery,
-      options?: ExecuteOptions,
-    ): Promise<[Error] | [null, QueryResult]> {
+      query: { sql: string; parameters: readonly unknown[] },
+      options?: { abortSignal?: AbortSignal },
+    ): Promise<[Error] | [null, Record<string, unknown>[]]> {
       const { abortSignal } = options ?? {};
 
       if (!abortSignal) {
