@@ -35,6 +35,9 @@ tests {
     expect(body.data.links[0].recipientEmail).to.equal("batch-a@example.com");
     expect(body.data.links[1].recipientEmail).to.equal("batch-b@example.com");
     expect(body.data.warning).to.contain("separate channel");
-    bru.setVar("documentId", body.data.links[0].id);
+    expect(body.data.links[0].documentId).to.be.a("string").and.not.empty;
+    expect(body.data.links[0].communicationId).to.be.a("string").and.not.empty;
+    bru.setVar("batchDocumentId", body.data.links[0].documentId);
+    bru.setVar("batchCommunicationId", body.data.links[0].communicationId);
   });
 }
