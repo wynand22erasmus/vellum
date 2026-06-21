@@ -1,16 +1,16 @@
 # src/lib/documents/types
 
-Shared document link + file types for verify and upload flows.
+Shared communication + graph types for verify and upload flows.
 
 ## Type Aliases
 
-- [DocumentContext](type-aliases/DocumentContext.md)
-- [DocumentUserLinkWithFile](type-aliases/DocumentUserLinkWithFile.md)
+- [CommunicationContext](type-aliases/CommunicationContext.md)
+- [CommunicationGraph](type-aliases/CommunicationGraph.md)
 
 ## Variables
 
-- [documentUserLinkWithFileInclude](variables/documentUserLinkWithFileInclude.md)
+- [communicationGraphInclude](variables/communicationGraphInclude.md)
 
 ## Functions
 
-- [toDocumentContext](functions/toDocumentContext.md)
+- [toCommunicationContext](functions/toCommunicationContext.md)

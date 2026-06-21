@@ -1,10 +1,10 @@
 # Function: useAdminDocumentQuery()
 
-> **useAdminDocumentQuery**(`id`): `UseQueryResult`\<`NoInfer`\<[`AdminDocumentDetail`](../type-aliases/AdminDocumentDetail.md)\>, `Error`\>
+> **useAdminDocumentQuery**(`id`): `UseQueryResult`\<`NoInfer`\<[`DocumentDetail`](../../../db-api-types/type-aliases/DocumentDetail.md)\>, `Error`\>
 
-Defined in: [src/lib/queries/admin.ts:148](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/queries/admin.ts#L148)
+Defined in: [src/lib/queries/admin.ts:144](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/queries/admin.ts#L144)
 
-Load a single admin document with audit logs.
+Load a single admin document envelope with links and audit logs.
 
 ## Parameters
 
@@ -14,4 +14,4 @@ Load a single admin document with audit logs.
 
 ## Returns
 
-`UseQueryResult`\<`NoInfer`\<[`AdminDocumentDetail`](../type-aliases/AdminDocumentDetail.md)\>, `Error`\>
+`UseQueryResult`\<`NoInfer`\<[`DocumentDetail`](../../../db-api-types/type-aliases/DocumentDetail.md)\>, `Error`\>

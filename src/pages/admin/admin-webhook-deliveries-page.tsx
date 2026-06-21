@@ -9,57 +9,43 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { PAGE_LABELS } from '@/lib/page-labels';
 import { dbColumn } from '@/components/data-table/column-helpers';
 import { useAdminListState } from '@/hooks/use-admin-list-state';
-import { useAdminListPageQuery } from '@/lib/queries/admin';
+import { type WebhookDelivery, useAdminListPageQuery } from '@/lib/queries/admin';
 import { AdminListPage } from '@/pages/admin/admin-list-page';
-
-type WebhookDeliveryRow = {
-  id: string;
-  deliveryId: string;
-  auditLogId: string;
-  eventType: string;
-  targetUrl: string;
-  payload: Record<string, unknown>;
-  responseStatus: number | null;
-  responseBody: string | null;
-  success: boolean;
-  attempt: number;
-  createdAt: string;
-};
 
 /** Admin webhook deliveries at `/admin/webhook-deliveries`. */
 export function AdminWebhookDeliveriesPage() {
   const listState = useAdminListState();
-  const query = useAdminListPageQuery<WebhookDeliveryRow>(
+  const query = useAdminListPageQuery<WebhookDelivery>(
     '/api/admin/webhook-deliveries',
-    'webhookDeliveries',
+    'WebhookDelivery',
     listState.queryParams,
   );
 
-  const columns = useMemo<ColumnDef<WebhookDeliveryRow>[]>(
+  const columns = useMemo<ColumnDef<WebhookDelivery>[]>(
     () => [
-      dbColumn<WebhookDeliveryRow>('WebhookDelivery', 'createdAt', 'Time'),
-      dbColumn<WebhookDeliveryRow>('WebhookDelivery', 'eventType', 'Event'),
-      dbColumn<WebhookDeliveryRow>('WebhookDelivery', 'success', 'OK', {
+      dbColumn<WebhookDelivery>('WebhookDelivery', 'createdAt', 'Time'),
+      dbColumn<WebhookDelivery>('WebhookDelivery', 'eventType', 'Event'),
+      dbColumn<WebhookDelivery>('WebhookDelivery', 'success', 'OK', {
         cell: ({ getValue }) => (getValue() ? 'Yes' : 'No'),
       }),
-      dbColumn<WebhookDeliveryRow>('WebhookDelivery', 'responseStatus', 'Status', {
+      dbColumn<WebhookDelivery>('WebhookDelivery', 'responseStatus', 'Status', {
         cell: ({ getValue }) => {
           const status = getValue() as number | null;
           return status ?? '—';
         },
       }),
-      dbColumn<WebhookDeliveryRow>('WebhookDelivery', 'attempt', 'Attempt'),
-      dbColumn<WebhookDeliveryRow>('WebhookDelivery', 'auditLogId', 'Audit log', {
+      dbColumn<WebhookDelivery>('WebhookDelivery', 'attempt', 'Attempt'),
+      dbColumn<WebhookDelivery>('WebhookDelivery', 'auditLogId', 'Audit log', {
         cell: ({ getValue }) => (
           <span className="font-mono text-xs">{getValue() as string}</span>
         ),
       }),
-      dbColumn<WebhookDeliveryRow>('WebhookDelivery', 'targetUrl', 'Target', {
+      dbColumn<WebhookDelivery>('WebhookDelivery', 'targetUrl', 'Target', {
         cell: ({ getValue }) => (
           <span className="font-mono text-xs break-all">{getValue() as string}</span>
         ),
       }),
-      dbColumn<WebhookDeliveryRow>('WebhookDelivery', 'payload', 'Payload', {
+      dbColumn<WebhookDelivery>('WebhookDelivery', 'payload', 'Payload', {
         cell: ({ getValue }) => (
           <pre className="max-h-32 max-w-md overflow-auto whitespace-pre-wrap font-mono text-xs">
             {JSON.stringify(getValue(), null, 2)}

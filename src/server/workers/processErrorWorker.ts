@@ -6,8 +6,10 @@
 
 import { Worker } from 'bullmq';
 import type { Prisma } from '../../../generated/client.ts';
+import { createDeadLetter } from '../../lib/dead-letter.ts';
+import { DeadLetterPipeline } from '../../../generated/enums.ts';
 import {
-  linkFailedAuditLogToProcessError,
+  linkDeadLetterToProcessError,
   linkProcessErrorByCorrelationId,
 } from '../../lib/errors/link-audit-process-error.ts';
 import { prisma } from '../../lib/prisma.ts';
@@ -33,20 +35,21 @@ export const processErrorWorker = new Worker(
         source: data.source,
         userId: data.userId,
         documentId: data.documentId,
+        communicationId: data.communicationId,
         extensions: (data.extensions ?? undefined) as Prisma.InputJsonValue | undefined,
         internal: (data.internal ?? undefined) as Prisma.InputJsonValue | undefined,
-        failedAuditLogId: data.failedAuditLogId,
+        deadLetterId: data.deadLetterId,
         auditLogId: data.auditLogId,
         correlationId: data.correlationId,
       },
     });
 
-    if (data.failedAuditLogId) {
-      await linkFailedAuditLogToProcessError(data.failedAuditLogId, processError.id);
+    if (data.deadLetterId) {
+      await linkDeadLetterToProcessError(data.deadLetterId, processError.processErrorId);
     }
 
     if (data.correlationId && !data.auditLogId) {
-      await linkProcessErrorByCorrelationId(processError.id, data.correlationId);
+      await linkProcessErrorByCorrelationId(processError.processErrorId, data.correlationId);
     }
   },
   { connection: redisConnection },
@@ -55,11 +58,10 @@ export const processErrorWorker = new Worker(
 processErrorWorker.on('failed', async (job, err) => {
   if (!job) return;
   try {
-    await prisma.failedProcessError.create({
-      data: {
-        payload: job.data as object,
-        error: err instanceof Error ? err.message : String(err),
-      },
+    await createDeadLetter({
+      pipeline: DeadLetterPipeline.PROCESS_ERROR,
+      payload: job.data as object,
+      error: err instanceof Error ? err.message : String(err),
     });
   } catch {
     // Dead-letter write failed — already logged by BullMQ

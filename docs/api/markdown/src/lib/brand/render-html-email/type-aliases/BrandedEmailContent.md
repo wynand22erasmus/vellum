@@ -2,7 +2,7 @@
 
 > **BrandedEmailContent** = `object`
 
-Defined in: src/lib/brand/render-html-email.ts:11
+Defined in: [src/lib/brand/render-html-email.ts:11](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/render-html-email.ts#L11)
 
 Structured body passed into the shared HTML shell.
 
@@ -12,7 +12,7 @@ Structured body passed into the shared HTML shell.
 
 > **bodyParagraphs**: `string`[]
 
-Defined in: src/lib/brand/render-html-email.ts:15
+Defined in: [src/lib/brand/render-html-email.ts:15](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/render-html-email.ts#L15)
 
 ***
 
@@ -20,7 +20,7 @@ Defined in: src/lib/brand/render-html-email.ts:15
 
 > `optional` **codeBlock?**: `string`
 
-Defined in: src/lib/brand/render-html-email.ts:18
+Defined in: [src/lib/brand/render-html-email.ts:18](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/render-html-email.ts#L18)
 
 Large monospace code display (OTP).
 
@@ -30,7 +30,7 @@ Large monospace code display (OTP).
 
 > `optional` **cta?**: `object`
 
-Defined in: src/lib/brand/render-html-email.ts:16
+Defined in: [src/lib/brand/render-html-email.ts:16](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/render-html-email.ts#L16)
 
 #### label
 
@@ -46,7 +46,7 @@ Defined in: src/lib/brand/render-html-email.ts:16
 
 > `optional` **footerNote?**: `string`
 
-Defined in: src/lib/brand/render-html-email.ts:19
+Defined in: [src/lib/brand/render-html-email.ts:19](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/render-html-email.ts#L19)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: src/lib/brand/render-html-email.ts:19
 
 > **headline**: `string`
 
-Defined in: src/lib/brand/render-html-email.ts:14
+Defined in: [src/lib/brand/render-html-email.ts:14](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/render-html-email.ts#L14)
 
 ***
 
@@ -62,6 +62,6 @@ Defined in: src/lib/brand/render-html-email.ts:14
 
 > `optional` **preheader?**: `string`
 
-Defined in: src/lib/brand/render-html-email.ts:13
+Defined in: [src/lib/brand/render-html-email.ts:13](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/render-html-email.ts#L13)
 
 Short preview line (hidden in most clients).

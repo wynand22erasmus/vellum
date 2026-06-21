@@ -1,6 +1,6 @@
 # src/lib/users/userService
 
-Persists WorkOS and dev dashboard users in the local `users` table.
+Persists WorkOS and dev dashboard users in the local `User` table.
 
 ## Functions
 

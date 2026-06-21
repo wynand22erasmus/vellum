@@ -6,36 +6,24 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchJson } from '@/lib/api-client';
+import type { Document } from '@/lib/db-api-types';
 import { queryKeys } from '@/lib/queries/query-keys';
 
-/** Recipient dashboard document row. */
-export type DocumentRow = {
-  id: string;
-  fileName: string;
-  linkExpiresAt: string;
-  fileExpiresAt: string;
-  isUsed: boolean;
-  maxDownloads: number;
-  downloadCount: number;
-  downloadsRemaining: number;
-  linkActive: boolean;
-  fileAvailable: boolean;
-  createdAt: string;
-};
+export type { Document } from '@/lib/db-api-types';
 
 /** Load documents for the signed-in recipient. */
 export function useDocumentsQuery() {
   return useQuery({
-    queryKey: queryKeys.documents.list(),
+    queryKey: queryKeys.Document.list(),
     queryFn: async () => {
-      const data = await fetchJson<{ documents: DocumentRow[] }>('/api/documents');
-      return data.documents;
+      const data = await fetchJson<{ Document: Document[] }>('/api/documents');
+      return data.Document;
     },
   });
 }
 
 /** Request a new download link for a document. */
-export function useRequestDocumentLinkMutation() {
+export function useRequestCommunicationMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -46,7 +34,7 @@ export function useRequestDocumentLinkMutation() {
       return data.message ?? 'Link sent.';
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.documents.all });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.Document.all });
     },
   });
 }

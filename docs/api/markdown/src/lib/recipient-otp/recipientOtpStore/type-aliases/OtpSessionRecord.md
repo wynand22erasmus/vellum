@@ -2,7 +2,7 @@
 
 > **OtpSessionRecord** = `object`
 
-Defined in: src/lib/recipient-otp/recipientOtpStore.ts:12
+Defined in: [src/lib/recipient-otp/recipientOtpStore.ts:12](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/recipient-otp/recipientOtpStore.ts#L12)
 
 ## Properties
 
@@ -10,7 +10,7 @@ Defined in: src/lib/recipient-otp/recipientOtpStore.ts:12
 
 > **attempts**: `number`
 
-Defined in: src/lib/recipient-otp/recipientOtpStore.ts:16
+Defined in: [src/lib/recipient-otp/recipientOtpStore.ts:17](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/recipient-otp/recipientOtpStore.ts#L17)
 
 ***
 
@@ -18,7 +18,7 @@ Defined in: src/lib/recipient-otp/recipientOtpStore.ts:16
 
 > **channel**: `RecipientOtpChannel`
 
-Defined in: src/lib/recipient-otp/recipientOtpStore.ts:14
+Defined in: [src/lib/recipient-otp/recipientOtpStore.ts:15](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/recipient-otp/recipientOtpStore.ts#L15)
 
 ***
 
@@ -26,7 +26,15 @@ Defined in: src/lib/recipient-otp/recipientOtpStore.ts:14
 
 > **codeHash**: `string` \| `null`
 
-Defined in: src/lib/recipient-otp/recipientOtpStore.ts:15
+Defined in: [src/lib/recipient-otp/recipientOtpStore.ts:16](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/recipient-otp/recipientOtpStore.ts#L16)
+
+***
+
+### communicationId
+
+> **communicationId**: `string`
+
+Defined in: [src/lib/recipient-otp/recipientOtpStore.ts:14](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/recipient-otp/recipientOtpStore.ts#L14)
 
 ***
 
@@ -34,7 +42,7 @@ Defined in: src/lib/recipient-otp/recipientOtpStore.ts:15
 
 > **documentId**: `string`
 
-Defined in: src/lib/recipient-otp/recipientOtpStore.ts:13
+Defined in: [src/lib/recipient-otp/recipientOtpStore.ts:13](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/recipient-otp/recipientOtpStore.ts#L13)
 
 ***
 
@@ -42,4 +50,4 @@ Defined in: src/lib/recipient-otp/recipientOtpStore.ts:13
 
 > **resends**: `number`
 
-Defined in: src/lib/recipient-otp/recipientOtpStore.ts:17
+Defined in: [src/lib/recipient-otp/recipientOtpStore.ts:18](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/recipient-otp/recipientOtpStore.ts#L18)

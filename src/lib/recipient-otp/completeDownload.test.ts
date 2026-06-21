@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { DocumentContext } from '../documents/types.ts';
+import type { CommunicationContext } from '../documents/types.ts';
 import { completeDownload } from './completeDownload.ts';
 
 vi.mock('../prisma.ts', () => ({
   prisma: {
-    documentUserLink: {
+    document: {
       update: vi.fn().mockResolvedValue({}),
     },
   },
@@ -27,25 +27,28 @@ vi.mock('../env.ts', () => ({
 
 const { logEvent } = await import('../../server/queues/auditQueue.ts');
 
-function sampleDoc(overrides: Partial<DocumentContext> = {}): DocumentContext {
+function sampleDoc(overrides: Partial<CommunicationContext> = {}): CommunicationContext {
   return {
-    id: 'link-1',
-    documentFileId: 'file-1',
+    communicationId: 'link-1',
+    documentId: 'doc-1',
+    fileId: 'file-1',
+    recipientId: 'recipient-1',
     batchId: null,
-    recipientEmail: 'recipient@example.com',
+    email: 'recipient@example.com',
+    sourceSystemKey: 'recipient@example.com',
+    phoneNumber: null,
     downloadToken: 'token',
     passwordHash: 'hash',
     linkExpiresAt: new Date('2030-01-01T00:00:00.000Z'),
-    isUsed: false,
     maxDownloads: 2,
     downloadCount: 0,
     verifySuccessCount: 0,
     lastVerifiedAt: null,
     revokedAt: null,
     otpChannel: null,
-    recipientPhone: null,
-    totpSecretEnc: null,
+    authenticatorSecretEnc: null,
     createdAt: new Date('2026-01-01T00:00:00.000Z'),
+    updatedAt: new Date('2026-01-01T00:00:00.000Z'),
     s3Key: 'documents/key.pdf',
     fileName: 'report.pdf',
     fileExpiresAt: new Date('2030-01-01T00:00:00.000Z'),
@@ -72,6 +75,8 @@ describe('completeDownload', () => {
     expect(vi.mocked(logEvent)).toHaveBeenCalledWith(
       expect.objectContaining({
         eventType: 'FILE_DOWNLOAD_SUCCESS',
+        documentId: doc.documentId,
+        communicationId: doc.communicationId,
         metadata: expect.objectContaining({ sha256: doc.sha256 }),
       }),
     );

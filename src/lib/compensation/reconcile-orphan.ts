@@ -6,9 +6,13 @@
 
 import type { Prisma } from '../../../generated/client.ts';
 import { prisma } from '../prisma.ts';
-import { deleteDocumentFileIfExists, deleteDocumentIfExists } from './document.ts';
+import {
+  deleteDocumentIfExists,
+  deleteCommunicationIfExists,
+  deleteFileIfExists,
+} from './document.ts';
 import { deleteObjectIfExists } from './storage.ts';
-import type { OrphanedResource } from './orphan.ts';
+import { orphanResourceKey, type OrphanedResource } from './orphan.ts';
 
 const MAX_RECONCILE_ATTEMPTS = 5;
 
@@ -38,8 +42,14 @@ function isOrphanedResource(value: unknown): value is OrphanedResource {
   if (kind === 's3Object') {
     return typeof (value as { s3Key?: string }).s3Key === 'string';
   }
-  if (kind === 'document' || kind === 'documentFile') {
-    return typeof (value as { id?: string }).id === 'string';
+  if (kind === 'file') {
+    return typeof (value as { fileId?: string }).fileId === 'string';
+  }
+  if (kind === 'document') {
+    return typeof (value as { documentId?: string }).documentId === 'string';
+  }
+  if (kind === 'communication') {
+    return typeof (value as { communicationId?: string }).communicationId === 'string';
   }
   return false;
 }
@@ -49,25 +59,37 @@ async function reconcileOrphan(entry: OrphanedResource): Promise<void> {
     await deleteObjectIfExists(entry.s3Key);
     return;
   }
-  if (entry.kind === 'documentFile') {
-    await deleteDocumentFileIfExists(entry.id);
+  if (entry.kind === 'file') {
+    await deleteFileIfExists(entry.fileId);
+    return;
+  }
+  if (entry.kind === 'communication') {
+    await deleteCommunicationIfExists(entry.communicationId);
     return;
   }
   if (entry.kind === 'document') {
-    const link = await prisma.documentUserLink.findUnique({
-      where: { id: entry.id },
-      include: { documentFile: true },
+    const document = await prisma.document.findUnique({
+      where: { documentId: entry.documentId },
+      include: {
+        file: true,
+        communications: {
+          where: {
+            revokedAt: null,
+            linkExpiresAt: { gt: new Date() },
+          },
+          take: 1,
+        },
+      },
     });
-    if (!link) {
+    if (!document) {
       return;
     }
-    const linkActive =
-      link.documentFile.s3Key !== null && new Date() <= link.linkExpiresAt && !link.revokedAt;
-    if (linkActive) {
+    const hasActiveLink = document.communications.length > 0;
+    if (hasActiveLink) {
       return;
     }
-    if (link.documentFile.s3Key === null) {
-      await deleteDocumentIfExists(entry.id);
+    if (document.file.s3Key === null) {
+      await deleteDocumentIfExists(entry.documentId);
     }
   }
 }
@@ -99,13 +121,15 @@ export async function reconcileOrphansFromProcessErrors(): Promise<ReconcileResu
       try {
         await reconcileOrphan(orphan);
       } catch (err) {
-        failures.push(err instanceof Error ? err.message : String(err));
+        failures.push(
+          `${orphan.kind}:${orphanResourceKey(orphan)} — ${err instanceof Error ? err.message : String(err)}`,
+        );
       }
     }
 
     if (failures.length === 0) {
       await prisma.processError.update({
-        where: { id: row.id },
+        where: { processErrorId: row.processErrorId },
         data: {
           reconciledAt: new Date(),
           internal: {
@@ -119,7 +143,7 @@ export async function reconcileOrphansFromProcessErrors(): Promise<ReconcileResu
       reconciled += 1;
     } else {
       await prisma.processError.update({
-        where: { id: row.id },
+        where: { processErrorId: row.processErrorId },
         data: {
           reconcileAttempts: { increment: 1 },
           internal: {

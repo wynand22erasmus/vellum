@@ -1,6 +1,6 @@
 # Class: AppError
 
-Defined in: [src/lib/errors/app-error.ts:27](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L27)
+Defined in: [src/lib/errors/app-error.ts:27](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L27)
 
 Typed operational error mapped to RFC 9457 Problem Details by the global handler.
 
@@ -14,7 +14,7 @@ Typed operational error mapped to RFC 9457 Problem Details by the global handler
 
 > **new AppError**(`slug`, `detail`, `options?`): `AppError`
 
-Defined in: [src/lib/errors/app-error.ts:36](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L36)
+Defined in: [src/lib/errors/app-error.ts:36](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L36)
 
 #### Parameters
 
@@ -56,7 +56,7 @@ Defined in: node\_modules/typescript/lib/lib.es2022.error.d.ts:24
 
 > `readonly` **detail**: `string`
 
-Defined in: [src/lib/errors/app-error.ts:31](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L31)
+Defined in: [src/lib/errors/app-error.ts:31](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L31)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [src/lib/errors/app-error.ts:31](https://github.com/wynand22erasmus/
 
 > `readonly` **extensions**: `Record`\<`string`, `unknown`\>
 
-Defined in: [src/lib/errors/app-error.ts:32](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L32)
+Defined in: [src/lib/errors/app-error.ts:32](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L32)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: [src/lib/errors/app-error.ts:32](https://github.com/wynand22erasmus/
 
 > `readonly` `optional` **internal?**: `Record`\<`string`, `unknown`\>
 
-Defined in: [src/lib/errors/app-error.ts:34](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L34)
+Defined in: [src/lib/errors/app-error.ts:34](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L34)
 
 ***
 
@@ -104,7 +104,7 @@ Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1074
 
 > `readonly` `optional` **orphanedResources?**: [`OrphanedResource`](../../../compensation/orphan/type-aliases/OrphanedResource.md)[]
 
-Defined in: [src/lib/errors/app-error.ts:33](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L33)
+Defined in: [src/lib/errors/app-error.ts:33](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L33)
 
 ***
 
@@ -112,7 +112,7 @@ Defined in: [src/lib/errors/app-error.ts:33](https://github.com/wynand22erasmus/
 
 > `readonly` **slug**: `"validation-error"` \| `"unauthorized"` \| `"forbidden"` \| `"not-found"` \| `"gone"` \| `"unprocessable-content"` \| `"too-many-requests"` \| `"internal-error"` \| `"service-unavailable"` \| `"upload-rejected"` \| `"partial-failure"`
 
-Defined in: [src/lib/errors/app-error.ts:28](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L28)
+Defined in: [src/lib/errors/app-error.ts:28](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L28)
 
 ***
 
@@ -132,7 +132,7 @@ Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1076
 
 > `readonly` **status**: `number`
 
-Defined in: [src/lib/errors/app-error.ts:29](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L29)
+Defined in: [src/lib/errors/app-error.ts:29](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L29)
 
 ***
 
@@ -140,7 +140,7 @@ Defined in: [src/lib/errors/app-error.ts:29](https://github.com/wynand22erasmus/
 
 > `readonly` **title**: `string`
 
-Defined in: [src/lib/errors/app-error.ts:30](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L30)
+Defined in: [src/lib/errors/app-error.ts:30](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L30)
 
 ***
 
@@ -172,7 +172,7 @@ not capture any frames.
 
 > **get** **type**(): `string`
 
-Defined in: [src/lib/errors/app-error.ts:52](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L52)
+Defined in: [src/lib/errors/app-error.ts:52](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L52)
 
 Canonical RFC 9457 `type` URI.
 
@@ -186,7 +186,7 @@ Canonical RFC 9457 `type` URI.
 
 > `static` **badRequest**(`detail`, `extensions?`): `AppError`
 
-Defined in: [src/lib/errors/app-error.ts:56](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L56)
+Defined in: [src/lib/errors/app-error.ts:56](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L56)
 
 #### Parameters
 
@@ -278,7 +278,7 @@ a();
 
 > `static` **emailNotVerified**(`detail?`): `AppError`
 
-Defined in: [src/lib/errors/app-error.ts:69](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L69)
+Defined in: [src/lib/errors/app-error.ts:69](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L69)
 
 Sign-in blocked until the user verifies their email (`reason: EMAIL_NOT_VERIFIED`).
 
@@ -298,7 +298,7 @@ Sign-in blocked until the user verifies their email (`reason: EMAIL_NOT_VERIFIED
 
 > `static` **forbidden**(`detail?`, `extensions?`): `AppError`
 
-Defined in: [src/lib/errors/app-error.ts:64](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L64)
+Defined in: [src/lib/errors/app-error.ts:64](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L64)
 
 #### Parameters
 
@@ -320,7 +320,7 @@ Defined in: [src/lib/errors/app-error.ts:64](https://github.com/wynand22erasmus/
 
 > `static` **gone**(`detail`, `extensions?`): `AppError`
 
-Defined in: [src/lib/errors/app-error.ts:79](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L79)
+Defined in: [src/lib/errors/app-error.ts:79](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L79)
 
 #### Parameters
 
@@ -342,7 +342,7 @@ Defined in: [src/lib/errors/app-error.ts:79](https://github.com/wynand22erasmus/
 
 > `static` **internal**(`detail?`, `options?`): `AppError`
 
-Defined in: [src/lib/errors/app-error.ts:91](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L91)
+Defined in: [src/lib/errors/app-error.ts:91](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L91)
 
 #### Parameters
 
@@ -364,7 +364,7 @@ Defined in: [src/lib/errors/app-error.ts:91](https://github.com/wynand22erasmus/
 
 > `static` **notFound**(`detail?`): `AppError`
 
-Defined in: [src/lib/errors/app-error.ts:75](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L75)
+Defined in: [src/lib/errors/app-error.ts:75](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L75)
 
 #### Parameters
 
@@ -382,7 +382,7 @@ Defined in: [src/lib/errors/app-error.ts:75](https://github.com/wynand22erasmus/
 
 > `static` **partialFailure**(`detail`, `options?`): `AppError`
 
-Defined in: [src/lib/errors/app-error.ts:103](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L103)
+Defined in: [src/lib/errors/app-error.ts:103](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L103)
 
 #### Parameters
 
@@ -434,7 +434,7 @@ https://v8.dev/docs/stack-trace-api#customizing-stack-traces
 
 > `static` **serviceUnavailable**(`detail`, `extensions?`): `AppError`
 
-Defined in: [src/lib/errors/app-error.ts:95](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L95)
+Defined in: [src/lib/errors/app-error.ts:95](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L95)
 
 #### Parameters
 
@@ -456,7 +456,7 @@ Defined in: [src/lib/errors/app-error.ts:95](https://github.com/wynand22erasmus/
 
 > `static` **tooManyRequests**(`detail?`): `AppError`
 
-Defined in: [src/lib/errors/app-error.ts:87](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L87)
+Defined in: [src/lib/errors/app-error.ts:87](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L87)
 
 #### Parameters
 
@@ -474,7 +474,7 @@ Defined in: [src/lib/errors/app-error.ts:87](https://github.com/wynand22erasmus/
 
 > `static` **unauthorized**(`detail?`): `AppError`
 
-Defined in: [src/lib/errors/app-error.ts:60](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L60)
+Defined in: [src/lib/errors/app-error.ts:60](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L60)
 
 #### Parameters
 
@@ -492,7 +492,7 @@ Defined in: [src/lib/errors/app-error.ts:60](https://github.com/wynand22erasmus/
 
 > `static` **unprocessableContent**(`detail`, `extensions?`): `AppError`
 
-Defined in: [src/lib/errors/app-error.ts:83](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L83)
+Defined in: [src/lib/errors/app-error.ts:83](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L83)
 
 #### Parameters
 
@@ -514,7 +514,7 @@ Defined in: [src/lib/errors/app-error.ts:83](https://github.com/wynand22erasmus/
 
 > `static` **uploadRejected**(`detail`, `extensions?`): `AppError`
 
-Defined in: [src/lib/errors/app-error.ts:99](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/app-error.ts#L99)
+Defined in: [src/lib/errors/app-error.ts:99](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/app-error.ts#L99)
 
 #### Parameters
 

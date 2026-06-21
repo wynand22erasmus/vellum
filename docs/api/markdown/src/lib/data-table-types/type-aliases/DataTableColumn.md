@@ -2,7 +2,7 @@
 
 > **DataTableColumn**\<`T`\> = `object`
 
-Defined in: [src/lib/data-table-types.ts:33](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-types.ts#L33)
+Defined in: [src/lib/data-table-types.ts:33](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-types.ts#L33)
 
 Column metadata for `DataTable` headers, sorting, and filtering.
 
@@ -18,7 +18,7 @@ Column metadata for `DataTable` headers, sorting, and filtering.
 
 > **accessorFn**: (`row`) => `unknown`
 
-Defined in: [src/lib/data-table-types.ts:36](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-types.ts#L36)
+Defined in: [src/lib/data-table-types.ts:36](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-types.ts#L36)
 
 #### Parameters
 
@@ -36,7 +36,7 @@ Defined in: [src/lib/data-table-types.ts:36](https://github.com/wynand22erasmus/
 
 > `optional` **cell?**: (`context`) => `React.ReactNode`
 
-Defined in: [src/lib/data-table-types.ts:37](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-types.ts#L37)
+Defined in: [src/lib/data-table-types.ts:37](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-types.ts#L37)
 
 #### Parameters
 
@@ -60,7 +60,7 @@ Defined in: [src/lib/data-table-types.ts:37](https://github.com/wynand22erasmus/
 
 > `optional` **className?**: `string`
 
-Defined in: [src/lib/data-table-types.ts:48](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-types.ts#L48)
+Defined in: [src/lib/data-table-types.ts:48](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-types.ts#L48)
 
 ***
 
@@ -68,7 +68,7 @@ Defined in: [src/lib/data-table-types.ts:48](https://github.com/wynand22erasmus/
 
 > `optional` **dataType?**: [`DataTableColumnDataType`](DataTableColumnDataType.md)
 
-Defined in: [src/lib/data-table-types.ts:38](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-types.ts#L38)
+Defined in: [src/lib/data-table-types.ts:38](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-types.ts#L38)
 
 ***
 
@@ -76,7 +76,7 @@ Defined in: [src/lib/data-table-types.ts:38](https://github.com/wynand22erasmus/
 
 > `optional` **enableFiltering?**: `boolean`
 
-Defined in: [src/lib/data-table-types.ts:41](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-types.ts#L41)
+Defined in: [src/lib/data-table-types.ts:41](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-types.ts#L41)
 
 ***
 
@@ -84,7 +84,7 @@ Defined in: [src/lib/data-table-types.ts:41](https://github.com/wynand22erasmus/
 
 > `optional` **enableSorting?**: `boolean`
 
-Defined in: [src/lib/data-table-types.ts:40](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-types.ts#L40)
+Defined in: [src/lib/data-table-types.ts:40](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-types.ts#L40)
 
 ***
 
@@ -92,7 +92,7 @@ Defined in: [src/lib/data-table-types.ts:40](https://github.com/wynand22erasmus/
 
 > `optional` **enumOptions?**: readonly [`DataTableFilterOption`](DataTableFilterOption.md)[]
 
-Defined in: [src/lib/data-table-types.ts:39](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-types.ts#L39)
+Defined in: [src/lib/data-table-types.ts:39](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-types.ts#L39)
 
 ***
 
@@ -100,7 +100,7 @@ Defined in: [src/lib/data-table-types.ts:39](https://github.com/wynand22erasmus/
 
 > `optional` **filter?**: [`DataTableColumnFilter`](DataTableColumnFilter.md) \| `false`
 
-Defined in: [src/lib/data-table-types.ts:43](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-types.ts#L43)
+Defined in: [src/lib/data-table-types.ts:43](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-types.ts#L43)
 
 Explicit filter config, `false` to disable, or omit to infer from `dataType`.
 
@@ -110,7 +110,7 @@ Explicit filter config, `false` to disable, or omit to infer from `dataType`.
 
 > `optional` **filterFn?**: (`cellValue`, `filterValue`) => `boolean`
 
-Defined in: [src/lib/data-table-types.ts:46](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-types.ts#L46)
+Defined in: [src/lib/data-table-types.ts:46](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-types.ts#L46)
 
 #### Parameters
 
@@ -132,7 +132,7 @@ Defined in: [src/lib/data-table-types.ts:46](https://github.com/wynand22erasmus/
 
 > `optional` **filterOnly?**: `boolean`
 
-Defined in: [src/lib/data-table-types.ts:51](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-types.ts#L51)
+Defined in: [src/lib/data-table-types.ts:51](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-types.ts#L51)
 
 When true, column appears in the header only (filter/sort), not in body rows.
 
@@ -142,7 +142,7 @@ When true, column appears in the header only (filter/sort), not in body rows.
 
 > **header**: `React.ReactNode`
 
-Defined in: [src/lib/data-table-types.ts:35](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-types.ts#L35)
+Defined in: [src/lib/data-table-types.ts:35](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-types.ts#L35)
 
 ***
 
@@ -150,7 +150,7 @@ Defined in: [src/lib/data-table-types.ts:35](https://github.com/wynand22erasmus/
 
 > `optional` **headerClassName?**: `string`
 
-Defined in: [src/lib/data-table-types.ts:49](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-types.ts#L49)
+Defined in: [src/lib/data-table-types.ts:49](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-types.ts#L49)
 
 ***
 
@@ -158,7 +158,7 @@ Defined in: [src/lib/data-table-types.ts:49](https://github.com/wynand22erasmus/
 
 > **id**: `string`
 
-Defined in: [src/lib/data-table-types.ts:34](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-types.ts#L34)
+Defined in: [src/lib/data-table-types.ts:34](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-types.ts#L34)
 
 ***
 
@@ -166,7 +166,7 @@ Defined in: [src/lib/data-table-types.ts:34](https://github.com/wynand22erasmus/
 
 > `optional` **sortable?**: `boolean`
 
-Defined in: [src/lib/data-table-types.ts:45](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-types.ts#L45)
+Defined in: [src/lib/data-table-types.ts:45](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-types.ts#L45)
 
 #### Deprecated
 
@@ -178,7 +178,7 @@ Prefer `enableSorting`.
 
 > `optional` **sortFn?**: (`rowA`, `rowB`, `sort`) => `number`
 
-Defined in: [src/lib/data-table-types.ts:47](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-types.ts#L47)
+Defined in: [src/lib/data-table-types.ts:47](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-types.ts#L47)
 
 #### Parameters
 

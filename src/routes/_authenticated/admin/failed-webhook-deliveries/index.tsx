@@ -1,6 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { AdminFailedWebhookDeliveriesPage } from '@/pages/admin/admin-failed-webhook-deliveries-page';
+import { createFileRoute, redirect } from '@tanstack/react-router';
+import { normalizeAppPath } from '@/lib/sidebar-nav';
 
 export const Route = createFileRoute('/_authenticated/admin/failed-webhook-deliveries/')({
-  component: AdminFailedWebhookDeliveriesPage,
+  beforeLoad: () => {
+    throw redirect({ to: normalizeAppPath('/admin/dead-letters') });
+  },
 });

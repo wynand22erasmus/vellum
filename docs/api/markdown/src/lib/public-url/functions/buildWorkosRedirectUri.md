@@ -2,7 +2,7 @@
 
 > **buildWorkosRedirectUri**(): `string`
 
-Defined in: [src/lib/public-url.ts:67](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/public-url.ts#L67)
+Defined in: [src/lib/public-url.ts:69](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/public-url.ts#L69)
 
 WorkOS OAuth callback URL.
 

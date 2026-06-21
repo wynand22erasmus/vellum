@@ -2,7 +2,7 @@
 
 > **AdminListResult**\<`T`\> = `object`
 
-Defined in: [src/lib/queries/fetch-json.ts:11](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/queries/fetch-json.ts#L11)
+Defined in: [src/lib/queries/fetch-json.ts:11](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/queries/fetch-json.ts#L11)
 
 Paginated admin list response shape.
 
@@ -18,7 +18,7 @@ Paginated admin list response shape.
 
 > **items**: `T`[]
 
-Defined in: [src/lib/queries/fetch-json.ts:12](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/queries/fetch-json.ts#L12)
+Defined in: [src/lib/queries/fetch-json.ts:12](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/queries/fetch-json.ts#L12)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [src/lib/queries/fetch-json.ts:12](https://github.com/wynand22erasmu
 
 > **limit**: `number`
 
-Defined in: [src/lib/queries/fetch-json.ts:14](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/queries/fetch-json.ts#L14)
+Defined in: [src/lib/queries/fetch-json.ts:14](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/queries/fetch-json.ts#L14)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [src/lib/queries/fetch-json.ts:14](https://github.com/wynand22erasmu
 
 > **offset**: `number`
 
-Defined in: [src/lib/queries/fetch-json.ts:15](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/queries/fetch-json.ts#L15)
+Defined in: [src/lib/queries/fetch-json.ts:15](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/queries/fetch-json.ts#L15)
 
 ***
 
@@ -42,4 +42,4 @@ Defined in: [src/lib/queries/fetch-json.ts:15](https://github.com/wynand22erasmu
 
 > **total**: `number`
 
-Defined in: [src/lib/queries/fetch-json.ts:13](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/queries/fetch-json.ts#L13)
+Defined in: [src/lib/queries/fetch-json.ts:13](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/queries/fetch-json.ts#L13)

@@ -1,6 +1,6 @@
 # Interface: E2EState
 
-Defined in: [e2e/helpers.ts:26](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/e2e/helpers.ts#L26)
+Defined in: [e2e/helpers.ts:26](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/e2e/helpers.ts#L26)
 
 Fixture data written by `npm run test:e2e:seed` and read by browser tests.
 
@@ -10,7 +10,7 @@ Fixture data written by `npm run test:e2e:seed` and read by browser tests.
 
 > **apiKey**: `string`
 
-Defined in: [e2e/helpers.ts:28](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/e2e/helpers.ts#L28)
+Defined in: [e2e/helpers.ts:28](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/e2e/helpers.ts#L28)
 
 ***
 
@@ -18,7 +18,7 @@ Defined in: [e2e/helpers.ts:28](https://github.com/wynand22erasmus/vellum/blob/0
 
 > **baseUrl**: `string`
 
-Defined in: [e2e/helpers.ts:27](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/e2e/helpers.ts#L27)
+Defined in: [e2e/helpers.ts:27](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/e2e/helpers.ts#L27)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [e2e/helpers.ts:27](https://github.com/wynand22erasmus/vellum/blob/0
 
 > **documentId**: `string`
 
-Defined in: [e2e/helpers.ts:29](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/e2e/helpers.ts#L29)
+Defined in: [e2e/helpers.ts:29](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/e2e/helpers.ts#L29)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [e2e/helpers.ts:29](https://github.com/wynand22erasmus/vellum/blob/0
 
 > **downloadToken**: `string`
 
-Defined in: [e2e/helpers.ts:30](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/e2e/helpers.ts#L30)
+Defined in: [e2e/helpers.ts:30](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/e2e/helpers.ts#L30)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: [e2e/helpers.ts:30](https://github.com/wynand22erasmus/vellum/blob/0
 
 > **fileName**: `string`
 
-Defined in: [e2e/helpers.ts:33](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/e2e/helpers.ts#L33)
+Defined in: [e2e/helpers.ts:33](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/e2e/helpers.ts#L33)
 
 ***
 
@@ -50,7 +50,7 @@ Defined in: [e2e/helpers.ts:33](https://github.com/wynand22erasmus/vellum/blob/0
 
 > **password**: `string`
 
-Defined in: [e2e/helpers.ts:32](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/e2e/helpers.ts#L32)
+Defined in: [e2e/helpers.ts:32](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/e2e/helpers.ts#L32)
 
 ***
 
@@ -58,7 +58,7 @@ Defined in: [e2e/helpers.ts:32](https://github.com/wynand22erasmus/vellum/blob/0
 
 > **recipientEmail**: `string`
 
-Defined in: [e2e/helpers.ts:31](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/e2e/helpers.ts#L31)
+Defined in: [e2e/helpers.ts:31](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/e2e/helpers.ts#L31)
 
 ***
 
@@ -66,4 +66,4 @@ Defined in: [e2e/helpers.ts:31](https://github.com/wynand22erasmus/vellum/blob/0
 
 > **seededAt**: `string`
 
-Defined in: [e2e/helpers.ts:34](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/e2e/helpers.ts#L34)
+Defined in: [e2e/helpers.ts:34](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/e2e/helpers.ts#L34)

@@ -4,52 +4,39 @@
  * @packageDocumentation
  */
 
+import { canDeleteDocument, canDeleteCommunication, canDeleteFile } from '../retention/expiry.ts';
 import { prisma } from '../prisma.ts';
 
-/** Prior download-link fields captured before compensation rollback. */
-export interface DocumentLinkSnapshot {
-  downloadToken: string;
-  linkExpiresAt: Date;
-  isUsed: boolean;
+/** Prior link rows captured before regenerate rollback. */
+export interface RegenerateLinkSnapshot {
+  revokedCommunicationIds: string[];
+  createdCommunicationId?: string;
 }
 
 /**
- * Deletes a recipient link row if it exists (idempotent).
- *
- * @param id - {@link DocumentUserLink} primary key (legacy "document id")
+ * Deletes a document link row when purge rules allow (idempotent).
  */
-export async function deleteDocumentUserLinkIfExists(id: string): Promise<void> {
-  await prisma.documentUserLink.deleteMany({ where: { id } });
-}
-
-/** @deprecated Use {@link deleteDocumentUserLinkIfExists}. */
-export const deleteDocumentIfExists = deleteDocumentUserLinkIfExists;
-
-/**
- * Deletes a shared file row if it exists (idempotent).
- *
- * @param id - {@link DocumentFile} primary key
- */
-export async function deleteDocumentFileIfExists(id: string): Promise<void> {
-  await prisma.documentFile.deleteMany({ where: { id } });
+export async function deleteCommunicationIfExists(communicationId: string): Promise<void> {
+  if (await canDeleteCommunication(communicationId, new Date())) {
+    await prisma.communication.deleteMany({ where: { communicationId } });
+  }
 }
 
 /**
- * Restores link-related fields from a snapshot taken before mutation.
- *
- * @param id - {@link DocumentUserLink} primary key
- * @param snapshot - Prior token, expiry, and used flag
+ * Deletes a document envelope when purge rules allow (idempotent).
  */
-export async function revertDocumentLinkState(
-  id: string,
-  snapshot: DocumentLinkSnapshot,
-): Promise<void> {
-  await prisma.documentUserLink.update({
-    where: { id },
-    data: {
-      downloadToken: snapshot.downloadToken,
-      linkExpiresAt: snapshot.linkExpiresAt,
-      isUsed: snapshot.isUsed,
-    },
-  });
+export async function deleteDocumentIfExists(documentId: string): Promise<void> {
+  if (await canDeleteDocument(documentId, new Date())) {
+    await prisma.communication.deleteMany({ where: { documentId } });
+    await prisma.document.deleteMany({ where: { documentId } });
+  }
+}
+
+/**
+ * Deletes a file row when purge rules allow and no documents reference it.
+ */
+export async function deleteFileIfExists(fileId: string): Promise<void> {
+  if (await canDeleteFile(fileId, new Date())) {
+    await prisma.file.deleteMany({ where: { fileId } });
+  }
 }

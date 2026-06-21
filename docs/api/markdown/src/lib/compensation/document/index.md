@@ -4,14 +4,10 @@ Document compensation helpers.
 
 ## Interfaces
 
-- [DocumentLinkSnapshot](interfaces/DocumentLinkSnapshot.md)
-
-## Variables
-
-- [~~deleteDocumentIfExists~~](variables/deleteDocumentIfExists.md)
+- [RegenerateLinkSnapshot](interfaces/RegenerateLinkSnapshot.md)
 
 ## Functions
 
-- [deleteDocumentFileIfExists](functions/deleteDocumentFileIfExists.md)
-- [deleteDocumentUserLinkIfExists](functions/deleteDocumentUserLinkIfExists.md)
-- [revertDocumentLinkState](functions/revertDocumentLinkState.md)
+- [deleteCommunicationIfExists](functions/deleteCommunicationIfExists.md)
+- [deleteDocumentIfExists](functions/deleteDocumentIfExists.md)
+- [deleteFileIfExists](functions/deleteFileIfExists.md)

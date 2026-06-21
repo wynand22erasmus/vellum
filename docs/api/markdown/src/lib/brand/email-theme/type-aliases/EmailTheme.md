@@ -2,7 +2,7 @@
 
 > **EmailTheme** = `object`
 
-Defined in: src/lib/brand/email-theme.ts:10
+Defined in: [src/lib/brand/email-theme.ts:10](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/email-theme.ts#L10)
 
 Visual and legal settings applied to HTML notification emails.
 
@@ -12,7 +12,7 @@ Visual and legal settings applied to HTML notification emails.
 
 > **footerHtml**: `string`
 
-Defined in: src/lib/brand/email-theme.ts:13
+Defined in: [src/lib/brand/email-theme.ts:13](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/email-theme.ts#L13)
 
 ***
 
@@ -20,7 +20,7 @@ Defined in: src/lib/brand/email-theme.ts:13
 
 > **logoUrl**: `string`
 
-Defined in: src/lib/brand/email-theme.ts:11
+Defined in: [src/lib/brand/email-theme.ts:11](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/email-theme.ts#L11)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: src/lib/brand/email-theme.ts:11
 
 > **primaryColor**: `string`
 
-Defined in: src/lib/brand/email-theme.ts:12
+Defined in: [src/lib/brand/email-theme.ts:12](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/email-theme.ts#L12)
 
 ***
 
@@ -36,4 +36,4 @@ Defined in: src/lib/brand/email-theme.ts:12
 
 > `optional` **supportEmail?**: `string`
 
-Defined in: src/lib/brand/email-theme.ts:14
+Defined in: [src/lib/brand/email-theme.ts:14](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/email-theme.ts#L14)

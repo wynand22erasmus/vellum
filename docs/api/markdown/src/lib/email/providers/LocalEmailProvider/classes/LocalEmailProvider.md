@@ -1,6 +1,6 @@
 # Class: LocalEmailProvider
 
-Defined in: [src/lib/email/providers/LocalEmailProvider.ts:14](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/email/providers/LocalEmailProvider.ts#L14)
+Defined in: [src/lib/email/providers/LocalEmailProvider.ts:14](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/email/providers/LocalEmailProvider.ts#L14)
 
 Sends mail through Mailpit (`MAILPIT_HOST` / `MAILPIT_PORT`).
 
@@ -24,7 +24,7 @@ Sends mail through Mailpit (`MAILPIT_HOST` / `MAILPIT_PORT`).
 
 > **send**(`payload`): `Promise`\<`void`\>
 
-Defined in: [src/lib/email/providers/LocalEmailProvider.ts:22](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/email/providers/LocalEmailProvider.ts#L22)
+Defined in: [src/lib/email/providers/LocalEmailProvider.ts:22](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/email/providers/LocalEmailProvider.ts#L22)
 
 Delivers one message.
 

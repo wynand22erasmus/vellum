@@ -64,6 +64,6 @@ Defined in: node\_modules/zod/v4/core/schemas.d.cts:37
 
 ### type
 
-> **type**: `"string"` \| `"number"` \| `"bigint"` \| `"boolean"` \| `"symbol"` \| `"undefined"` \| `"object"` \| `"function"` \| `"default"` \| `"map"` \| `"int"` \| `"enum"` \| `"unknown"` \| `"set"` \| `"record"` \| `"pipe"` \| `"optional"` \| `"null"` \| `"void"` \| `"never"` \| `"any"` \| `"date"` \| `"file"` \| `"array"` \| `"tuple"` \| `"union"` \| `"intersection"` \| `"literal"` \| `"nullable"` \| `"nonoptional"` \| `"success"` \| `"transform"` \| `"prefault"` \| `"catch"` \| `"nan"` \| `"readonly"` \| `"template_literal"` \| `"promise"` \| `"lazy"` \| `"custom"`
+> **type**: `"string"` \| `"number"` \| `"bigint"` \| `"boolean"` \| `"symbol"` \| `"undefined"` \| `"object"` \| `"function"` \| `"file"` \| `"map"` \| `"int"` \| `"enum"` \| `"unknown"` \| `"default"` \| `"set"` \| `"record"` \| `"pipe"` \| `"optional"` \| `"null"` \| `"void"` \| `"never"` \| `"any"` \| `"date"` \| `"array"` \| `"tuple"` \| `"union"` \| `"intersection"` \| `"literal"` \| `"nullable"` \| `"nonoptional"` \| `"success"` \| `"transform"` \| `"prefault"` \| `"catch"` \| `"nan"` \| `"readonly"` \| `"template_literal"` \| `"promise"` \| `"lazy"` \| `"custom"`
 
 Defined in: node\_modules/zod/v4/core/schemas.d.cts:36

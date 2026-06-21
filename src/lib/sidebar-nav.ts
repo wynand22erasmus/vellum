@@ -83,14 +83,24 @@ export function buildSidebarNav(options: {
       href: path(PAGE_LABELS.admin.href!),
       children: [
         {
-          id: 'admin-document-files',
-          label: PAGE_LABELS.adminDocumentFiles.nav,
-          href: path(PAGE_LABELS.adminDocumentFiles.href!),
+          id: 'admin-files',
+          label: PAGE_LABELS.adminFiles.nav,
+          href: path(PAGE_LABELS.adminFiles.href!),
         },
         {
           id: 'admin-documents',
           label: PAGE_LABELS.adminDocuments.nav,
           href: path(PAGE_LABELS.adminDocuments.href!),
+        },
+        {
+          id: 'admin-recipients',
+          label: PAGE_LABELS.adminRecipients.nav,
+          href: path(PAGE_LABELS.adminRecipients.href!),
+        },
+        {
+          id: 'admin-communications',
+          label: PAGE_LABELS.adminCommunications.nav,
+          href: path(PAGE_LABELS.adminCommunications.href!),
         },
         {
           id: 'admin-users',
@@ -103,9 +113,9 @@ export function buildSidebarNav(options: {
           href: path(PAGE_LABELS.adminAuditLogs.href!),
         },
         {
-          id: 'admin-failed-audit',
-          label: PAGE_LABELS.adminFailedAuditLogs.nav,
-          href: path(PAGE_LABELS.adminFailedAuditLogs.href!),
+          id: 'admin-dead-letters',
+          label: PAGE_LABELS.adminDeadLetters.nav,
+          href: path(PAGE_LABELS.adminDeadLetters.href!),
         },
         {
           id: 'admin-process-errors',
@@ -113,19 +123,9 @@ export function buildSidebarNav(options: {
           href: path(PAGE_LABELS.adminProcessErrors.href!),
         },
         {
-          id: 'admin-failed-process-errors',
-          label: PAGE_LABELS.adminFailedProcessErrors.nav,
-          href: path(PAGE_LABELS.adminFailedProcessErrors.href!),
-        },
-        {
           id: 'admin-webhook-deliveries',
           label: PAGE_LABELS.adminWebhookDeliveries.nav,
           href: path(PAGE_LABELS.adminWebhookDeliveries.href!),
-        },
-        {
-          id: 'admin-failed-webhook-deliveries',
-          label: PAGE_LABELS.adminFailedWebhookDeliveries.nav,
-          href: path(PAGE_LABELS.adminFailedWebhookDeliveries.href!),
         },
       ],
     });

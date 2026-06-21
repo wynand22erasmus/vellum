@@ -12,7 +12,6 @@ describe('getVerifyRejection', () => {
       {
         maxDownloads: 1,
         downloadCount: 1,
-        isUsed: true,
         verifySuccessCount: 3,
         lastVerifiedAt: new Date(),
       },
@@ -22,13 +21,12 @@ describe('getVerifyRejection', () => {
     expect(reason).toBe('download_limit_reached');
   });
 
-  it('allows re-verify within window when isUsed', () => {
+  it('allows re-verify within window after prior success', () => {
     const now = new Date();
     const reason = getVerifyRejection(
       {
         maxDownloads: 1,
         downloadCount: 0,
-        isUsed: true,
         verifySuccessCount: 1,
         lastVerifiedAt: now,
       },
@@ -46,7 +44,6 @@ describe('computeVerifyConsumptionUpdate', () => {
       {
         maxDownloads: 1,
         downloadCount: 0,
-        isUsed: false,
         verifySuccessCount: 2,
         lastVerifiedAt: now,
       },
@@ -56,7 +53,6 @@ describe('computeVerifyConsumptionUpdate', () => {
     expect(update.reverifyAttempt).toBe(3);
     expect(update.isFinalConsumption).toBe(true);
     expect(update.downloadCount).toBe(1);
-    expect(update.isUsed).toBe(true);
   });
 
   it('resets counters when multi-download remains', () => {
@@ -65,7 +61,6 @@ describe('computeVerifyConsumptionUpdate', () => {
       {
         maxDownloads: 3,
         downloadCount: 0,
-        isUsed: false,
         verifySuccessCount: 2,
         lastVerifiedAt: now,
       },
@@ -73,7 +68,6 @@ describe('computeVerifyConsumptionUpdate', () => {
       config,
     );
     expect(update.downloadCount).toBe(1);
-    expect(update.isUsed).toBe(false);
     expect(update.verifySuccessCount).toBe(0);
   });
 });

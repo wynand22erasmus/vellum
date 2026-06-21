@@ -9,9 +9,9 @@ import { AppError } from '../errors/app-error.ts';
 /** A resource left inconsistent after a failed compensation attempt. */
 export type OrphanedResource =
   | { kind: 's3Object'; s3Key: string }
-  | { kind: 'document'; id: string }
-  | { kind: 'documentFile'; id: string }
-  | { kind: 'presignedUrl'; documentId: string };
+  | { kind: 'file'; fileId: string }
+  | { kind: 'document'; documentId: string }
+  | { kind: 'communication'; communicationId: string };
 
 /**
  * Builds RFC 9457 extension members for orphaned resources.
@@ -49,4 +49,18 @@ export function compensationFailedError(
     orphanedResources: orphans,
     extensions: toOrphanExtension(orphans),
   });
+}
+
+/** Reads the primary key from a stored orphan entry (supports legacy `id` keys). */
+export function orphanResourceKey(entry: OrphanedResource): string {
+  switch (entry.kind) {
+    case 's3Object':
+      return entry.s3Key;
+    case 'file':
+      return entry.fileId;
+    case 'document':
+      return entry.documentId;
+    case 'communication':
+      return entry.communicationId;
+  }
 }

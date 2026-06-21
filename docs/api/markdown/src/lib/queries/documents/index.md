@@ -2,11 +2,13 @@
 
 Recipient dashboard document queries.
 
-## Type Aliases
-
-- [DocumentRow](type-aliases/DocumentRow.md)
-
 ## Functions
 
 - [useDocumentsQuery](functions/useDocumentsQuery.md)
-- [useRequestDocumentLinkMutation](functions/useRequestDocumentLinkMutation.md)
+- [useRequestCommunicationMutation](functions/useRequestCommunicationMutation.md)
+
+## References
+
+### Document
+
+Re-exports [Document](../../db-api-types/type-aliases/Document.md)

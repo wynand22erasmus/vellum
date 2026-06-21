@@ -1,0 +1,5 @@
+# Variable: Route
+
+> `const` **Route**: `Route`\<`Register`, `Route`\<`Register`, `Route`\<`Register`, `RootRoute`\<`Register`, `undefined`, \{ \}, `AnyContext`, `AnyContext`, \{ \}, `undefined`, `unknown`, `unknown`, `unknown`, `unknown`, `undefined`\>, `""`, `"/"`, `"/_authenticated"`, `"/_authenticated"`, `undefined`, `ResolveParams`\<`""`\>, `AnyContext`, `AnyContext`, (`__namedParameters`) => `void`, \{ \}, `undefined`, `unknown`, `unknown`, `unknown`, `unknown`, `undefined`\>, `"/admin"`, `"/admin"`, `"/_authenticated/admin"`, `"/_authenticated/admin"`, `undefined`, `ResolveParams`\<`"/admin"`\>, `AnyContext`, `AnyContext`, (`__namedParameters`) => `void`, \{ \}, `undefined`, `unknown`, `unknown`, `unknown`, `unknown`, `undefined`\>, `"/document-links"`, `"/admin/document-links/"`, `"/_authenticated/admin/document-links/"`, `"/_authenticated/admin/document-links/"`, `undefined`, `ResolveParams`\<`"/document-links"`\>, `AnyContext`, `AnyContext`, () => `never`, \{ \}, `undefined`, `unknown`, `unknown`, `unknown`, `unknown`, `undefined`\>
+
+Defined in: src/routes/\_authenticated/admin/document-links/index.tsx:4

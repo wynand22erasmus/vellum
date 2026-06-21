@@ -40,8 +40,8 @@ devRouter.get(
     ]);
 
     ok(req, res, {
-      deliveries: deliveries.map((row) => ({
-        id: row.id,
+      WebhookDelivery: deliveries.map((row) => ({
+        webhookDeliveryId: row.webhookDeliveryId,
         deliveryId: row.deliveryId,
         auditLogId: row.auditLogId,
         eventType: row.eventType,

@@ -1,6 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { AdminFailedAuditLogsPage } from '@/pages/admin/admin-failed-audit-logs-page';
+import { createFileRoute, redirect } from '@tanstack/react-router';
+import { normalizeAppPath } from '@/lib/sidebar-nav';
 
 export const Route = createFileRoute('/_authenticated/admin/failed-audit-logs/')({
-  component: AdminFailedAuditLogsPage,
+  beforeLoad: () => {
+    throw redirect({ to: normalizeAppPath('/admin/dead-letters') });
+  },
 });

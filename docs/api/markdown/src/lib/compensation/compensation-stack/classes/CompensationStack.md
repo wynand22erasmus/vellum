@@ -1,6 +1,6 @@
 # Class: CompensationStack
 
-Defined in: [src/lib/compensation/compensation-stack.ts:20](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/compensation/compensation-stack.ts#L20)
+Defined in: [src/lib/compensation/compensation-stack.ts:20](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/compensation/compensation-stack.ts#L20)
 
 Registers undo steps and runs them in reverse order when `main` throws.
 
@@ -20,7 +20,7 @@ Registers undo steps and runs them in reverse order when `main` throws.
 
 > **registerUndo**(`label`, `fn`, `orphanOnFail?`): `void`
 
-Defined in: [src/lib/compensation/compensation-stack.ts:30](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/compensation/compensation-stack.ts#L30)
+Defined in: [src/lib/compensation/compensation-stack.ts:30](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/compensation/compensation-stack.ts#L30)
 
 Registers an undo step executed LIFO if a later step fails.
 
@@ -54,7 +54,7 @@ Resource descriptor if undo fails
 
 > **run**\<`T`\>(`main`): `Promise`\<`T`\>
 
-Defined in: [src/lib/compensation/compensation-stack.ts:43](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/compensation/compensation-stack.ts#L43)
+Defined in: [src/lib/compensation/compensation-stack.ts:43](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/compensation/compensation-stack.ts#L43)
 
 Runs `main`; on failure executes registered undos and rethrows or wraps orphans.
 

@@ -1,6 +1,6 @@
 # Function: getSizableOrigin()
 
-> **getSizableOrigin**(`input`): `"map"` \| `"unknown"` \| `"set"` \| `"file"`
+> **getSizableOrigin**(`input`): `"file"` \| `"map"` \| `"unknown"` \| `"set"`
 
 Defined in: node\_modules/zod/v4/core/util.d.cts:186
 
@@ -12,4 +12,4 @@ Defined in: node\_modules/zod/v4/core/util.d.cts:186
 
 ## Returns
 
-`"map"` \| `"unknown"` \| `"set"` \| `"file"`
+`"file"` \| `"map"` \| `"unknown"` \| `"set"`

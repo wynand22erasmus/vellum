@@ -1,5 +1,5 @@
 /**
- * Admin document detail with revoke action.
+ * Admin document envelope detail with revoke-all-links action.
  *
  * @packageDocumentation
  */
@@ -11,33 +11,78 @@ import { toast } from 'sonner';
 import { DocumentStatusBadges } from '@/components/features/document-status-badges';
 import { FileSha256Display } from '@/components/features/file-sha256-display';
 import { PAGE_LABELS } from '@/lib/page-labels';
-import { dbColumn } from '@/components/data-table/column-helpers';
+import { dbColumn, disableColumnInteractions } from '@/components/data-table/column-helpers';
 import { DataTable } from '@/components/data-table/data-table';
 import { PageContainer } from '@/components/layout/page-container';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { normalizeAppPath } from '@/lib/sidebar-nav';
-import { useAdminDocumentQuery, useRevokeDocumentMutation } from '@/lib/queries/admin';
+import {
+  type DocumentAuditLogSummary,
+  type DocumentCommunicationSummary,
+  useAdminDocumentQuery,
+  useRevokeDocumentMutation,
+} from '@/lib/queries/admin';
 
-type AuditLogRow = {
-  id: string;
-  timestamp: string;
-  eventType: string;
-  ipAddress: string | null;
-};
-
-/** Admin document detail view with audit history. */
+/** Admin document envelope detail with links and audit history. */
 export function AdminDocumentDetailPage() {
   const { id } = useParams({ strict: false }) as { id: string };
   const { data: doc, isLoading, error } = useAdminDocumentQuery(id);
   const revoke = useRevokeDocumentMutation();
 
-  const auditColumns = useMemo<ColumnDef<AuditLogRow>[]>(
+  const hasActiveLink = doc?.Communication.some((link) => link.linkActive) ?? false;
+
+  const linkColumns = useMemo<ColumnDef<DocumentCommunicationSummary>[]>(
     () => [
-      dbColumn<AuditLogRow>('AuditLog', 'timestamp', 'Time'),
-      dbColumn<AuditLogRow>('AuditLog', 'eventType', 'Event'),
-      dbColumn<AuditLogRow>('AuditLog', 'ipAddress', 'IP', {
+      dbColumn<DocumentCommunicationSummary>('Communication', 'createdAt', 'Created'),
+      dbColumn<DocumentCommunicationSummary>('Communication', 'linkExpiresAt', 'Expires'),
+      dbColumn<DocumentCommunicationSummary>('Communication', 'linkActive', 'Active', {
+        cell: ({ getValue }) => (
+          <Badge variant={getValue() ? 'default' : 'secondary'}>
+            {getValue() ? 'Active' : 'Inactive'}
+          </Badge>
+        ),
+      }),
+      dbColumn<DocumentCommunicationSummary>('Communication', 'revokedAt', 'Revoked', {
+        cell: ({ getValue }) => {
+          const value = getValue() as string | null;
+          return value ? new Date(value).toLocaleString() : '—';
+        },
+      }),
+      disableColumnInteractions<DocumentCommunicationSummary>({
+        id: 'actions',
+        header: '',
+        cell: ({ row }) => (
+          <Button variant="outline" size="sm" asChild>
+            <Link to={normalizeAppPath(`/admin/communications/${row.original.communicationId}`)}>Detail</Link>
+          </Button>
+        ),
+      }),
+    ],
+    [],
+  );
+
+  const auditColumns = useMemo<ColumnDef<DocumentAuditLogSummary>[]>(
+    () => [
+      dbColumn<DocumentAuditLogSummary>('AuditLog', 'createdAt', 'Time'),
+      dbColumn<DocumentAuditLogSummary>('AuditLog', 'eventType', 'Event'),
+      dbColumn<DocumentAuditLogSummary>('AuditLog', 'communicationId', 'Link', {
+        cell: ({ getValue }) => {
+          const linkId = getValue() as string | null;
+          if (!linkId) return '—';
+          return (
+            <Link
+              to={normalizeAppPath(`/admin/communications/${linkId}`)}
+              className="font-mono text-xs underline"
+            >
+              {linkId.slice(0, 8)}…
+            </Link>
+          );
+        },
+      }),
+      dbColumn<DocumentAuditLogSummary>('AuditLog', 'ipAddress', 'IP', {
         cell: ({ getValue }) => getValue() ?? '—',
       }),
     ],
@@ -45,12 +90,16 @@ export function AdminDocumentDetailPage() {
   );
 
   async function handleRevoke() {
-    if (!doc || doc.revokedAt) return;
-    if (!window.confirm('Revoke this link and delete the file from storage immediately?')) {
+    if (!doc || !hasActiveLink) return;
+    if (
+      !window.confirm(
+        'Revoke all active download links for this document envelope? The shared file is retained when other envelopes reference it.',
+      )
+    ) {
       return;
     }
     try {
-      const message = await revoke.mutateAsync(doc.id);
+      const message = await revoke.mutateAsync(doc.documentId);
       toast.success(message);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Revoke failed');
@@ -82,14 +131,14 @@ export function AdminDocumentDetailPage() {
       variant="wide"
       actions={
         <div className="flex gap-2">
-          {!doc.revokedAt && doc.fileAvailable ? (
+          {hasActiveLink && doc.fileAvailable ? (
             <Button
               variant="destructive"
               size="sm"
               disabled={revoke.isPending}
               onClick={() => void handleRevoke()}
             >
-              Revoke link
+              Revoke all links
             </Button>
           ) : null}
           <Button variant="outline" size="sm" asChild>
@@ -113,11 +162,9 @@ export function AdminDocumentDetailPage() {
             <DocumentStatusBadges
               linkActive={doc.linkActive}
               fileAvailable={doc.fileAvailable}
-              isUsed={doc.isUsed}
               maxDownloads={doc.maxDownloads}
               downloadCount={doc.downloadCount}
               downloadsRemaining={doc.downloadsRemaining}
-              revokedAt={doc.revokedAt}
               deletedAt={doc.deletedAt}
             />
           </dd>
@@ -127,10 +174,20 @@ export function AdminDocumentDetailPage() {
         </div>
       </dl>
 
+      <h2 className="mb-4 text-lg font-semibold">Document links</h2>
+      <div className="mb-8">
+        <DataTable
+          columns={linkColumns}
+          data={doc.Communication}
+          pageSize={25}
+          emptyMessage="No outbound links for this document"
+        />
+      </div>
+
       <h2 className="mb-4 text-lg font-semibold">Audit trail</h2>
       <DataTable
         columns={auditColumns}
-        data={doc.auditLogs}
+        data={doc.AuditLog}
         pageSize={25}
         emptyMessage="No audit events for this document"
       />

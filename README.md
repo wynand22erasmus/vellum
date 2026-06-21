@@ -110,7 +110,7 @@ The web UI uses TanStack Router at `/` (`src/routes/`, `src/pages/`, `src/compon
 |------|------|
 | `src/server.ts` | Production HTTP server (container CMD). Listens on `env.port` (default 3000), serves the built SPA from `dist/` when `NODE_ENV=production`. |
 | `src/api-server.ts` | Development API-only server on `PORT` / `APP_HOST_PORT` (default 8573). Used by `npm run dev:api` and the dev stack; no Vite UI. |
-| `src/server/workers/index.ts` | BullMQ worker process (`npm run worker`). Registers cron schedulers and loads email, audit, scrub, and reconciliation workers. |
+| `src/server/workers/index.ts` | BullMQ worker process (`npm run worker`). Registers cron schedulers and loads email, audit, purge, and reconciliation workers. |
 | `src/server/create-app.ts` | Shared Express factory: middleware, API routers, and production SPA fallback. Imported by both server entrypoints. |
 
 ## Deploying

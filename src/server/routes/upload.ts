@@ -8,12 +8,16 @@ import { randomUUID } from 'node:crypto';
 import { Router } from 'express';
 import multer from 'multer';
 import { z } from 'zod';
+import { RecipientOtpChannel } from '../../../generated/enums.ts';
 import { asyncHandler } from '../middleware/asyncHandler.ts';
 import { AppError } from '../../lib/errors/app-error.ts';
 import { validationErrorFromZod } from '../../lib/errors/validation-detail.ts';
 import { CompensationStack } from '../../lib/compensation/compensation-stack.ts';
-import { createDocumentUserLink } from '../../lib/documents/createDocumentUserLink.ts';
-import { ingestDocumentFile } from '../../lib/documents/ingestDocumentFile.ts';
+import { createDelivery } from '../../lib/documents/createDelivery.ts';
+import { createDocument } from '../../lib/documents/createDocument.ts';
+import { createCommunication } from '../../lib/documents/createCommunication.ts';
+import { ingestFile } from '../../lib/documents/ingestFile.ts';
+import { upsertRecipient } from '../../lib/documents/upsertRecipient.ts';
 import {
   batchRecipientSchema,
   uploadFieldsSchema,
@@ -50,41 +54,37 @@ uploadRouter.post(
     const maxDownloads = parsed.data.maxDownloads ?? env.defaultMaxDownloads;
     const otpChannel = env.recipientOtpEnabled ? (parsed.data.otpChannel ?? null) : null;
     const recipientPhone =
-      otpChannel === 'sms' || otpChannel === 'whatsapp' ? parsed.data.recipientPhone : null;
+      otpChannel === RecipientOtpChannel.SMS || otpChannel === RecipientOtpChannel.WHATSAPP
+        ? parsed.data.recipientPhone
+        : null;
 
     const { safeFileName } = resolveUploadFileName(req.file.originalname, env.allowedUploadExtensions);
     const stack = new CompensationStack();
 
-    const result = await stack.run(async () => {
-      const documentFile = await ingestDocumentFile({
+    const result = await stack.run(async () =>
+      createDelivery({
         buffer: req.file!.buffer,
         fileName: safeFileName,
         mimeType: req.file!.mimetype,
         fileTtlSeconds: fileTtl,
-        stack,
-      });
-
-      const { link, totpProvisioningUri } = await createDocumentUserLink({
-        documentFile,
-        recipientEmail,
-        password,
         linkTtlSeconds: linkTtl,
+        recipientEmail,
+        sourceSystemKey: parsed.data.sourceSystemKey,
+        password,
         maxDownloads,
         otpChannel,
         recipientPhone,
         stack,
-      });
-
-      return { link, documentFile, totpProvisioningUri, maxDownloads, otpChannel };
-    });
+      }),
+    );
 
     created(req, res, {
-      id: result.link.id,
-      linkId: result.link.id,
-      fileId: result.documentFile.id,
-      sha256: result.documentFile.sha256,
-      maxDownloads: result.maxDownloads,
-      otpChannel: result.otpChannel,
+      documentId: result.document.documentId,
+      communicationId: result.link.communicationId,
+      fileId: result.file.fileId,
+      sha256: result.file.sha256,
+      maxDownloads,
+      otpChannel,
       ...(result.totpProvisioningUri ? { totpProvisioningUri: result.totpProvisioningUri } : {}),
       warning:
         'The file password must be communicated to the recipient via a separate channel (e.g., SMS, phone call). Do not include it in the same email as the download link.',
@@ -137,7 +137,7 @@ uploadRouter.post(
     const stack = new CompensationStack();
 
     const payload = await stack.run(async () => {
-      const documentFile = await ingestDocumentFile({
+      const file = await ingestFile({
         buffer: req.file!.buffer,
         fileName: safeFileName,
         mimeType: req.file!.mimetype,
@@ -145,39 +145,57 @@ uploadRouter.post(
         stack,
       });
 
-      const links: Array<{ id: string; recipientEmail: string; totpProvisioningUri?: string }> = [];
+      const links: Array<{
+        documentId: string;
+        communicationId: string;
+        recipientEmail: string;
+        totpProvisioningUri?: string;
+      }> = [];
 
       for (const recipient of recipients) {
         const otpChannel = env.recipientOtpEnabled ? (recipient.otpChannel ?? null) : null;
         const recipientPhone =
-          otpChannel === 'sms' || otpChannel === 'whatsapp' ? recipient.recipientPhone : null;
+          otpChannel === RecipientOtpChannel.SMS || otpChannel === RecipientOtpChannel.WHATSAPP
+            ? recipient.recipientPhone
+            : null;
 
-        const { link, totpProvisioningUri } = await createDocumentUserLink({
-          documentFile,
-          recipientEmail: recipient.recipientEmail,
-          password: recipient.password,
-          linkTtlSeconds: recipient.linkTtl,
-          maxDownloads: recipient.maxDownloads,
+        const { recipient: recipientRow, totpProvisioningUri } = await upsertRecipient({
+          sourceSystemKey: recipient.sourceSystemKey,
+          email: recipient.recipientEmail,
+          phoneNumber: recipientPhone,
           otpChannel,
-          recipientPhone,
+        });
+
+        const document = await createDocument({
+          file,
+          recipient: recipientRow,
+          password: recipient.password,
+          maxDownloads: recipient.maxDownloads,
           batchId,
           stack,
         });
 
+        const { link } = await createCommunication({
+          document,
+          linkTtlSeconds: recipient.linkTtl,
+          stack,
+        });
+
         links.push({
-          id: link.id,
-          recipientEmail: link.recipientEmail,
+          documentId: document.documentId,
+          communicationId: link.communicationId,
+          recipientEmail: recipientRow.email,
           ...(totpProvisioningUri ? { totpProvisioningUri } : {}),
         });
       }
 
-      return { documentFile, links };
+      return { file, links };
     });
 
     created(req, res, {
       batchId,
-      fileId: payload.documentFile.id,
-      sha256: payload.documentFile.sha256,
+      fileId: payload.file.fileId,
+      sha256: payload.file.sha256,
       links: payload.links,
       warning:
         'Each recipient file password must be communicated via a separate channel. Do not include passwords in the same email as download links.',

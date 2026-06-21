@@ -1,6 +1,8 @@
 /**
  * TanStack Query key factory for list and admin queries.
  *
+ * Keys use Prisma model / database table names.
+ *
  * @packageDocumentation
  */
 
@@ -35,34 +37,31 @@ export function buildAdminListQuery(params: AdminListParams = {}): string {
   return qs.toString();
 }
 
-/** @deprecated Use {@link buildAdminListQuery} */
-export function adminListQuery(params: ListParams = {}): string {
-  return buildAdminListQuery(params);
-}
-
 /** Query key factory for list and admin queries. */
 export const queryKeys = {
-  documents: {
-    all: ['documents'] as const,
-    list: () => [...queryKeys.documents.all, 'list'] as const,
+  Document: {
+    all: ['Document'] as const,
+    list: () => [...queryKeys.Document.all, 'list'] as const,
   },
   admin: {
     all: ['admin'] as const,
-    users: (params?: AdminListParams) => [...queryKeys.admin.all, 'users', params ?? {}] as const,
-    documents: (params?: AdminListParams) =>
-      [...queryKeys.admin.all, 'documents', params ?? {}] as const,
-    documentFiles: (params?: AdminListParams) =>
-      [...queryKeys.admin.all, 'document-files', params ?? {}] as const,
-    document: (id: string) => [...queryKeys.admin.all, 'document', id] as const,
-    documentFile: (id: string) => [...queryKeys.admin.all, 'document-file', id] as const,
-    auditLogs: (params?: AdminListParams) =>
-      [...queryKeys.admin.all, 'audit-logs', params ?? {}] as const,
-    failedAuditLogs: (params?: AdminListParams) =>
-      [...queryKeys.admin.all, 'failed-audit-logs', params ?? {}] as const,
-    processErrors: (params?: AdminListParams) =>
-      [...queryKeys.admin.all, 'process-errors', params ?? {}] as const,
-    failedProcessErrors: (params?: AdminListParams) =>
-      [...queryKeys.admin.all, 'failed-process-errors', params ?? {}] as const,
+    User: (params?: AdminListParams) => [...queryKeys.admin.all, 'User', params ?? {}] as const,
+    Document: (params?: AdminListParams) =>
+      [...queryKeys.admin.all, 'Document', params ?? {}] as const,
+    DocumentDetail: (id: string) => [...queryKeys.admin.all, 'Document', id] as const,
+    File: (params?: AdminListParams) => [...queryKeys.admin.all, 'File', params ?? {}] as const,
+    FileDetail: (id: string) => [...queryKeys.admin.all, 'File', id] as const,
+    Recipient: (params?: AdminListParams) =>
+      [...queryKeys.admin.all, 'Recipient', params ?? {}] as const,
+    RecipientDetail: (id: string) => [...queryKeys.admin.all, 'Recipient', id] as const,
+    Communication: (params?: AdminListParams) =>
+      [...queryKeys.admin.all, 'Communication', params ?? {}] as const,
+    CommunicationDetail: (id: string) =>
+      [...queryKeys.admin.all, 'Communication', id] as const,
+    AuditLog: (params?: AdminListParams) =>
+      [...queryKeys.admin.all, 'AuditLog', params ?? {}] as const,
+    ProcessError: (params?: AdminListParams) =>
+      [...queryKeys.admin.all, 'ProcessError', params ?? {}] as const,
     list: (endpoint: string, dataKey: string, params?: AdminListParams) =>
       [...queryKeys.admin.all, 'list', endpoint, dataKey, params ?? {}] as const,
   },

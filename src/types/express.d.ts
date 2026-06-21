@@ -13,8 +13,8 @@ declare global {
       requestId?: string;
       /** Shared incident UUID for audit + process-error linking (e.g. verify wrong password). */
       errorCorrelationId?: string;
-      /** Document context for process-error linking on public routes. */
-      errorDocumentId?: string;
+      /** Document link context for process-error linking on public routes. */
+      errorCommunicationId?: string;
       /** Set by `dashboardAuth` or `adminAuth`. */
       user?: AuthUser;
     }

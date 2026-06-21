@@ -152,7 +152,7 @@ export function VerifyPage() {
   }
 
   async function handleResendOtp() {
-    if (!token || !otpSessionId || otpChannel === 'authenticator') return;
+    if (!token || !otpSessionId || otpChannel === 'AUTHENTICATOR') return;
     setResendLoading(true);
     setError(null);
     try {
@@ -177,11 +177,11 @@ export function VerifyPage() {
     loading || !token || (captchaRequired && step === 'captcha' && !captchaToken);
 
   const otpHint =
-    otpChannel === 'authenticator'
+    otpChannel === 'AUTHENTICATOR'
       ? 'Enter the 6-digit code from your authenticator app.'
-      : otpChannel === 'sms'
+      : otpChannel === 'SMS'
         ? 'Enter the code sent to your phone via SMS.'
-        : otpChannel === 'whatsapp'
+        : otpChannel === 'WHATSAPP'
           ? 'Enter the code sent to your phone via WhatsApp.'
           : 'Enter the verification code sent to your email.';
 
@@ -238,7 +238,7 @@ export function VerifyPage() {
           <Button type="submit" className="w-full" disabled={loading || !otpCode}>
             {loading ? 'Verifying…' : 'Confirm and download'}
           </Button>
-          {otpChannel !== 'authenticator' ? (
+          {otpChannel !== 'AUTHENTICATOR' ? (
             <Button
               type="button"
               variant="outline"

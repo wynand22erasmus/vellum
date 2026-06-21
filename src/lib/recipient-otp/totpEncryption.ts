@@ -1,5 +1,5 @@
 /**
- * AES-256-GCM encryption for TOTP secrets stored on DocumentUserLink rows.
+ * AES-256-GCM encryption for TOTP secrets stored on Recipient rows.
  *
  * @packageDocumentation
  */
@@ -15,7 +15,7 @@ function deriveKey(): Buffer {
 }
 
 /**
- * Encrypts a plaintext TOTP secret for storage in `DocumentUserLink.totpSecretEnc`.
+ * Encrypts a plaintext TOTP secret for storage in `Recipient.authenticatorSecretEnc`.
  */
 export function encryptTotpSecret(plaintext: string): string {
   const iv = randomBytes(IV_LENGTH);

@@ -2,7 +2,7 @@
 
 > **useAdminListPageQuery**\<`T`\>(`endpoint`, `dataKey`, `params?`): `UseQueryResult`\<`NoInfer`\<[`AdminListResult`](../../fetch-json/type-aliases/AdminListResult.md)\<`T`\>\>, `Error`\>
 
-Defined in: [src/lib/queries/admin.ts:92](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/queries/admin.ts#L92)
+Defined in: [src/lib/queries/admin.ts:53](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/queries/admin.ts#L53)
 
 Generic admin list hook keyed by endpoint and response field.
 

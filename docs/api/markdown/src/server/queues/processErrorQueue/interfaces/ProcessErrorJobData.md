@@ -1,6 +1,6 @@
 # Interface: ProcessErrorJobData
 
-Defined in: [src/server/queues/processErrorQueue.ts:16](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/server/queues/processErrorQueue.ts#L16)
+Defined in: [src/server/queues/processErrorQueue.ts:16](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/queues/processErrorQueue.ts#L16)
 
 Payload for a single process-error persistence job.
 
@@ -10,9 +10,17 @@ Payload for a single process-error persistence job.
 
 > `optional` **auditLogId?**: `string`
 
-Defined in: [src/server/queues/processErrorQueue.ts:31](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/server/queues/processErrorQueue.ts#L31)
+Defined in: [src/server/queues/processErrorQueue.ts:32](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/queues/processErrorQueue.ts#L32)
 
 Linked `AuditLog` when correlation is known at record time.
+
+***
+
+### communicationId?
+
+> `optional` **communicationId?**: `string`
+
+Defined in: [src/server/queues/processErrorQueue.ts:26](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/queues/processErrorQueue.ts#L26)
 
 ***
 
@@ -20,9 +28,19 @@ Linked `AuditLog` when correlation is known at record time.
 
 > `optional` **correlationId?**: `string`
 
-Defined in: [src/server/queues/processErrorQueue.ts:33](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/server/queues/processErrorQueue.ts#L33)
+Defined in: [src/server/queues/processErrorQueue.ts:34](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/queues/processErrorQueue.ts#L34)
 
 Shared incident UUID across audit and process-error pipelines.
+
+***
+
+### deadLetterId?
+
+> `optional` **deadLetterId?**: `string`
+
+Defined in: [src/server/queues/processErrorQueue.ts:30](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/queues/processErrorQueue.ts#L30)
+
+Linked `DeadLetter` when audit enqueue/worker failed.
 
 ***
 
@@ -30,7 +48,7 @@ Shared incident UUID across audit and process-error pipelines.
 
 > **detail**: `string`
 
-Defined in: [src/server/queues/processErrorQueue.ts:20](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/server/queues/processErrorQueue.ts#L20)
+Defined in: [src/server/queues/processErrorQueue.ts:20](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/queues/processErrorQueue.ts#L20)
 
 ***
 
@@ -38,7 +56,7 @@ Defined in: [src/server/queues/processErrorQueue.ts:20](https://github.com/wynan
 
 > `optional` **documentId?**: `string`
 
-Defined in: [src/server/queues/processErrorQueue.ts:25](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/server/queues/processErrorQueue.ts#L25)
+Defined in: [src/server/queues/processErrorQueue.ts:25](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/queues/processErrorQueue.ts#L25)
 
 ***
 
@@ -46,17 +64,7 @@ Defined in: [src/server/queues/processErrorQueue.ts:25](https://github.com/wynan
 
 > `optional` **extensions?**: `Record`\<`string`, `unknown`\>
 
-Defined in: [src/server/queues/processErrorQueue.ts:26](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/server/queues/processErrorQueue.ts#L26)
-
-***
-
-### failedAuditLogId?
-
-> `optional` **failedAuditLogId?**: `string`
-
-Defined in: [src/server/queues/processErrorQueue.ts:29](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/server/queues/processErrorQueue.ts#L29)
-
-Linked `FailedAuditLog` when audit enqueue/worker failed.
+Defined in: [src/server/queues/processErrorQueue.ts:27](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/queues/processErrorQueue.ts#L27)
 
 ***
 
@@ -64,7 +72,7 @@ Linked `FailedAuditLog` when audit enqueue/worker failed.
 
 > `optional` **instance?**: `string`
 
-Defined in: [src/server/queues/processErrorQueue.ts:21](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/server/queues/processErrorQueue.ts#L21)
+Defined in: [src/server/queues/processErrorQueue.ts:21](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/queues/processErrorQueue.ts#L21)
 
 ***
 
@@ -72,7 +80,7 @@ Defined in: [src/server/queues/processErrorQueue.ts:21](https://github.com/wynan
 
 > `optional` **internal?**: `Record`\<`string`, `unknown`\>
 
-Defined in: [src/server/queues/processErrorQueue.ts:27](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/server/queues/processErrorQueue.ts#L27)
+Defined in: [src/server/queues/processErrorQueue.ts:28](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/queues/processErrorQueue.ts#L28)
 
 ***
 
@@ -80,7 +88,7 @@ Defined in: [src/server/queues/processErrorQueue.ts:27](https://github.com/wynan
 
 > **problemType**: `string`
 
-Defined in: [src/server/queues/processErrorQueue.ts:17](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/server/queues/processErrorQueue.ts#L17)
+Defined in: [src/server/queues/processErrorQueue.ts:17](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/queues/processErrorQueue.ts#L17)
 
 ***
 
@@ -88,7 +96,7 @@ Defined in: [src/server/queues/processErrorQueue.ts:17](https://github.com/wynan
 
 > `optional` **requestId?**: `string`
 
-Defined in: [src/server/queues/processErrorQueue.ts:22](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/server/queues/processErrorQueue.ts#L22)
+Defined in: [src/server/queues/processErrorQueue.ts:22](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/queues/processErrorQueue.ts#L22)
 
 ***
 
@@ -96,7 +104,7 @@ Defined in: [src/server/queues/processErrorQueue.ts:22](https://github.com/wynan
 
 > **source**: `string`
 
-Defined in: [src/server/queues/processErrorQueue.ts:23](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/server/queues/processErrorQueue.ts#L23)
+Defined in: [src/server/queues/processErrorQueue.ts:23](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/queues/processErrorQueue.ts#L23)
 
 ***
 
@@ -104,7 +112,7 @@ Defined in: [src/server/queues/processErrorQueue.ts:23](https://github.com/wynan
 
 > **status**: `number`
 
-Defined in: [src/server/queues/processErrorQueue.ts:19](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/server/queues/processErrorQueue.ts#L19)
+Defined in: [src/server/queues/processErrorQueue.ts:19](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/queues/processErrorQueue.ts#L19)
 
 ***
 
@@ -112,7 +120,7 @@ Defined in: [src/server/queues/processErrorQueue.ts:19](https://github.com/wynan
 
 > **title**: `string`
 
-Defined in: [src/server/queues/processErrorQueue.ts:18](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/server/queues/processErrorQueue.ts#L18)
+Defined in: [src/server/queues/processErrorQueue.ts:18](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/queues/processErrorQueue.ts#L18)
 
 ***
 
@@ -120,4 +128,4 @@ Defined in: [src/server/queues/processErrorQueue.ts:18](https://github.com/wynan
 
 > `optional` **userId?**: `string`
 
-Defined in: [src/server/queues/processErrorQueue.ts:24](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/server/queues/processErrorQueue.ts#L24)
+Defined in: [src/server/queues/processErrorQueue.ts:24](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/queues/processErrorQueue.ts#L24)

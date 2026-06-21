@@ -2,7 +2,7 @@
 
 > **ResolvedDbColumnMeta** = `object`
 
-Defined in: [src/lib/data-table-db-column-registry.ts:43](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-db-column-registry.ts#L43)
+Defined in: [src/lib/data-table-db-column-registry.ts:42](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-db-column-registry.ts#L42)
 
 Column meta resolved from Prisma registry and optional overrides.
 
@@ -12,7 +12,7 @@ Column meta resolved from Prisma registry and optional overrides.
 
 > **dataType**: [`DataTableColumnDataType`](../../data-table-types/type-aliases/DataTableColumnDataType.md)
 
-Defined in: [src/lib/data-table-db-column-registry.ts:44](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-db-column-registry.ts#L44)
+Defined in: [src/lib/data-table-db-column-registry.ts:43](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-db-column-registry.ts#L43)
 
 ***
 
@@ -20,7 +20,7 @@ Defined in: [src/lib/data-table-db-column-registry.ts:44](https://github.com/wyn
 
 > **dbField**: `string`
 
-Defined in: [src/lib/data-table-db-column-registry.ts:48](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-db-column-registry.ts#L48)
+Defined in: [src/lib/data-table-db-column-registry.ts:47](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-db-column-registry.ts#L47)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [src/lib/data-table-db-column-registry.ts:48](https://github.com/wyn
 
 > **dbModel**: [`DbModelName`](../../data-table-db-schema/type-aliases/DbModelName.md)
 
-Defined in: [src/lib/data-table-db-column-registry.ts:47](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-db-column-registry.ts#L47)
+Defined in: [src/lib/data-table-db-column-registry.ts:46](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-db-column-registry.ts#L46)
 
 ***
 
@@ -36,7 +36,7 @@ Defined in: [src/lib/data-table-db-column-registry.ts:47](https://github.com/wyn
 
 > **descriptor**: [`DbColumnDescriptor`](../../data-table-db-schema/type-aliases/DbColumnDescriptor.md)
 
-Defined in: [src/lib/data-table-db-column-registry.ts:49](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-db-column-registry.ts#L49)
+Defined in: [src/lib/data-table-db-column-registry.ts:48](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-db-column-registry.ts#L48)
 
 ***
 
@@ -44,7 +44,7 @@ Defined in: [src/lib/data-table-db-column-registry.ts:49](https://github.com/wyn
 
 > `optional` **enumOptions?**: readonly [`DataTableFilterOption`](../../data-table-types/type-aliases/DataTableFilterOption.md)[]
 
-Defined in: [src/lib/data-table-db-column-registry.ts:45](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-db-column-registry.ts#L45)
+Defined in: [src/lib/data-table-db-column-registry.ts:44](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-db-column-registry.ts#L44)
 
 ***
 
@@ -52,4 +52,4 @@ Defined in: [src/lib/data-table-db-column-registry.ts:45](https://github.com/wyn
 
 > `optional` **filterAs?**: [`DbColumnDescriptor`](../../data-table-db-schema/type-aliases/DbColumnDescriptor.md)\[`"filterAs"`\]
 
-Defined in: [src/lib/data-table-db-column-registry.ts:46](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-db-column-registry.ts#L46)
+Defined in: [src/lib/data-table-db-column-registry.ts:45](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-db-column-registry.ts#L45)

@@ -1,5 +1,5 @@
 /**
- * Admin documents list.
+ * Admin documents list (delivery envelopes).
  *
  * @packageDocumentation
  */
@@ -12,36 +12,40 @@ import { PAGE_LABELS } from '@/lib/page-labels';
 import { dbColumn, disableColumnInteractions } from '@/components/data-table/column-helpers';
 import { useAdminListState } from '@/hooks/use-admin-list-state';
 import { normalizeAppPath } from '@/lib/sidebar-nav';
-import { type AdminDocumentRow, useAdminDocumentsQuery } from '@/lib/queries/admin';
+import { type Document, useAdminDocumentsQuery } from '@/lib/queries/admin';
 import { AdminListPage } from '@/pages/admin/admin-list-page';
 import { Button } from '@/components/ui/button';
 
-/** Admin documents at `/admin/documents`. */
+/** Admin document envelopes at `/admin/documents`. */
 export function AdminDocumentsPage() {
   const listState = useAdminListState();
   const query = useAdminDocumentsQuery(listState.queryParams);
 
-  const columns = useMemo<ColumnDef<AdminDocumentRow>[]>(
+  const columns = useMemo<ColumnDef<Document>[]>(
     () => [
-      dbColumn<AdminDocumentRow>('DocumentFile', 'fileName', 'File'),
-      dbColumn<AdminDocumentRow>('DocumentUserLink', 'recipientEmail', 'Recipient'),
-      dbColumn<AdminDocumentRow>('DocumentUserLink', 'createdAt', 'Created'),
-      dbColumn<AdminDocumentRow>('DocumentUserLink', 'status', 'Status', {
+      dbColumn<Document>('File', 'fileName', 'File'),
+      dbColumn<Document>('Recipient', 'email', 'Recipient', {
+        accessorKey: 'recipientEmail',
+      }),
+      dbColumn<Document>('Document', 'createdAt', 'Created'),
+      dbColumn<Document>('Document', 'status', 'Status', {
         cell: ({ row }) => (
           <DocumentStatusBadges
             linkActive={row.original.linkActive}
             fileAvailable={row.original.fileAvailable}
-            isUsed={row.original.isUsed}
+            downloadCount={row.original.downloadCount}
+            maxDownloads={row.original.maxDownloads}
+            downloadsRemaining={row.original.downloadsRemaining}
             deletedAt={row.original.deletedAt}
           />
         ),
       }),
-      disableColumnInteractions<AdminDocumentRow>({
+      disableColumnInteractions<Document>({
         id: 'actions',
         header: '',
         cell: ({ row }) => (
           <Button variant="outline" size="sm" asChild>
-            <Link to={normalizeAppPath(`/admin/documents/${row.original.id}`)}>Detail</Link>
+            <Link to={normalizeAppPath(`/admin/documents/${row.original.documentId}`)}>Detail</Link>
           </Button>
         ),
       }),

@@ -23,10 +23,11 @@ export interface ProcessErrorJobData {
   source: string;
   userId?: string;
   documentId?: string;
+  communicationId?: string;
   extensions?: Record<string, unknown>;
   internal?: Record<string, unknown>;
-  /** Linked `FailedAuditLog` when audit enqueue/worker failed. */
-  failedAuditLogId?: string;
+  /** Linked `DeadLetter` when audit enqueue/worker failed. */
+  deadLetterId?: string;
   /** Linked `AuditLog` when correlation is known at record time. */
   auditLogId?: string;
   /** Shared incident UUID across audit and process-error pipelines. */

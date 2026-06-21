@@ -8,8 +8,7 @@ import { rename, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { AuditEventType } from '../../../generated/enums.ts';
 import { CompensationStack } from '../../lib/compensation/compensation-stack.ts';
-import { createDocumentUserLink } from '../../lib/documents/createDocumentUserLink.ts';
-import { ingestDocumentFile } from '../../lib/documents/ingestDocumentFile.ts';
+import { createDelivery } from '../../lib/documents/createDelivery.ts';
 import { scanBuffer } from '../../lib/clamav.ts';
 import { AppError } from '../../lib/errors/app-error.ts';
 import { env } from '../../lib/env.ts';
@@ -187,14 +186,17 @@ export async function ingestSftpFile(ctx: SftpIngestContext): Promise<void> {
   }
 
   const stack = new CompensationStack();
-  let documentFile;
+  let delivery;
   try {
-    documentFile = await stack.run(async () =>
-      ingestDocumentFile({
+    delivery = await stack.run(async () =>
+      createDelivery({
         buffer,
         fileName: safeFileName,
         mimeType: mimeFromFileName(safeFileName),
         fileTtlSeconds: manifest.fileTtl,
+        linkTtlSeconds: manifest.linkTtl,
+        recipientEmail: manifest.recipientEmail,
+        password: manifest.password,
         stack,
         skipVirusScan: true,
       }),
@@ -206,48 +208,32 @@ export async function ingestSftpFile(ctx: SftpIngestContext): Promise<void> {
         : err instanceof Error
           ? err.message
           : String(err);
-    await moveToFailed(ctx, 'storage', reason);
+    const step: SftpFailureStep =
+      err instanceof AppError && err.status === 503 ? 'email' : 'document';
+    await moveToFailed(ctx, step, reason);
     return;
   }
 
   logEvent({
     eventType: AuditEventType.SFTP_STORAGE_UPLOADED,
     metadata: {
-      s3Key: documentFile.s3Key,
-      sha256: documentFile.sha256,
+      s3Key: delivery.file.s3Key,
+      sha256: delivery.file.sha256,
+      fileId: delivery.file.fileId,
       remotePath,
       fileName: safeFileName,
       sftpUser,
     },
   });
 
-  let linkResult;
-  try {
-    linkResult = await stack.run(async () =>
-      createDocumentUserLink({
-        documentFile,
-        recipientEmail: manifest.recipientEmail,
-        password: manifest.password,
-        linkTtlSeconds: manifest.linkTtl,
-        stack,
-      }),
-    );
-  } catch (err) {
-    const reason =
-      err instanceof AppError
-        ? (err.detail ?? err.message)
-        : err instanceof Error
-          ? err.message
-          : String(err);
-    await moveToFailed(ctx, 'document', reason);
-    return;
-  }
-
   logEvent({
     eventType: AuditEventType.SFTP_DOCUMENT_CREATED,
-    documentId: linkResult.link.id,
+    documentId: delivery.document.documentId,
+    communicationId: delivery.link.communicationId,
     metadata: {
-      documentId: linkResult.link.id,
+      documentId: delivery.document.documentId,
+      communicationId: delivery.link.communicationId,
+      fileId: delivery.file.fileId,
       remotePath,
       fileName: safeFileName,
       sftpUser,
@@ -256,10 +242,12 @@ export async function ingestSftpFile(ctx: SftpIngestContext): Promise<void> {
 
   logEvent({
     eventType: AuditEventType.SFTP_EMAIL_QUEUED,
-    documentId: linkResult.link.id,
+    documentId: delivery.document.documentId,
+    communicationId: delivery.link.communicationId,
     metadata: {
-      jobId: linkResult.emailJobId,
-      documentId: linkResult.link.id,
+      jobId: delivery.emailJobId,
+      documentId: delivery.document.documentId,
+      communicationId: delivery.link.communicationId,
       remotePath,
       fileName: safeFileName,
       sftpUser,
@@ -275,10 +263,12 @@ export async function ingestSftpFile(ctx: SftpIngestContext): Promise<void> {
     );
     logEvent({
       eventType: AuditEventType.SFTP_INGESTION_COMPLETED,
-      documentId: linkResult.link.id,
+      documentId: delivery.document.documentId,
+      communicationId: delivery.link.communicationId,
       metadata: {
         archivedPath,
-        documentId: linkResult.link.id,
+        documentId: delivery.document.documentId,
+        communicationId: delivery.link.communicationId,
         remotePath,
         fileName: safeFileName,
         sftpUser,
@@ -288,7 +278,8 @@ export async function ingestSftpFile(ctx: SftpIngestContext): Promise<void> {
     const reason =
       err instanceof Error ? err.message : 'Failed to archive source files after ingest.';
     logSftpFailure('archive', reason, {
-      documentId: linkResult.link.id,
+      documentId: delivery.document.documentId,
+      communicationId: delivery.link.communicationId,
       remotePath,
       fileName: safeFileName,
       sftpUser,

@@ -2,7 +2,7 @@
 
 > **BrandPreset** = `object`
 
-Defined in: [src/lib/brand/presets.ts:8](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/brand/presets.ts#L8)
+Defined in: [src/lib/brand/presets.ts:8](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/presets.ts#L8)
 
 White-label configuration consumed by the SPA and EmailService.
 
@@ -12,7 +12,7 @@ White-label configuration consumed by the SPA and EmailService.
 
 > **displayName**: `string`
 
-Defined in: [src/lib/brand/presets.ts:10](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/brand/presets.ts#L10)
+Defined in: [src/lib/brand/presets.ts:10](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/presets.ts#L10)
 
 ***
 
@@ -20,7 +20,7 @@ Defined in: [src/lib/brand/presets.ts:10](https://github.com/wynand22erasmus/vel
 
 > **documentTitle**: `string`
 
-Defined in: [src/lib/brand/presets.ts:13](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/brand/presets.ts#L13)
+Defined in: [src/lib/brand/presets.ts:13](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/presets.ts#L13)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [src/lib/brand/presets.ts:13](https://github.com/wynand22erasmus/vel
 
 > **email**: `object`
 
-Defined in: [src/lib/brand/presets.ts:21](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/brand/presets.ts#L21)
+Defined in: [src/lib/brand/presets.ts:21](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/presets.ts#L21)
 
 #### footerHtml?
 
@@ -100,7 +100,7 @@ Support contact shown in the footer (overridable via `BRAND_SUPPORT_EMAIL`).
 
 > **id**: `string`
 
-Defined in: [src/lib/brand/presets.ts:9](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/brand/presets.ts#L9)
+Defined in: [src/lib/brand/presets.ts:9](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/presets.ts#L9)
 
 ***
 
@@ -108,7 +108,7 @@ Defined in: [src/lib/brand/presets.ts:9](https://github.com/wynand22erasmus/vell
 
 > `optional` **legal?**: `object`
 
-Defined in: [src/lib/brand/presets.ts:56](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/brand/presets.ts#L56)
+Defined in: [src/lib/brand/presets.ts:56](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/presets.ts#L56)
 
 Optional footer links on auth pages.
 
@@ -126,7 +126,7 @@ Optional footer links on auth pages.
 
 > **logos**: `object`
 
-Defined in: [src/lib/brand/presets.ts:15](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/brand/presets.ts#L15)
+Defined in: [src/lib/brand/presets.ts:15](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/presets.ts#L15)
 
 #### appleTouchIcon?
 
@@ -150,7 +150,7 @@ Defined in: [src/lib/brand/presets.ts:15](https://github.com/wynand22erasmus/vel
 
 > **shortName**: `string`
 
-Defined in: [src/lib/brand/presets.ts:11](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/brand/presets.ts#L11)
+Defined in: [src/lib/brand/presets.ts:11](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/presets.ts#L11)
 
 ***
 
@@ -158,7 +158,7 @@ Defined in: [src/lib/brand/presets.ts:11](https://github.com/wynand22erasmus/vel
 
 > **sms**: `object`
 
-Defined in: [src/lib/brand/presets.ts:44](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/brand/presets.ts#L44)
+Defined in: [src/lib/brand/presets.ts:44](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/presets.ts#L44)
 
 Twilio SMS body templates (`{{displayName}}`, `{{code}}`, `{{fileName}}`, `{{expiresMinutes}}`).
 
@@ -176,7 +176,7 @@ Twilio SMS body templates (`{{displayName}}`, `{{code}}`, `{{fileName}}`, `{{exp
 
 > **tagline**: `string`
 
-Defined in: [src/lib/brand/presets.ts:12](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/brand/presets.ts#L12)
+Defined in: [src/lib/brand/presets.ts:12](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/presets.ts#L12)
 
 ***
 
@@ -184,7 +184,7 @@ Defined in: [src/lib/brand/presets.ts:12](https://github.com/wynand22erasmus/vel
 
 > **whatsapp**: `object`
 
-Defined in: [src/lib/brand/presets.ts:50](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/brand/presets.ts#L50)
+Defined in: [src/lib/brand/presets.ts:50](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/presets.ts#L50)
 
 Twilio WhatsApp body templates (same placeholders as [BrandPreset.sms](#sms)).
 
@@ -202,4 +202,4 @@ Twilio WhatsApp body templates (same placeholders as [BrandPreset.sms](#sms)).
 
 > `optional` **wordmark?**: `string`
 
-Defined in: [src/lib/brand/presets.ts:14](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/brand/presets.ts#L14)
+Defined in: [src/lib/brand/presets.ts:14](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/brand/presets.ts#L14)

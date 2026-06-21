@@ -9,7 +9,7 @@ API tests live in a [Bruno 3 workspace](https://docs.usebruno.com/get-started/br
 
 ## Success responses
 
-Successful JSON responses use `Content-Type: application/vnd.vellum.result+json`. Assert on `body.data.*` (e.g. `body.data.documents`, `body.data.downloadUrl`). Detail-only confirmations (logout, request-link) expose the message in `body.detail`. Errors remain `application/problem+json` — unchanged.
+Successful JSON responses use `Content-Type: application/vnd.vellum.result+json`. Assert on `body.data.*` using PascalCase table keys (e.g. `body.data.Document`, `body.data.WebhookDelivery`, `body.data.downloadUrl`). Detail-only confirmations (logout, request-link) expose the message in `body.detail`. Errors remain `application/problem+json` — unchanged.
 
 ## Layout
 

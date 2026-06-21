@@ -1,6 +1,6 @@
 # src/lib/revoke-document
 
-Shared document link revocation for admin and integrator API callers.
+Shared document envelope revocation for admin and integrator API callers.
 
 ## Type Aliases
 

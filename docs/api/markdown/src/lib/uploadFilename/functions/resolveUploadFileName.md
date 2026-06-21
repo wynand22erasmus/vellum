@@ -2,7 +2,7 @@
 
 > **resolveUploadFileName**(`originalName`, `allowedExtensions`): `object`
 
-Defined in: [src/lib/uploadFilename.ts:174](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/uploadFilename.ts#L174)
+Defined in: [src/lib/uploadFilename.ts:174](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/uploadFilename.ts#L174)
 
 Produces a storage-safe filename and validates the effective extension.
 

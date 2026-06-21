@@ -1,6 +1,6 @@
 # src/pages/admin/admin-document-detail-page
 
-Admin document detail with revoke action.
+Admin document envelope detail with revoke-all-links action.
 
 ## Functions
 

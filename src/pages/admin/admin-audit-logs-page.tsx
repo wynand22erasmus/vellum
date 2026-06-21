@@ -11,32 +11,23 @@ import { PAGE_LABELS } from '@/lib/page-labels';
 import { dbColumn } from '@/components/data-table/column-helpers';
 import { useAdminListState } from '@/hooks/use-admin-list-state';
 import { normalizeAppPath } from '@/lib/sidebar-nav';
-import { useAdminListPageQuery } from '@/lib/queries/admin';
+import { type AuditLog, useAdminListPageQuery } from '@/lib/queries/admin';
 import { AdminListPage } from '@/pages/admin/admin-list-page';
-
-type AuditRow = {
-  id: string;
-  eventType: string;
-  timestamp: string;
-  userId: string | null;
-  documentId: string | null;
-  ipAddress: string | null;
-};
 
 /** Admin audit log listing with filters and pagination. */
 export function AdminAuditLogsPage() {
   const listState = useAdminListState();
-  const query = useAdminListPageQuery<AuditRow>(
+  const query = useAdminListPageQuery<AuditLog>(
     '/api/admin/audit-logs',
-    'auditLogs',
+    'AuditLog',
     listState.queryParams,
   );
 
-  const columns = useMemo<ColumnDef<AuditRow>[]>(
+  const columns = useMemo<ColumnDef<AuditLog>[]>(
     () => [
-      dbColumn<AuditRow>('AuditLog', 'timestamp', 'Time'),
-      dbColumn<AuditRow>('AuditLog', 'eventType', 'Event'),
-      dbColumn<AuditRow>('AuditLog', 'documentId', 'Document', {
+      dbColumn<AuditLog>('AuditLog', 'createdAt', 'Time'),
+      dbColumn<AuditLog>('AuditLog', 'eventType', 'Event'),
+      dbColumn<AuditLog>('AuditLog', 'documentId', 'Document', {
         cell: ({ getValue }) => {
           const id = getValue() as string | null;
           if (!id) return '—';
@@ -47,7 +38,21 @@ export function AdminAuditLogsPage() {
           );
         },
       }),
-      dbColumn<AuditRow>('AuditLog', 'ipAddress', 'IP', {
+      dbColumn<AuditLog>('AuditLog', 'communicationId', 'Link', {
+        cell: ({ getValue }) => {
+          const id = getValue() as string | null;
+          if (!id) return '—';
+          return (
+            <Link
+              to={normalizeAppPath(`/admin/communications/${id}`)}
+              className="font-mono text-xs underline"
+            >
+              {id.slice(0, 8)}…
+            </Link>
+          );
+        },
+      }),
+      dbColumn<AuditLog>('AuditLog', 'ipAddress', 'IP', {
         cell: ({ getValue }) => getValue() ?? '—',
       }),
     ],

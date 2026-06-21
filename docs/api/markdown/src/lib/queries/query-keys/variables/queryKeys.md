@@ -2,7 +2,7 @@
 
 > `const` **queryKeys**: `object`
 
-Defined in: [src/lib/queries/query-keys.ts:44](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/queries/query-keys.ts#L44)
+Defined in: [src/lib/queries/query-keys.ts:41](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/queries/query-keys.ts#L41)
 
 Query key factory for list and admin queries.
 
@@ -16,9 +16,9 @@ Query key factory for list and admin queries.
 
 > **all**: readonly \[`"admin"`\]
 
-#### admin.auditLogs
+#### admin.AuditLog
 
-> **auditLogs**: (`params?`) => readonly \[`"admin"`, `"audit-logs"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
+> **AuditLog**: (`params?`) => readonly \[`"admin"`, `"AuditLog"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
 
 ##### Parameters
 
@@ -28,11 +28,25 @@ Query key factory for list and admin queries.
 
 ##### Returns
 
-readonly \[`"admin"`, `"audit-logs"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
+readonly \[`"admin"`, `"AuditLog"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
 
-#### admin.document
+#### admin.Communication
 
-> **document**: (`id`) => readonly \[`"admin"`, `"document"`, `string`\]
+> **Communication**: (`params?`) => readonly \[`"admin"`, `"Communication"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
+
+##### Parameters
+
+###### params?
+
+[`AdminListParams`](../type-aliases/AdminListParams.md)
+
+##### Returns
+
+readonly \[`"admin"`, `"Communication"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
+
+#### admin.CommunicationDetail
+
+> **CommunicationDetail**: (`id`) => readonly \[`"admin"`, `"Communication"`, `string`\]
 
 ##### Parameters
 
@@ -42,11 +56,25 @@ readonly \[`"admin"`, `"audit-logs"`, [`AdminListParams`](../type-aliases/AdminL
 
 ##### Returns
 
-readonly \[`"admin"`, `"document"`, `string`\]
+readonly \[`"admin"`, `"Communication"`, `string`\]
 
-#### admin.documentFile
+#### admin.Document
 
-> **documentFile**: (`id`) => readonly \[`"admin"`, `"document-file"`, `string`\]
+> **Document**: (`params?`) => readonly \[`"admin"`, `"Document"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
+
+##### Parameters
+
+###### params?
+
+[`AdminListParams`](../type-aliases/AdminListParams.md)
+
+##### Returns
+
+readonly \[`"admin"`, `"Document"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
+
+#### admin.DocumentDetail
+
+> **DocumentDetail**: (`id`) => readonly \[`"admin"`, `"Document"`, `string`\]
 
 ##### Parameters
 
@@ -56,25 +84,11 @@ readonly \[`"admin"`, `"document"`, `string`\]
 
 ##### Returns
 
-readonly \[`"admin"`, `"document-file"`, `string`\]
+readonly \[`"admin"`, `"Document"`, `string`\]
 
-#### admin.documentFiles
+#### admin.File
 
-> **documentFiles**: (`params?`) => readonly \[`"admin"`, `"document-files"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
-
-##### Parameters
-
-###### params?
-
-[`AdminListParams`](../type-aliases/AdminListParams.md)
-
-##### Returns
-
-readonly \[`"admin"`, `"document-files"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
-
-#### admin.documents
-
-> **documents**: (`params?`) => readonly \[`"admin"`, `"documents"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
+> **File**: (`params?`) => readonly \[`"admin"`, `"File"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
 
 ##### Parameters
 
@@ -84,35 +98,21 @@ readonly \[`"admin"`, `"document-files"`, [`AdminListParams`](../type-aliases/Ad
 
 ##### Returns
 
-readonly \[`"admin"`, `"documents"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
+readonly \[`"admin"`, `"File"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
 
-#### admin.failedAuditLogs
+#### admin.FileDetail
 
-> **failedAuditLogs**: (`params?`) => readonly \[`"admin"`, `"failed-audit-logs"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
-
-##### Parameters
-
-###### params?
-
-[`AdminListParams`](../type-aliases/AdminListParams.md)
-
-##### Returns
-
-readonly \[`"admin"`, `"failed-audit-logs"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
-
-#### admin.failedProcessErrors
-
-> **failedProcessErrors**: (`params?`) => readonly \[`"admin"`, `"failed-process-errors"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
+> **FileDetail**: (`id`) => readonly \[`"admin"`, `"File"`, `string`\]
 
 ##### Parameters
 
-###### params?
+###### id
 
-[`AdminListParams`](../type-aliases/AdminListParams.md)
+`string`
 
 ##### Returns
 
-readonly \[`"admin"`, `"failed-process-errors"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
+readonly \[`"admin"`, `"File"`, `string`\]
 
 #### admin.list
 
@@ -136,23 +136,9 @@ readonly \[`"admin"`, `"failed-process-errors"`, [`AdminListParams`](../type-ali
 
 readonly \[`"admin"`, `"list"`, `string`, `string`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
 
-#### admin.processErrors
+#### admin.ProcessError
 
-> **processErrors**: (`params?`) => readonly \[`"admin"`, `"process-errors"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
-
-##### Parameters
-
-###### params?
-
-[`AdminListParams`](../type-aliases/AdminListParams.md)
-
-##### Returns
-
-readonly \[`"admin"`, `"process-errors"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
-
-#### admin.users
-
-> **users**: (`params?`) => readonly \[`"admin"`, `"users"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
+> **ProcessError**: (`params?`) => readonly \[`"admin"`, `"ProcessError"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
 
 ##### Parameters
 
@@ -162,20 +148,62 @@ readonly \[`"admin"`, `"process-errors"`, [`AdminListParams`](../type-aliases/Ad
 
 ##### Returns
 
-readonly \[`"admin"`, `"users"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
+readonly \[`"admin"`, `"ProcessError"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
 
-### documents
+#### admin.Recipient
 
-> **documents**: `object`
+> **Recipient**: (`params?`) => readonly \[`"admin"`, `"Recipient"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
 
-#### documents.all
+##### Parameters
 
-> **all**: readonly \[`"documents"`\]
+###### params?
 
-#### documents.list
-
-> **list**: () => readonly \[`"documents"`, `"list"`\]
+[`AdminListParams`](../type-aliases/AdminListParams.md)
 
 ##### Returns
 
-readonly \[`"documents"`, `"list"`\]
+readonly \[`"admin"`, `"Recipient"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
+
+#### admin.RecipientDetail
+
+> **RecipientDetail**: (`id`) => readonly \[`"admin"`, `"Recipient"`, `string`\]
+
+##### Parameters
+
+###### id
+
+`string`
+
+##### Returns
+
+readonly \[`"admin"`, `"Recipient"`, `string`\]
+
+#### admin.User
+
+> **User**: (`params?`) => readonly \[`"admin"`, `"User"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
+
+##### Parameters
+
+###### params?
+
+[`AdminListParams`](../type-aliases/AdminListParams.md)
+
+##### Returns
+
+readonly \[`"admin"`, `"User"`, [`AdminListParams`](../type-aliases/AdminListParams.md)\]
+
+### Document
+
+> **Document**: `object`
+
+#### Document.all
+
+> **all**: readonly \[`"Document"`\]
+
+#### Document.list
+
+> **list**: () => readonly \[`"Document"`, `"list"`\]
+
+##### Returns
+
+readonly \[`"Document"`, `"list"`\]

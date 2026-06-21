@@ -2,7 +2,7 @@
 
 > **recordProcessErrorFromProblem**(`problem`, `ctx`): `void`
 
-Defined in: [src/lib/errors/record-process-error.ts:104](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/record-process-error.ts#L104)
+Defined in: [src/lib/errors/record-process-error.ts:106](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/record-process-error.ts#L106)
 
 Persists a normalized Problem Details envelope.
 
@@ -18,15 +18,19 @@ Persists a normalized Problem Details envelope.
 
 `string`
 
+#### communicationId?
+
+`string`
+
 #### correlationId?
 
 `string`
 
-#### documentId?
+#### deadLetterId?
 
 `string`
 
-#### failedAuditLogId?
+#### documentId?
 
 `string`
 

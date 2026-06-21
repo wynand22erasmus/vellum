@@ -69,7 +69,7 @@ export async function uploadObject(
 }
 
 /**
- * Deletes an object from the documents bucket (scrub worker).
+ * Deletes an object from the documents bucket (purge worker).
  *
  * @param key - Object key to remove
  */

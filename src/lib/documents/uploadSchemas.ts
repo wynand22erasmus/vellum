@@ -5,9 +5,15 @@
  */
 
 import { z } from 'zod';
+import { RecipientOtpChannel } from '../../../generated/enums.ts';
 import { env } from '../env.ts';
 
-export const recipientOtpChannelSchema = z.enum(['email', 'sms', 'whatsapp', 'authenticator']);
+export const recipientOtpChannelSchema = z.enum([
+  RecipientOtpChannel.EMAIL,
+  RecipientOtpChannel.SMS,
+  RecipientOtpChannel.WHATSAPP,
+  RecipientOtpChannel.AUTHENTICATOR,
+]);
 
 const otpFieldsRefinement = (
   data: { otpChannel?: z.infer<typeof recipientOtpChannelSchema>; recipientPhone?: string },
@@ -29,12 +35,13 @@ const otpFieldsRefinement = (
   }
 
   if (
-    (data.otpChannel === 'sms' || data.otpChannel === 'whatsapp') &&
+    (data.otpChannel === RecipientOtpChannel.SMS ||
+      data.otpChannel === RecipientOtpChannel.WHATSAPP) &&
     !data.recipientPhone
   ) {
     ctx.addIssue({
       code: 'custom',
-      message: 'recipientPhone is required when otpChannel is sms or whatsapp.',
+      message: 'recipientPhone is required when otpChannel is SMS or WHATSAPP.',
       path: ['recipientPhone'],
     });
   }
@@ -44,6 +51,7 @@ const otpFieldsRefinement = (
 export const uploadFieldsSchema = z
   .object({
     recipientEmail: z.string().email(),
+    sourceSystemKey: z.string().min(1).max(256).optional(),
     password: z.string().min(8),
     linkTtl: z.coerce.number().int().positive(),
     fileTtl: z.coerce.number().int().positive(),
@@ -60,6 +68,7 @@ export const uploadFieldsSchema = z
 export const batchRecipientSchema = z
   .object({
     recipientEmail: z.string().email(),
+    sourceSystemKey: z.string().min(1).max(256).optional(),
     password: z.string().min(8),
     linkTtl: z.coerce.number().int().positive(),
     fileTtl: z.coerce.number().int().positive(),
