@@ -51,8 +51,8 @@ export async function createApp(): Promise<express.Application> {
   app.use('/api', metaRouter);
   app.use('/api/upload', apiKeyAuth, uploadRouter);
   app.use('/api/verify', verifyRouter);
-  app.use('/api/documents', integratorOrAdminAuth, documentRevokeRouter);
   app.use('/api/documents', dashboardAuth, documentsRouter);
+  app.use('/api/documents/:id/revoke', integratorOrAdminAuth, documentRevokeRouter);
   app.use('/api/admin', adminAuth, adminRouter);
   app.use('/api/studio', adminAuth, studioRouter);
   app.use('/api/dev', adminAuth, devRouter);

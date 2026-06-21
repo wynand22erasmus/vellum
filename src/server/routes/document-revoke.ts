@@ -18,7 +18,7 @@ function routeParam(value: string | string[]): string {
 export const documentRevokeRouter = Router({ mergeParams: true });
 
 documentRevokeRouter.post(
-  '/:id/revoke',
+  '/',
   asyncHandler(async (req, res) => {
     const authMode = req.authMode;
     if (authMode !== 'apiKey' && authMode !== 'admin') {
