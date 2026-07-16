@@ -2,7 +2,7 @@
 
 > **CompleteDownloadResult** = `object`
 
-Defined in: src/lib/recipient-otp/completeDownload.ts:18
+Defined in: [src/lib/recipient-otp/completeDownload.ts:18](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/recipient-otp/completeDownload.ts#L18)
 
 ## Properties
 
@@ -10,7 +10,7 @@ Defined in: src/lib/recipient-otp/completeDownload.ts:18
 
 > **downloadsUsed**: `number`
 
-Defined in: src/lib/recipient-otp/completeDownload.ts:22
+Defined in: [src/lib/recipient-otp/completeDownload.ts:22](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/recipient-otp/completeDownload.ts#L22)
 
 ***
 
@@ -18,7 +18,7 @@ Defined in: src/lib/recipient-otp/completeDownload.ts:22
 
 > **downloadUrl**: `string`
 
-Defined in: src/lib/recipient-otp/completeDownload.ts:19
+Defined in: [src/lib/recipient-otp/completeDownload.ts:19](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/recipient-otp/completeDownload.ts#L19)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: src/lib/recipient-otp/completeDownload.ts:19
 
 > **fileName**: `string`
 
-Defined in: src/lib/recipient-otp/completeDownload.ts:20
+Defined in: [src/lib/recipient-otp/completeDownload.ts:20](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/recipient-otp/completeDownload.ts#L20)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: src/lib/recipient-otp/completeDownload.ts:20
 
 > **maxDownloads**: `number`
 
-Defined in: src/lib/recipient-otp/completeDownload.ts:23
+Defined in: [src/lib/recipient-otp/completeDownload.ts:23](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/recipient-otp/completeDownload.ts#L23)
 
 ***
 
@@ -42,4 +42,4 @@ Defined in: src/lib/recipient-otp/completeDownload.ts:23
 
 > **sha256**: `string`
 
-Defined in: src/lib/recipient-otp/completeDownload.ts:21
+Defined in: [src/lib/recipient-otp/completeDownload.ts:21](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/recipient-otp/completeDownload.ts#L21)

@@ -2,6 +2,8 @@
 
 TanStack Query key factory for list and admin queries.
 
+Keys use Prisma model / database table names.
+
 ## Type Aliases
 
 - [AdminListParams](type-aliases/AdminListParams.md)
@@ -14,5 +16,4 @@ TanStack Query key factory for list and admin queries.
 
 ## Functions
 
-- [~~adminListQuery~~](functions/adminListQuery.md)
 - [buildAdminListQuery](functions/buildAdminListQuery.md)

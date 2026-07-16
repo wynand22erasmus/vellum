@@ -2,7 +2,7 @@
 
 > **VerifyConsumptionDocument** = `object`
 
-Defined in: src/lib/verify-consumption.ts:8
+Defined in: [src/lib/verify-consumption.ts:8](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/verify-consumption.ts#L8)
 
 Document fields required to evaluate verify consumption.
 
@@ -12,15 +12,7 @@ Document fields required to evaluate verify consumption.
 
 > **downloadCount**: `number`
 
-Defined in: src/lib/verify-consumption.ts:10
-
-***
-
-### isUsed
-
-> **isUsed**: `boolean`
-
-Defined in: src/lib/verify-consumption.ts:11
+Defined in: [src/lib/verify-consumption.ts:10](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/verify-consumption.ts#L10)
 
 ***
 
@@ -28,7 +20,7 @@ Defined in: src/lib/verify-consumption.ts:11
 
 > **lastVerifiedAt**: `Date` \| `null`
 
-Defined in: src/lib/verify-consumption.ts:13
+Defined in: [src/lib/verify-consumption.ts:12](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/verify-consumption.ts#L12)
 
 ***
 
@@ -36,7 +28,7 @@ Defined in: src/lib/verify-consumption.ts:13
 
 > **maxDownloads**: `number`
 
-Defined in: src/lib/verify-consumption.ts:9
+Defined in: [src/lib/verify-consumption.ts:9](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/verify-consumption.ts#L9)
 
 ***
 
@@ -44,4 +36,4 @@ Defined in: src/lib/verify-consumption.ts:9
 
 > **verifySuccessCount**: `number`
 
-Defined in: src/lib/verify-consumption.ts:12
+Defined in: [src/lib/verify-consumption.ts:11](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/verify-consumption.ts#L11)

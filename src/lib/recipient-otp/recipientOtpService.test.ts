@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { RecipientOtpChannel } from '../../../generated/enums.ts';
 import { isRecipientOtpRequired } from './recipientOtpService.ts';
 
 vi.mock('../env.ts', () => ({
@@ -17,7 +18,7 @@ describe('isRecipientOtpRequired', () => {
   });
 
   it('returns true when enabled and channel set', () => {
-    expect(isRecipientOtpRequired({ otpChannel: 'email' })).toBe(true);
+    expect(isRecipientOtpRequired({ otpChannel: RecipientOtpChannel.EMAIL })).toBe(true);
   });
 
   it('returns false when channel is null', () => {

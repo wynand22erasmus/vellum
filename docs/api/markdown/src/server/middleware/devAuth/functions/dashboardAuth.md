@@ -2,7 +2,7 @@
 
 > **dashboardAuth**(`req`, `_res`, `next`): `Promise`\<`void`\>
 
-Defined in: [src/server/middleware/devAuth.ts:19](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/server/middleware/devAuth.ts#L19)
+Defined in: [src/server/middleware/devAuth.ts:19](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/middleware/devAuth.ts#L19)
 
 Populates `req.user` for protected dashboard routes.
 

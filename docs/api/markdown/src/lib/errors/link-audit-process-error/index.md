@@ -7,5 +7,5 @@ Bidirectional links between audit rows and process errors via explicit IDs or co
 - [correlationIdFromAuditJob](functions/correlationIdFromAuditJob.md)
 - [linkAuditLogByCorrelationId](functions/linkAuditLogByCorrelationId.md)
 - [linkAuditLogToProcessError](functions/linkAuditLogToProcessError.md)
-- [linkFailedAuditLogToProcessError](functions/linkFailedAuditLogToProcessError.md)
+- [linkDeadLetterToProcessError](functions/linkDeadLetterToProcessError.md)
 - [linkProcessErrorByCorrelationId](functions/linkProcessErrorByCorrelationId.md)

@@ -1,5 +1,5 @@
 /**
- * Persists WorkOS and dev dashboard users in the local `users` table.
+ * Persists WorkOS and dev dashboard users in the local `User` table.
  *
  * @packageDocumentation
  */
@@ -26,7 +26,7 @@ function resolveKind(email: string, existingKind?: PrismaUserKind): PrismaUserKi
 /** @internal */
 function toAuthUser(user: DbUser): AuthUser {
   return {
-    id: user.id,
+    id: user.userId,
     email: user.email,
     emailVerified: user.emailVerified,
     kind: user.kind as UserKind,
@@ -43,14 +43,14 @@ function toAuthUser(user: DbUser): AuthUser {
  * @returns Persisted user as {@link AuthUser}
  */
 export async function upsertWorkOSUser(workosUser: WorkOSUser): Promise<AuthUser> {
-  const existing = await prisma.user.findUnique({ where: { id: workosUser.id } });
+  const existing = await prisma.user.findUnique({ where: { userId: workosUser.id } });
   const kind = resolveKind(workosUser.email, existing?.kind);
   const lastSignInAt = workosUser.lastSignInAt ? new Date(workosUser.lastSignInAt) : new Date();
 
   const user = await prisma.user.upsert({
-    where: { id: workosUser.id },
+    where: { userId: workosUser.id },
     create: {
-      id: workosUser.id,
+      userId: workosUser.id,
       email: normalizeEmail(workosUser.email),
       emailVerified: workosUser.emailVerified,
       kind,
@@ -84,15 +84,15 @@ export async function upsertWorkOSUser(workosUser: WorkOSUser): Promise<AuthUser
  */
 export async function upsertDevUser(email: string): Promise<AuthUser> {
   const normalized = normalizeEmail(email);
-  const id = `dev:${normalized}`;
-  const existing = await prisma.user.findUnique({ where: { id } });
+  const userId = `dev:${normalized}`;
+  const existing = await prisma.user.findUnique({ where: { userId } });
   const kind = resolveKind(normalized, existing?.kind);
   const verifiedOnCreate = env.skipEmailVerification;
 
   const user = await prisma.user.upsert({
-    where: { id },
+    where: { userId },
     create: {
-      id,
+      userId,
       email: normalized,
       emailVerified: verifiedOnCreate,
       kind,
@@ -111,11 +111,11 @@ export async function upsertDevUser(email: string): Promise<AuthUser> {
 /**
  * Marks a user's email as verified after they follow the dev verification link.
  *
- * @param userId - Primary key in `users`
+ * @param userId - Primary key in `User`
  */
 export async function markEmailVerified(userId: string): Promise<AuthUser> {
   const user = await prisma.user.update({
-    where: { id: userId },
+    where: { userId },
     data: { emailVerified: true },
   });
   return toAuthUser(user);
@@ -127,6 +127,6 @@ export async function markEmailVerified(userId: string): Promise<AuthUser> {
  * @param id - Session subject (`sub` claim)
  */
 export async function findUserById(id: string): Promise<AuthUser | null> {
-  const user = await prisma.user.findUnique({ where: { id } });
+  const user = await prisma.user.findUnique({ where: { userId: id } });
   return user ? toAuthUser(user) : null;
 }

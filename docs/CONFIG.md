@@ -102,7 +102,7 @@ See [SFTP_INGESTION.md](./SFTP_INGESTION.md) for drop format, audit pipeline, an
 | `TWILIO_ACCOUNT_SID` | If SMS/WhatsApp | — | Twilio account SID |
 | `TWILIO_AUTH_TOKEN` | If SMS/WhatsApp | — | Twilio auth token |
 | `TWILIO_FROM_NUMBER` | If SMS/WhatsApp | — | Twilio sender (E.164; prefix `whatsapp:` for WhatsApp) |
-| `TOTP_ENCRYPTION_KEY` | No | `SESSION_SECRET` | AES key material for `DocumentUserLink.totpSecretEnc` |
+| `TOTP_ENCRYPTION_KEY` | No | `SESSION_SECRET` | AES key material for `Recipient.authenticatorSecretEnc` |
 
 See [ERROR_HANDLING.md](./ERROR_HANDLING.md) for the full error-handling standard.
 

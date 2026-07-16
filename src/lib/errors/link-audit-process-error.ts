@@ -15,24 +15,27 @@ export async function linkAuditLogToProcessError(
 ): Promise<void> {
   await prisma.$transaction([
     prisma.auditLog.update({
-      where: { id: auditLogId },
+      where: { auditLogId },
       data: { processErrorId },
     }),
     prisma.processError.update({
-      where: { id: processErrorId },
+      where: { processErrorId },
       data: { auditLogId },
     }),
   ]);
 }
 
-/** Sets `FailedAuditLog.processErrorId` after the process error row is persisted. */
-export async function linkFailedAuditLogToProcessError(
-  failedAuditLogId: string,
+/** Sets dead-letter `linkedTable`/`linkedId` after the process error row is persisted. */
+export async function linkDeadLetterToProcessError(
+  deadLetterId: string,
   processErrorId: string,
 ): Promise<void> {
-  await prisma.failedAuditLog.update({
-    where: { id: failedAuditLogId },
-    data: { processErrorId },
+  await prisma.deadLetter.update({
+    where: { deadLetterId },
+    data: {
+      linkedTable: 'ProcessError',
+      linkedId: processErrorId,
+    },
   });
 }
 
@@ -46,10 +49,10 @@ export async function linkAuditLogByCorrelationId(
   const processError = await prisma.processError.findFirst({
     where: { correlationId },
     orderBy: { createdAt: 'desc' },
-    select: { id: true },
+    select: { processErrorId: true },
   });
   if (processError) {
-    await linkAuditLogToProcessError(auditLogId, processError.id);
+    await linkAuditLogToProcessError(auditLogId, processError.processErrorId);
   }
 }
 
@@ -67,11 +70,11 @@ export async function linkProcessErrorByCorrelationId(
         equals: correlationId,
       },
     },
-    orderBy: { timestamp: 'desc' },
-    select: { id: true },
+    orderBy: { createdAt: 'desc' },
+    select: { auditLogId: true },
   });
   if (auditLog) {
-    await linkAuditLogToProcessError(auditLog.id, processErrorId);
+    await linkAuditLogToProcessError(auditLog.auditLogId, processErrorId);
   }
 }
 

@@ -1,6 +1,8 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { AdminDocumentFileDetailPage } from '@/pages/admin/admin-document-file-detail-page';
+import { createFileRoute, redirect } from '@tanstack/react-router';
+import { normalizeAppPath } from '@/lib/sidebar-nav';
 
 export const Route = createFileRoute('/_authenticated/admin/document-files/$id')({
-  component: AdminDocumentFileDetailPage,
+  beforeLoad: ({ params }) => {
+    throw redirect({ to: normalizeAppPath(`/admin/files/${params.id}`) });
+  },
 });

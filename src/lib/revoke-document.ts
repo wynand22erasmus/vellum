@@ -1,11 +1,12 @@
 /**
- * Shared document link revocation for admin and integrator API callers.
+ * Shared document envelope revocation for admin and integrator API callers.
  *
  * @packageDocumentation
  */
 
 import { prisma } from './prisma.ts';
 import { AppError } from './errors/app-error.ts';
+import { revokeActiveCommunications } from './documents/createCommunication.ts';
 import { logEvent } from '../server/queues/auditQueue.ts';
 
 export type RevokeDocumentOptions = {
@@ -16,40 +17,31 @@ export type RevokeDocumentOptions = {
   userAgent?: string;
 };
 
-/**
- * Revokes a recipient link. Shared S3 objects are not deleted (other links may reference them).
- */
+/** Revokes all active links on a document envelope; shared S3 file is retained. */
 export async function revokeDocument(options: RevokeDocumentOptions): Promise<void> {
-  const link = await prisma.documentUserLink.findUnique({
-    where: { id: options.documentId },
-    include: { documentFile: true },
+  const document = await prisma.document.findUnique({
+    where: { documentId: options.documentId },
+    include: { file: true },
   });
-  if (!link) {
+  if (!document) {
     throw AppError.notFound(
       `Document with id "${options.documentId}" was not found.`,
     );
   }
 
   const now = new Date();
-
-  await prisma.documentUserLink.update({
-    where: { id: link.id },
-    data: {
-      linkExpiresAt: now,
-      revokedAt: now,
-      isUsed: true,
-    },
-  });
+  const activeCommunicationIds = await revokeActiveCommunications(document.documentId, now);
 
   logEvent({
     eventType: 'LINK_REVOKED',
-    documentId: link.id,
+    documentId: document.documentId,
     userId: options.authMode === 'admin' ? options.revokedBy : undefined,
     metadata: {
       revokedBy: options.revokedBy,
       authMode: options.authMode,
-      fileId: link.documentFileId,
-      sharedFileRetained: !!link.documentFile.s3Key,
+      fileId: document.fileId,
+      activeCommunicationIds,
+      sharedFileRetained: !!document.file.s3Key,
     },
     ip: options.ip,
     userAgent: options.userAgent,

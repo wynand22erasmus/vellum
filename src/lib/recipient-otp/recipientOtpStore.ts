@@ -11,6 +11,7 @@ import { redisConnection } from '../redis.ts';
 
 export type OtpSessionRecord = {
   documentId: string;
+  communicationId: string;
   channel: RecipientOtpChannel;
   codeHash: string | null;
   attempts: number;
@@ -42,14 +43,16 @@ export function generateOtpCode(): string {
 export async function createOtpSession(input: {
   sessionId: string;
   documentId: string;
+  communicationId: string;
   channel: RecipientOtpChannel;
   code?: string;
 }): Promise<{ code: string | null }> {
-  const needsCode = input.channel !== 'authenticator';
+  const needsCode = input.channel !== 'AUTHENTICATOR';
   const code = needsCode ? (input.code ?? generateOtpCode()) : null;
 
   const record: OtpSessionRecord = {
     documentId: input.documentId,
+    communicationId: input.communicationId,
     channel: input.channel,
     codeHash: code ? hashCode(code) : null,
     attempts: 0,
@@ -114,7 +117,7 @@ export async function resendOtpCode(
     return { ok: false, reason: 'expired' };
   }
 
-  if (record.channel === 'authenticator') {
+  if (record.channel === 'AUTHENTICATOR') {
     return { ok: false, reason: 'authenticator' };
   }
 

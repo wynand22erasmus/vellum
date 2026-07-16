@@ -55,7 +55,7 @@ Vellum lets organizations **send sensitive files to specific people by email** w
 | **Audit log** | An immutable record of an action (login, download, email sent, revocation, etc.) kept for compliance. |
 | **Webhook** | An automatic HTTP notification from Vellum to the integrator's system when an audit event occurs. |
 | **TTL (time to live)** | How long something lasts before expiry — separately configurable for the link, the stored file, and database records. |
-| **Scrub / purge** | Automatic deletion of expired files from storage (scrub) or old rows from the database (purge). |
+| **Purge** | Automatic deletion of expired files from storage or old rows from the database per retention policy. |
 | **SHA-256 checksum** | A fingerprint of the file contents; it lets the recipient confirm the download was not corrupted or swapped. |
 | **White-label** | Custom branding (logo, colors, email wording) so Vellum appears as the client's product. |
 
@@ -116,7 +116,7 @@ Vellum is a secure, **API-first** document transfer platform for regulated indus
 | **API-first** | Machine upload via Bearer API key; optional SFTP MFT drop |
 | **Two-key download** | Possession (email link token) + knowledge (file password) on every download |
 | **Optional third factor** | Recipient OTP (email, SMS, WhatsApp, or TOTP authenticator) after password |
-| **Self-cleaning vault** | Files scrubbed from object storage on TTL; audit rows retained for compliance |
+| **Self-cleaning vault** | Files purged from object storage on TTL; audit rows retained for compliance |
 | **Multi-tier lifecycle** | Independent TTLs for verify link, object storage, and database record |
 | **Download limits** | Configurable `maxDownloads` per recipient link (default 1) |
 | **Integrity proof** | SHA-256 checksum shown to recipient after successful verify |
@@ -163,7 +163,7 @@ Dashboard users are stored in Postgres (`users` table) with `kind` of `ADMIN` or
 | **Frontend** | Vite + React 19 + TanStack Router + shadcn/ui + Tailwind | SPA dashboard, verify flow, admin UI |
 | **Database** | PostgreSQL 15 + Prisma ORM | Metadata, users, audit, webhook delivery log |
 | **Object storage** | MinIO (dev) / AWS S3 (prod) | Document bytes; presigned downloads |
-| **Job queue** | BullMQ + Redis | Email, audit, webhook, scrub, reconciliation |
+| **Job queue** | BullMQ + Redis | Email, audit, webhook, purge, reconciliation |
 | **Virus scanning** | ClamAV (INSTREAM) | Malware detection before storage |
 | **Authentication** | WorkOS AuthKit (prod) / dev mock | Dashboard SSO |
 | **Email (dev)** | Mailpit + Nodemailer | Local SMTP + HTML preview |
@@ -248,7 +248,7 @@ Both API entrypoints import `createApp()` from `src/server/create-app.ts`.
                                             ┌─────────────────┐
                                             │  Workers         │
                                             │  email, audit,   │
-                                            │  webhook, scrub, │
+                                            │  webhook, purge, │
                                             │  process-error,  │
                                             │  orphan-reconcile│
                                             └─────────────────┘
@@ -269,16 +269,16 @@ sequenceDiagram
 
   I->>API: POST /api/upload (Bearer + multipart)
   API->>API: Zod validate fields; compute sha256
-  API->>DB: find DocumentFile by sha256
+  API->>DB: find File by sha256
   alt New unique bytes (no dedup hit)
     API->>AV: INSTREAM scan buffer
     AV-->>API: clean
-    API->>DB: create DocumentFile row
+    API->>DB: create File row
     API->>S3: PutObject; set s3Key
-  else Existing DocumentFile with s3Key
+  else Existing File with s3Key
     Note over API: Skip scan + upload; reuse file row
   end
-  API->>DB: create DocumentUserLink (token, passwordHash, TTLs)
+  API->>DB: create Communication (token, passwordHash, TTLs)
   API->>Q: enqueue send-initial-link
   API-->>I: 201 { id, fileId, sha256, maxDownloads, warning }
   Q->>W: process job
@@ -302,15 +302,15 @@ sequenceDiagram
   R->>SPA: GET /verify/{token}
   R->>SPA: hCaptcha (if enabled)
   R->>API: POST /api/verify { token, password, hcaptchaToken? }
-  API->>DB: load DocumentUserLink + DocumentFile
-  API->>API: check expiry, revoke, scrub, download limits, re-verify window
+  API->>DB: load Communication + File
+  API->>API: check expiry, revoke, purge, download limits, re-verify window
   API->>API: Argon2 verify password
   alt OTP required
     API-->>SPA: { otpRequired, otpSessionId, channel }
     R->>API: POST /api/verify/otp { token, otpSessionId, code }
   end
   API->>S3: generatePresignedUrl (30s, attachment disposition)
-  API->>DB: update downloadCount, isUsed, verifySuccessCount
+  API->>DB: update downloadCount, downloadCount, verifySuccessCount
   API->>A: FILE_DOWNLOAD_SUCCESS
   API-->>SPA: { downloadUrl, sha256, fileName }
   SPA->>SPA: navigate /verify/{token}/complete
@@ -409,124 +409,146 @@ Email links and OAuth callbacks use `APP_URL` or derive from `VELLUM_HOST`, `VEL
 
 ## 6. Data Model
 
-### 6.1 Design Principle: File / Link Split
+### 6.1 Design Principle: Four-Layer Domain Model
 
-As of version 2.0, Vellum separates **shared file assets** from **per-recipient download links** (document version 2.1 describes that model):
+Vellum separates **shared file assets**, **recipient identity**, **delivery envelopes**, and **outbound communications**:
 
-| Model | Table | Represents |
-|-------|-------|--------------|
-| `DocumentFile` | `document_files` | One stored object (deduplicated by SHA-256) |
-| `DocumentUserLink` | `document_user_links` | One recipient's token, password, limits, OTP config |
+| Model | Table | Primary key | Represents |
+|-------|-------|-------------|------------|
+| `File` | `File` | `fileId` | One stored object (deduplicated by SHA-256) |
+| `Recipient` | `Recipient` | `recipientId` | Logical recipient identity (email, OTP prefs) |
+| `Document` | `Document` | `documentId` | Delivery envelope: file + recipient + password + download limits |
+| `Communication` | `Communication` | `communicationId` | Verify URL token + link expiry (one row per email send) |
+
+**Naming convention:** Every primary key column uses the table name (`fileId`, `documentId`, …). Foreign keys reuse the same column name (`Document.fileId` → `File.fileId`).
 
 This enables batch upload (one file, many recipients) and SHA-256 deduplication without duplicating S3 objects.
 
-> **Plain language:** The **file** is the document in the vault (stored once). Each **link** is a separate envelope to a different recipient — each with their own password, expiry, and download limits — pointing at the same vault object when the content is identical.
+> **Plain language:** The **file** is stored once in the vault. Each **document envelope** binds that file to one recipient with their own password and download limits. Each **communication** is the emailed verify link (token + expiry) for that envelope.
 
 ### 6.2 Entity Relationship
 
 ```text
-DocumentFile 1 ──< * DocumentUserLink
-DocumentUserLink 1 ──< * AuditLog  (via documentId → link id, legacy column name)
+File 1 ──< * Document >── * Recipient
+Document 1 ──< * Communication
+Document / Communication ──< * AuditLog
 
-User (standalone)
-AuditLog (optional userId, optional documentId)
-ProcessError (standalone, cross-linked to audit failures)
-WebhookDelivery → auditLogId (no FK, string reference)
-FailedAuditLog / FailedProcessError / FailedWebhookDelivery (dead letters)
+User (standalone; userId PK)
+AuditLog (auditLogId PK; optional documentId, communicationId, userId)
+ProcessError (processErrorId PK; soft-linked auditLogId, deadLetterId)
+DeadLetter (deadLetterId PK; pipeline AUDIT | PROCESS_ERROR | WEBHOOK)
+WebhookDelivery (webhookDeliveryId PK; deliveryId header value; auditLogId reference)
 ```
 
-### 6.3 DocumentFile
+### 6.3 File
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | UUID | Primary key |
+| `fileId` | UUID | Primary key |
 | `sha256` | String @unique | SHA-256 hex (64 chars) — dedup key |
-| `s3Key` | String? | Object key; `null` after scrub |
+| `s3Key` | String? | Object key; `null` after purge |
 | `fileName` | String | Original filename (sanitized) |
 | `fileExpiresAt` | DateTime | When object may be deleted from storage |
 | `recordExpiresAt` | DateTime | When DB row may be purged (`REPORTING_LIFETIME_YEARS`) |
-| `deletedAt` | DateTime? | Set when scrubbed |
+| `deletedAt` | DateTime? | Set when purged |
 | `byteSize` | Int? | File size in bytes |
-| `createdAt` | DateTime | Insert time |
+| `createdAt`, `updatedAt` | DateTime | Timestamps |
 
 **Dedup behavior:** On upload, compute SHA-256. If a row exists with a matching hash and a non-null `s3Key`, reuse it (extend `fileExpiresAt` if the new request is longer). Skip virus scan and S3 upload for deduplicated bytes.
 
-### 6.4 DocumentUserLink
+### 6.4 Recipient
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | UUID | Primary key; API "document id" for integrators |
-| `documentFileId` | UUID FK | Shared file reference |
-| `recipientEmail` | String | Recipient inbox for download link |
+| `recipientId` | UUID | Primary key |
+| `sourceSystemKey` | String @unique | Integrator-stable identity key |
+| `email` | String | Inbox for download links |
+| `phoneNumber` | String? | E.164 for SMS/WhatsApp OTP |
+| `otpChannel` | RecipientOtpChannel? | Optional second factor channel |
+| `authenticatorSecretEnc` | String? | AES-256-GCM encrypted TOTP secret |
+| `createdAt`, `updatedAt` | DateTime | Timestamps |
+
+### 6.5 Document
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `documentId` | UUID | Primary key; integrator revoke id |
+| `fileId` | UUID FK | Shared file reference |
+| `recipientId` | UUID FK | Recipient reference |
 | `passwordHash` | String | Argon2 hash of file password |
-| `downloadToken` | String @unique | Opaque token in verify URL |
-| `linkExpiresAt` | DateTime | When verify link stops working |
 | `maxDownloads` | Int default 1 | Successful download cap |
 | `downloadCount` | Int default 0 | Consumptions used |
 | `verifySuccessCount` | Int default 0 | Re-verify attempts in current window |
 | `lastVerifiedAt` | DateTime? | Start of current re-verify window |
-| `isUsed` | Boolean default false | Fully consumed (all downloads + re-verify exhausted) |
+| `batchId` | String? | Groups batch upload envelopes |
+| `createdAt`, `updatedAt` | DateTime | Timestamps |
+
+### 6.6 Communication
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `communicationId` | UUID | Primary key |
+| `documentId` | UUID FK | Parent envelope |
+| `downloadToken` | String @unique | Opaque token in verify URL |
+| `linkExpiresAt` | DateTime | When verify link stops working |
 | `revokedAt` | DateTime? | Manual revocation timestamp |
-| `otpChannel` | RecipientOtpChannel? | Optional second factor channel |
-| `recipientPhone` | String? | E.164 for SMS/WhatsApp OTP |
-| `totpSecretEnc` | String? | AES-256-GCM encrypted TOTP secret |
-| `batchId` | String? | Groups batch upload links |
-| `createdAt` | DateTime | Insert time |
+| `createdAt`, `updatedAt` | DateTime | Timestamps |
 
-**Legacy note:** `AuditLog.documentId` stores the **link** id (`DocumentUserLink.id`), not the file id, for API backward compatibility.
-
-### 6.5 User
+### 6.7 User
 
 | Field | Description |
 |-------|-------------|
-| `id` | WorkOS user id or `dev:{email}` |
+| `userId` | WorkOS user id or `dev:{email}` |
 | `email` | Unique, normalized lowercase |
 | `emailVerified` | Required before dashboard sign-in (except admins) |
 | `kind` | `ADMIN` or `CONSUMER` |
 | `firstName`, `lastName`, `profilePictureUrl` | From WorkOS profile |
 | `lastSignInAt` | Updated on login |
 
-### 6.6 AuditLog
+### 6.8 AuditLog
 
 Immutable compliance events. See [Appendix A](#appendix-a-audit-event-catalog).
 
 | Field | Description |
 |-------|-------------|
+| `auditLogId` | Primary key |
 | `eventType` | `AuditEventType` enum |
-| `timestamp` | UTC insert time |
+| `createdAt` | UTC insert time |
 | `userId` | Dashboard user when applicable |
-| `documentId` | Link id when applicable |
+| `documentId` | `Document.documentId` when applicable |
+| `communicationId` | `Communication.communicationId` when applicable |
 | `ipAddress`, `userAgent` | HTTP context |
 | `metadata` | JSON event-specific payload |
 | `expiresAt` | Retention horizon |
 | `processErrorId` | Cross-link to operational error |
 
-### 6.7 WebhookDelivery
+### 6.9 WebhookDelivery
 
 One row per HTTP delivery attempt:
 
 | Field | Description |
 |-------|-------------|
+| `webhookDeliveryId` | Primary key |
 | `deliveryId` | UUID; matches `X-Vellum-Delivery-Id` header |
 | `auditLogId` | Source audit row |
 | `eventType`, `targetUrl`, `payload` | Delivery context |
 | `responseStatus`, `responseBody` | Truncated target response |
 | `success`, `attempt` | Outcome and retry count |
 
-### 6.8 ProcessError and Dead Letters
+### 6.10 ProcessError and DeadLetter
 
-Operational failures (HTTP 4xx/5xx, worker crashes) persist to `ProcessError` via the process-error queue. Failed queue writes go to `FailedAuditLog`, `FailedProcessError`, or `FailedWebhookDelivery`. Cross-table linking uses `correlationId`, `processErrorId`, and `failedAuditLogId` — see [ERROR_HANDLING.md](./ERROR_HANDLING.md).
+Operational failures (HTTP 4xx/5xx, worker crashes) persist to `ProcessError` (`processErrorId` PK) via the process-error queue. Failed queue writes go to `DeadLetter` (`deadLetterId` PK, tagged by `pipeline`). Cross-table linking uses `correlationId`, `auditLogId`, and `deadLetterId` — see [ERROR_HANDLING.md](./ERROR_HANDLING.md).
 
-### 6.9 Prisma Migrations (Current)
+| Model | Primary key | Notes |
+|-------|-------------|-------|
+| `ProcessError` | `processErrorId` | RFC 9457 problem details + optional `documentId`, `communicationId`, `deadLetterId` |
+| `DeadLetter` | `deadLetterId` | `pipeline` enum; `linkedTable` / `linkedId` back-fill to `ProcessError`; `retried` reserved for future replay |
+
+### 6.11 Prisma Migrations (Current)
 
 | Migration | Scope |
 |-----------|-------|
-| `20260602160000_init` | Initial schema |
-| `20260607120000_roadmap_items_1_4` | Download limits, revocation, audit export fields, re-verify columns |
-| `20260607140000_roadmap_items_5_10` | OTP fields, captcha audit enum, recipient OTP channel |
-| `20260608140000_batch_upload_document_split` | `DocumentFile` + `DocumentUserLink` split |
-| `20260609120000_sftp_ingestion_audit_events` | SFTP audit enum values |
-| `20260609180000_webhook_delivery` | `WebhookDelivery`, `FailedWebhookDelivery` |
+| `20260620000000_init` | Full schema: `File`, `Recipient`, `Document`, `Communication`, `User`, `AuditLog`, `DeadLetter`, `ProcessError`, `WebhookDelivery` with table-scoped primary keys |
 
 ---
 
@@ -538,9 +560,9 @@ Operational failures (HTTP 4xx/5xx, worker crashes) persist to `ProcessError` vi
 
 | Factor | Mechanism | Storage |
 |--------|-----------|---------|
-| **Possession** | Verify URL contains `downloadToken` | `DocumentUserLink.downloadToken` |
-| **Knowledge** | File password entered on verify page | Argon2 hash in `passwordHash` |
-| **Optional OTP** | Code after password when `RECIPIENT_OTP_ENABLED` **and** the link has `otpChannel` set at upload | Redis session + channel-specific delivery |
+| **Possession** | Verify URL contains `downloadToken` | `Communication.downloadToken` |
+| **Knowledge** | File password entered on verify page | Argon2 hash in `Document.passwordHash` |
+| **Optional OTP** | Code after password when `RECIPIENT_OTP_ENABLED` **and** `Recipient.otpChannel` is set at upload | Redis session + channel-specific delivery |
 
 Dashboard session cookies do **not** grant file access. Admins use the same verify flow unless testing via API.
 
@@ -578,7 +600,7 @@ Dashboard session cookies do **not** grant file access. Admins use the same veri
 
 ### 7.5 Revocation
 
-`POST /api/documents/:id/revoke` sets `linkExpiresAt = now`, `revokedAt = now`, `isUsed = true`. Shared `DocumentFile` is **not** deleted — other recipient links may still reference it. Emits `LINK_REVOKED`. Implemented in `src/lib/revoke-document.ts`; mounted before dashboard auth so API key callers can revoke without session.
+`POST /api/documents/:id/revoke` sets `linkExpiresAt = now`, `revokedAt = now`, `downloadCount = true`. Shared `File` is **not** deleted — other recipient links may still reference it. Emits `LINK_REVOKED`. Implemented in `src/lib/revoke-document.ts`; mounted before dashboard auth so API key callers can revoke without session.
 
 ### 7.6 Webhook Security
 
@@ -598,9 +620,9 @@ Vellum signs the raw JSON body with HMAC-SHA256 in `X-Vellum-Signature: sha256={
 
 | Tier | Field | Meaning |
 |------|-------|---------|
-| **Link** | `DocumentUserLink.linkExpiresAt` | Verify URL validity |
-| **File** | `DocumentFile.fileExpiresAt` | Object storage retention |
-| **Record** | `DocumentFile.recordExpiresAt` | Database row retention (default +5 years from upload) |
+| **Link** | `Communication.linkExpiresAt` | Verify URL validity |
+| **File** | `File.fileExpiresAt` | Object storage retention |
+| **Record** | `File.recordExpiresAt` | Database row retention (default +5 years from upload) |
 
 Constraint: `linkTtl ≤ fileTtl` at upload time. Link TTL is always set **per upload** via the `linkTtl` field (seconds) — there is no global default read from environment at runtime.
 
@@ -618,14 +640,14 @@ Constraint: `linkTtl ≤ fileTtl` at upload time. Link TTL is always set **per u
 | HTTP batch | `POST /api/upload/batch` | same + `parseBatchRecipients` |
 | SFTP drop | Worker inbox poll | `src/server/sftp/` |
 
-All paths call `ingestDocumentFile()` then `createDocumentUserLink()`.
+All paths call `ingestFile()` then `createCommunication()`.
 
-**`createDocumentUserLink()` steps:**
+**`createCommunication()` steps:**
 
 1. Resolve `maxDownloads` (field or `DEFAULT_MAX_DOWNLOADS`).
 2. If `RECIPIENT_OTP_ENABLED`, persist `otpChannel`; generate encrypted TOTP secret + provisioning URI for `authenticator`.
 3. Hash password with Argon2; generate 32-byte hex `downloadToken`.
-4. Insert `DocumentUserLink` with `linkExpiresAt = now + linkTtl`.
+4. Insert `Communication` with `linkExpiresAt = now + linkTtl`.
 5. Enqueue `send-initial-link` on email-queue.
 6. Register compensation undo (delete link row on downstream failure).
 
@@ -634,9 +656,9 @@ All paths call `ingestDocumentFile()` then `createDocumentUserLink()`.
 Implemented in `src/lib/verify-consumption.ts`:
 
 1. Before password check, reject if `downloadCount >= maxDownloads` (`download_limit_reached`).
-2. If `isUsed` and outside re-verify window or max re-verify attempts exceeded → `link_consumed`.
+2. If `downloadCount` and outside re-verify window or max re-verify attempts exceeded → `link_consumed`.
 3. On successful verify, increment `verifySuccessCount` within window.
-4. When `verifySuccessCount` reaches `maxReverifyAttempts` (env), increment `downloadCount` and possibly set `isUsed = true` if all downloads consumed.
+4. When `verifySuccessCount` reaches `maxReverifyAttempts` (env), increment `downloadCount` and possibly set `downloadCount = true` if all downloads consumed.
 5. Reset `verifySuccessCount` when a consumption completes but downloads remain.
 
 This **softens the one-time-download experience**: the recipient can retry the download if the browser fails within the grace window before the link is fully consumed.
@@ -648,18 +670,18 @@ This **softens the one-time-download experience**: the recipient can retry the d
 | `REVERIFY_WINDOW_MS` | `300000` (5 min) | Duration of a re-verify window after the first successful verify in a consumption cycle |
 | `MAX_REVERIFY_ATTEMPTS` | `3` | Successful verifies allowed within one window before one `downloadCount` increment |
 
-**Example (`maxDownloads=1`, defaults):** The recipient verifies the password → receives a presigned URL → the browser fails to download → they may re-enter the password up to 3 times within 5 minutes → on the 3rd success, `downloadCount` becomes 1 and `isUsed` becomes true (unless more downloads are allowed).
+**Example (`maxDownloads=1`, defaults):** The recipient verifies the password → receives a presigned URL → the browser fails to download → they may re-enter the password up to 3 times within 5 minutes → on the 3rd success, `downloadCount` becomes 1 and `downloadCount` becomes true (unless more downloads are allowed).
 
 **Implementation reference:** `getVerifyRejection()` and `computeVerifyConsumptionUpdate()` in `src/lib/verify-consumption.ts`; applied in `completeDownload()` after Argon2 and optional OTP succeed.
 
-### 8.4 Scrub Workers
+### 8.4 Purge Workers
 
 | Worker | Schedule | Action |
 |--------|----------|--------|
-| `fileScrubWorker` | Hourly cron | Null `DocumentFile.s3Key`, delete S3 object, emit `FILE_SCRUBBED` |
-| `recordScrubWorker` | Monthly cron | Purge expired `DocumentFile`, links, and audit rows past `expiresAt` |
+| `filePurgeWorker` | Hourly cron | Null `File.s3Key`, delete S3 object, emit `FILE_PURGED` |
+| `recordPurgeWorker` | Monthly cron | Purge expired `File`, links, and audit rows past `expiresAt` |
 
-File scrub: DB update first, then S3 delete (compensation restores DB on S3 failure).
+File purge: DB update first, then S3 delete (compensation restores DB on S3 failure).
 
 ### 8.5 SHA-256 Integrity
 
@@ -734,7 +756,7 @@ See [ERROR_HANDLING.md](./ERROR_HANDLING.md).
 
 **POST /api/verify** body: `{ token, password, hcaptchaToken? }`
 
-Failure reasons in audit `metadata.reason`: `invalid_token`, `revoked`, `file_scrubbed`, `expired_link`, `download_limit_reached`, `link_consumed`, `Incorrect password`, `rate_limited`, `captcha_failed`.
+Failure reasons in audit `metadata.reason`: `invalid_token`, `revoked`, `file_purged`, `expired_link`, `download_limit_reached`, `link_consumed`, `Incorrect password`, `rate_limited`, `captcha_failed`.
 
 **POST /api/verify/otp** body: `{ token, otpSessionId, code }`
 
@@ -809,7 +831,7 @@ Revoke accepts **either** API key or admin session via `integratorOrAdminAuth`.
 | `/verify/$token` | Public | Password + captcha + OTP entry |
 | `/verify/$token/complete` | Public | Download + SHA-256 display |
 | `/admin` | Admin | Table overview tiles |
-| `/admin/document-files`, `/admin/documents` | Admin | File and link browsers; **revoke** on link detail |
+| `/admin/files`, `/admin/documents` | Admin | File and link browsers; **revoke** on link detail |
 | `/admin/audit-logs`, … | Admin | All DB tables read-only |
 | `/admin/webhook-deliveries` | Admin | Webhook delivery log |
 | `/dev/webhooks` | Admin (dev) | Native webhook inspector |
@@ -817,7 +839,7 @@ Revoke accepts **either** API key or admin session via `integratorOrAdminAuth`.
 
 ### 11.3 Status Badges
 
-`DocumentStatusBadges` shows whether the link is active, expired, or revoked; whether the file is available or scrubbed; and download usage (for example, "1 of 2 downloads used").
+`DocumentStatusBadges` shows whether the link is active, expired, or revoked; whether the file is available or purged; and download usage (for example, "1 of 2 downloads used").
 
 ### 11.4 Data Tables
 
@@ -885,7 +907,7 @@ Dev bypass: `SKIP_CAPTCHA=true` (non-production only).
 | `audit-queue` | routes, workers | `auditWorker` | Persist audit + enqueue webhooks |
 | `webhook-queue` | `auditWorker` | `webhookWorker` | HTTP POST to integrator URLs |
 | `process-errors-queue` | `errorHandler`, workers | `processErrorWorker` | Persist ProcessError |
-| `cleanup-queue` | cron schedulers | scrub/reconcile workers | Lifecycle maintenance |
+| `cleanup-queue` | cron schedulers | purge/reconcile workers | Lifecycle maintenance |
 
 ### 14.2 Workers
 
@@ -894,8 +916,8 @@ Dev bypass: `SKIP_CAPTCHA=true` (non-production only).
 | `emailWorker` | `emailWorker.ts` | Nodemailer send; audit email events |
 | `auditWorker` | `auditWorker.ts` | Insert AuditLog; enqueue webhook jobs |
 | `webhookWorker` | `webhookWorker.ts` | Signed POST; WebhookDelivery rows |
-| `fileScrubWorker` | `fileScrubWorker.ts` | Delete expired S3 objects |
-| `recordScrubWorker` | `recordScrubWorker.ts` | Purge expired DB rows |
+| `filePurgeWorker` | `filePurgeWorker.ts` | Delete expired S3 objects |
+| `recordPurgeWorker` | `recordPurgeWorker.ts` | Purge expired DB rows |
 | `processErrorWorker` | `processErrorWorker.ts` | ProcessError persistence + linking |
 | `orphanReconciliationWorker` | `orphanReconciliationWorker.ts` | Optional daily orphan cleanup |
 
@@ -903,8 +925,8 @@ Dev bypass: `SKIP_CAPTCHA=true` (non-production only).
 
 | Job | Pattern | Action |
 |-----|---------|--------|
-| `scrub-files` | `0 * * * *` (hourly) | File scrub |
-| `scrub-records` | `0 0 1 * *` (monthly) | Record purge |
+| `purge-files` | `0 * * * *` (hourly) | File purge |
+| `purge-records` | `0 0 1 * *` (monthly) | Record purge |
 | `reconcile-orphans` | `ORPHAN_RECONCILE_CRON` | Optional orphan reconciliation |
 
 ---
@@ -973,7 +995,7 @@ After `auditWorker` inserts a row, if `WEBHOOKS_ENABLED` and the matching `WEBHO
 
 **Headers:** `X-Vellum-Event-Type`, `X-Vellum-Delivery-Id`, `X-Vellum-Signature`
 
-**Retries:** Up to `WEBHOOK_MAX_RETRIES`; final failure → `FailedWebhookDelivery`.
+**Retries:** Up to `WEBHOOK_MAX_RETRIES`; final failure → `DeadLetter` (`pipeline = WEBHOOK`).
 
 Full catalog: [EVENTS_AND_WEBHOOKS.md](./EVENTS_AND_WEBHOOKS.md).
 
@@ -1042,9 +1064,9 @@ Multi-step mutations use LIFO undo:
 
 | Flow | Undo on failure |
 |------|-----------------|
-| Upload | LIFO undo of registered steps: new `DocumentUserLink` row; **if not deduped**, new `DocumentFile` row + S3 object |
+| Upload | LIFO undo of registered steps: new `Communication` row; **if not deduped**, new `File` row + S3 object |
 | Request link | Revert token/expiry state |
-| File scrub | Restore s3Key in DB |
+| File purge | Restore s3Key in DB |
 
 Partial failure returns `compensationFailed` extension.
 
@@ -1067,27 +1089,29 @@ This enables SIEM queries that join compliance events with operational error row
 
 ### 18.1 Admin Data Browser
 
-Read-only paginated lists for every Postgres table. Detail pages exist for document files and document links. The only mutating admin UI action is **Revoke link** on `/admin/documents/:id` (which calls `POST /api/documents/:id/revoke` with an admin session). Revocation invalidates the link only — shared storage is retained when other links reference the same file (§7.5). *Note:* The confirm dialog text mentions deleting the file; backend behavior matches §7.5 (link revoked, shared file kept).
+Read-only paginated lists for every Postgres table. Detail pages exist for document files and communications. The only mutating admin UI action is **Revoke link** on `/admin/documents/:id` (which calls `POST /api/documents/:id/revoke` with an admin session). Revocation invalidates the link only — shared storage is retained when other links reference the same file (§7.5). *Note:* The confirm dialog text mentions deleting the file; backend behavior matches §7.5 (link revoked, shared file kept).
 
 Integrators revoke via API key; recipients use **Request new link** on the dashboard instead of revoke.
 
 ### 18.2 Admin API Endpoints
 
-All under `/api/admin`, admin session required:
+All under `/api/admin`, admin session required. List responses use PascalCase table keys (`{ Document: [...] }`, `{ File: [...] }`, …) with table-scoped id fields (`documentId`, `fileId`, …).
 
 | Method | Path | Returns |
 |--------|------|---------|
-| `GET` | `/documents` | Paginated `DocumentUserLink` list |
-| `GET` | `/documents/:id` | Link detail + file metadata |
-| `GET` | `/document-files` | Paginated `DocumentFile` list |
-| `GET` | `/document-files/:id` | File detail + linked recipients |
-| `GET` | `/users` | User list |
-| `GET` | `/audit-logs` | Audit export (JSON/CSV, cursor) |
-| `GET` | `/failed-audit-logs` | Dead-letter audit queue |
-| `GET` | `/process-errors` | Operational errors |
-| `GET` | `/failed-process-errors` | Dead-letter process errors |
-| `GET` | `/webhook-deliveries` | Outbound webhook attempts |
-| `GET` | `/failed-webhook-deliveries` | Exhausted webhook retries |
+| `GET` | `/files` | `{ File: [...] }` |
+| `GET` | `/files/:id` | File detail + `{ Document: [...] }` summaries |
+| `GET` | `/recipients` | `{ Recipient: [...] }` |
+| `GET` | `/recipients/:id` | Recipient detail + `{ Document: [...] }` |
+| `GET` | `/documents` | `{ Document: [...] }` envelopes |
+| `GET` | `/documents/:id` | Document detail + `{ Communication: [...] }`, `{ AuditLog: [...] }` |
+| `GET` | `/communications` | `{ Communication: [...] }` |
+| `GET` | `/communications/:id` | Communication detail + `{ AuditLog: [...] }` |
+| `GET` | `/users` | `{ User: [...] }` |
+| `GET` | `/audit-logs` | `{ AuditLog: [...] }` export (JSON/CSV, cursor) |
+| `GET` | `/dead-letters` | `{ DeadLetter: [...] }` (`pipeline` filter) |
+| `GET` | `/process-errors` | `{ ProcessError: [...] }` |
+| `GET` | `/webhook-deliveries` | `{ WebhookDelivery: [...] }` |
 
 ### 18.3 Dev Sidebar
 
@@ -1218,9 +1242,9 @@ To rebuild Vellum v2.1 from this document alone:
 
 1. **Bootstrap repo:** Node 24+, TypeScript ESM, Vite + React, Express, Prisma, BullMQ, Zod, Argon2, AWS SDK S3.
 2. **Implement schema:** All models in §6; run migrations in order listed in §6.9.
-3. **Core lib:** `env.ts`, `AppError` + Problem Details, `CompensationStack`, S3 client (dual endpoint), ClamAV INSTREAM, `ingestDocumentFile`, `createDocumentUserLink`, `verify-consumption`, `revoke-document`.
+3. **Core lib:** `env.ts`, `AppError` + Problem Details, `CompensationStack`, S3 client (dual endpoint), ClamAV INSTREAM, `ingestFile`, `createCommunication`, `verify-consumption`, `revoke-document`.
 4. **API routes:** Mount order per `create-app.ts` (§9); implement upload, verify (+ OTP + captcha), documents, revoke, admin export, auth, health, meta.
-5. **Queues/workers:** email, audit (+ webhook enqueue), webhook, process-error, file/record scrub, optional orphan reconcile.
+5. **Queues/workers:** email, audit (+ webhook enqueue), webhook, process-error, file/record purge, optional orphan reconcile.
 6. **SFTP:** inbox watcher, manifest parser, ingest pipeline with audit events (§15).
 7. **Frontend:** TanStack Router pages for verify flow, dashboard, admin tables, dev webhooks.
 8. **Branding:** Presets, HTML email renderer, SMS/WhatsApp templates.
@@ -1234,28 +1258,18 @@ To rebuild Vellum v2.1 from this document alone:
 
 All values below exist in the Prisma `AuditEventType` enum. Each is emitted when the corresponding action occurs — not on every installation or on every upload.
 
-| Event | Description | Typical `documentId` |
-|-------|-------------|----------------------|
-| `USER_LOGIN` | Dashboard sign-in | — (uses `userId`) |
-| `EMAIL_INITIAL_SENT` | First download-link email sent | Link id |
-| `EMAIL_REGENERATE_SENT` | Regenerated link email sent | Link id |
-| `FILE_DOWNLOAD_SUCCESS` | Password (+ OTP) verified; presigned URL issued | Link id |
-| `FILE_DOWNLOAD_FAILED` | Verify failure (see `metadata.reason`) | Link id when known |
-| `FILE_SCRUBBED` | Object removed from storage | — (uses `metadata.fileId`) |
-| `LINK_REVOKED` | Manual link revocation | Link id |
-| `CAPTCHA_FAILED` | hCaptcha verification failed | Optional link id |
-| `RECIPIENT_OTP_SENT` | OTP code sent | Link id |
-| `RECIPIENT_OTP_RESENT` | OTP resent | Link id |
-| `RECIPIENT_OTP_FAILED` | Wrong/expired/max-attempt OTP | Link id |
-| `RECIPIENT_OTP_VERIFIED` | OTP accepted | Link id |
-| `SFTP_FILE_RECEIVED` | SFTP inbox file detected | — |
-| `SFTP_METADATA_VALIDATED` | Manifest parsed | — |
-| `SFTP_VIRUS_SCAN_PASSED` | ClamAV clean | — |
-| `SFTP_STORAGE_UPLOADED` | Object stored | — |
-| `SFTP_DOCUMENT_CREATED` | Link row created | Link id |
-| `SFTP_EMAIL_QUEUED` | Initial-link email job enqueued | Link id |
-| `SFTP_INGESTION_COMPLETED` | SFTP pipeline success | — |
-| `SFTP_INGESTION_FAILED` | SFTP pipeline failure | — |
+| Event | Description | Typical `documentId` | Typical `communicationId` |
+|-------|-------------|----------------------|---------------------------|
+| `USER_LOGIN` | Dashboard sign-in | — | — |
+| `EMAIL_INITIAL_SENT` | First download-link email sent | ✓ | ✓ |
+| `EMAIL_REGENERATE_SENT` | Regenerated download-link email sent | ✓ | ✓ |
+| `FILE_DOWNLOAD_SUCCESS` | Password (+ OTP) verified; presigned URL issued | ✓ | ✓ |
+| `FILE_DOWNLOAD_FAILED` | Verify failure (see `metadata.reason`) | optional | optional |
+| `FILE_PURGED` | Object removed from storage | — (uses `metadata.fileId`) | — |
+| `LINK_REVOKED` | Manual envelope revocation | ✓ | — |
+| `CAPTCHA_FAILED` | hCaptcha verification failed | optional | optional |
+| `RECIPIENT_OTP_*` | OTP lifecycle events | ✓ | ✓ |
+| `SFTP_*` | SFTP ingestion pipeline | varies | varies |
 
 Each event maps to an optional `WEBHOOK_URL_{EVENT}` — see [EVENTS_AND_WEBHOOKS.md](./EVENTS_AND_WEBHOOKS.md).
 
@@ -1265,10 +1279,11 @@ Each event maps to an optional `WEBHOOK_URL_{EVENT}` — see [EVENTS_AND_WEBHOOK
 
 ## Appendix B: Evolution from v1.0
 
-| v1.0 (May 2026) | v2.1 (Current) |
+| v1.0 (May 2026) | v2.2 (Current) |
 |-----------------|----------------|
-| Monolithic `Document` model | `DocumentFile` + `DocumentUserLink` split |
-| Single download (`isUsed` immediately) | Download limits + re-verify grace window |
+| Monolithic `Document` model | `File` + `Recipient` + `Document` + `Communication` |
+| Generic `id` primary keys | Table-scoped PKs (`fileId`, `documentId`, …) matching FK names |
+| Single download (`downloadCount` immediately) | Download limits + re-verify grace window |
 | No revocation API | `POST /api/documents/:id/revoke` + `LINK_REVOKED` |
 | No audit export | Admin JSON/CSV export with cursor pagination |
 | Password only | Optional recipient OTP (4 channels) + hCaptcha |
@@ -1288,7 +1303,7 @@ Each event maps to an optional `WEBHOOK_URL_{EVENT}` — see [EVENTS_AND_WEBHOOK
 | Can Vellum read our files? | Operators see metadata (filename, dates, status) — not file contents. Downloads use direct storage URLs; bytes do not stream through the app server. |
 | Is the password in the email? | **No.** By design. The sender must communicate it separately. |
 | Can an admin download without the password? | **No** (unless they know the password and use the public verify link like anyone else). |
-| What happens when a link expires? | The recipient can sign in to the dashboard with the **same email address** the document was sent to and request a new link — if the underlying file has not yet been scrubbed. |
+| What happens when a link expires? | The recipient can sign in to the dashboard with the **same email address** the document was sent to and request a new link — if the underlying file has not yet been purged. |
 | What happens when the file is deleted? | The audit history remains (for years, by default). Recipients cannot download again. |
 | Can one file go to 50 people? | Yes, via batch upload (up to `MAX_BATCH_RECIPIENTS`, default 50). Each person gets their own link and password. |
 | How do we know the file was not tampered with? | A SHA-256 checksum is shown after successful verify; the recipient compares it locally using `sha256sum`. |
@@ -1301,7 +1316,7 @@ Each event maps to an optional `WEBHOOK_URL_{EVENT}` — see [EVENTS_AND_WEBHOOK
 
 | Item | Value |
 |------|-------|
-| **Version** | 2.1 |
+| **Version** | 2.2 |
 | **Last verified against codebase** | June 2026 (`main`, roadmap items 1–11 merged) |
 | **Source of truth for schema** | `prisma/schema.prisma` |
 | **Source of truth for env vars** | `src/lib/env.ts` + [CONFIG.md](./CONFIG.md) |

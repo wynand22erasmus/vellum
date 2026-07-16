@@ -11,7 +11,7 @@ export const DOCUMENT_STATUS_FILTER_OPTIONS: readonly DataTableFilterOption[] = 
   { value: 'link-active', label: 'Link active' },
   { value: 'link-expired', label: 'Link expired' },
   { value: 'file-available', label: 'File available' },
-  { value: 'file-scrubbed', label: 'File scrubbed' },
+  { value: 'file-purged', label: 'File purged' },
   { value: 'downloaded', label: 'Downloaded' },
   { value: 'deleted', label: 'Deleted' },
 ] as const;
@@ -20,7 +20,7 @@ export const DOCUMENT_STATUS_FILTER_OPTIONS: readonly DataTableFilterOption[] = 
 export type DocumentStatusSource = {
   linkActive: boolean;
   fileAvailable: boolean;
-  isUsed: boolean;
+  downloadCount: number;
   deletedAt?: string | null;
 };
 
@@ -28,9 +28,9 @@ export type DocumentStatusSource = {
 export function documentStatusFilterTags(doc: DocumentStatusSource): string[] {
   const tags = [
     doc.linkActive ? 'link-active' : 'link-expired',
-    doc.fileAvailable ? 'file-available' : 'file-scrubbed',
+    doc.fileAvailable ? 'file-available' : 'file-purged',
   ];
-  if (doc.isUsed) {
+  if (doc.downloadCount > 0) {
     tags.push('downloaded');
   }
   if (doc.deletedAt) {

@@ -1,6 +1,6 @@
 # Class: EmailService
 
-Defined in: [src/lib/email/EmailService.ts:22](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/email/EmailService.ts#L22)
+Defined in: [src/lib/email/EmailService.ts:22](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/email/EmailService.ts#L22)
 
 Sends recipient emails using the configured provider (`local` or `ses`).
 
@@ -10,7 +10,7 @@ Sends recipient emails using the configured provider (`local` or `ses`).
 
 > **new EmailService**(): `EmailService`
 
-Defined in: [src/lib/email/EmailService.ts:26](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/email/EmailService.ts#L26)
+Defined in: [src/lib/email/EmailService.ts:26](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/email/EmailService.ts#L26)
 
 Selects [LocalEmailProvider](../../providers/LocalEmailProvider/classes/LocalEmailProvider.md) or [SesEmailProvider](../../providers/SesEmailProvider/classes/SesEmailProvider.md) from `EMAIL_PROVIDER`.
 
@@ -24,7 +24,7 @@ Selects [LocalEmailProvider](../../providers/LocalEmailProvider/classes/LocalEma
 
 > **sendAccountEmailVerification**(`to`, `verificationUrl`): `Promise`\<`void`\>
 
-Defined in: [src/lib/email/EmailService.ts:37](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/email/EmailService.ts#L37)
+Defined in: [src/lib/email/EmailService.ts:37](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/email/EmailService.ts#L37)
 
 Sends a dashboard account email verification link (development / Mailpit).
 
@@ -52,7 +52,7 @@ Full URL to `GET /api/auth/verify-email`
 
 > **sendDownloadLink**(`to`, `token`, `fileName`): `Promise`\<`void`\>
 
-Defined in: [src/lib/email/EmailService.ts:64](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/email/EmailService.ts#L64)
+Defined in: [src/lib/email/EmailService.ts:64](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/email/EmailService.ts#L64)
 
 #### Parameters
 
@@ -78,7 +78,7 @@ Defined in: [src/lib/email/EmailService.ts:64](https://github.com/wynand22erasmu
 
 > **sendRecipientOtp**(`to`, `code`, `fileName`, `expiresInSeconds`): `Promise`\<`void`\>
 
-Defined in: [src/lib/email/EmailService.ts:98](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/email/EmailService.ts#L98)
+Defined in: [src/lib/email/EmailService.ts:98](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/email/EmailService.ts#L98)
 
 Sends a one-time download verification code to the recipient (second factor).
 

@@ -1,6 +1,6 @@
 # Interface: RecordProcessErrorInput
 
-Defined in: [src/lib/errors/record-process-error.ts:16](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/record-process-error.ts#L16)
+Defined in: [src/lib/errors/record-process-error.ts:17](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/record-process-error.ts#L17)
 
 Payload for `recordProcessError` — same shape across HTTP and workers.
 
@@ -10,9 +10,17 @@ Payload for `recordProcessError` — same shape across HTTP and workers.
 
 > `optional` **auditLogId?**: `string`
 
-Defined in: [src/lib/errors/record-process-error.ts:35](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/record-process-error.ts#L35)
+Defined in: [src/lib/errors/record-process-error.ts:37](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/record-process-error.ts#L37)
 
 Linked `AuditLog` when correlation is known at record time.
+
+***
+
+### communicationId?
+
+> `optional` **communicationId?**: `string`
+
+Defined in: [src/lib/errors/record-process-error.ts:27](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/record-process-error.ts#L27)
 
 ***
 
@@ -20,9 +28,19 @@ Linked `AuditLog` when correlation is known at record time.
 
 > `optional` **correlationId?**: `string`
 
-Defined in: [src/lib/errors/record-process-error.ts:37](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/record-process-error.ts#L37)
+Defined in: [src/lib/errors/record-process-error.ts:39](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/record-process-error.ts#L39)
 
 Shared incident UUID across audit and process-error pipelines.
+
+***
+
+### deadLetterId?
+
+> `optional` **deadLetterId?**: `string`
+
+Defined in: [src/lib/errors/record-process-error.ts:33](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/record-process-error.ts#L33)
+
+Linked `DeadLetter` when audit enqueue/worker failed.
 
 ***
 
@@ -30,7 +48,7 @@ Shared incident UUID across audit and process-error pipelines.
 
 > **detail**: `string`
 
-Defined in: [src/lib/errors/record-process-error.ts:20](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/record-process-error.ts#L20)
+Defined in: [src/lib/errors/record-process-error.ts:21](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/record-process-error.ts#L21)
 
 ***
 
@@ -38,7 +56,7 @@ Defined in: [src/lib/errors/record-process-error.ts:20](https://github.com/wynan
 
 > `optional` **documentId?**: `string`
 
-Defined in: [src/lib/errors/record-process-error.ts:25](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/record-process-error.ts#L25)
+Defined in: [src/lib/errors/record-process-error.ts:26](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/record-process-error.ts#L26)
 
 ***
 
@@ -46,17 +64,7 @@ Defined in: [src/lib/errors/record-process-error.ts:25](https://github.com/wynan
 
 > `optional` **extensions?**: `Record`\<`string`, `unknown`\>
 
-Defined in: [src/lib/errors/record-process-error.ts:26](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/record-process-error.ts#L26)
-
-***
-
-### failedAuditLogId?
-
-> `optional` **failedAuditLogId?**: `string`
-
-Defined in: [src/lib/errors/record-process-error.ts:31](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/record-process-error.ts#L31)
-
-Linked `FailedAuditLog` when audit enqueue/worker failed.
+Defined in: [src/lib/errors/record-process-error.ts:28](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/record-process-error.ts#L28)
 
 ***
 
@@ -64,7 +72,7 @@ Linked `FailedAuditLog` when audit enqueue/worker failed.
 
 > `optional` **instance?**: `string`
 
-Defined in: [src/lib/errors/record-process-error.ts:21](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/record-process-error.ts#L21)
+Defined in: [src/lib/errors/record-process-error.ts:22](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/record-process-error.ts#L22)
 
 ***
 
@@ -72,7 +80,7 @@ Defined in: [src/lib/errors/record-process-error.ts:21](https://github.com/wynan
 
 > `optional` **internal?**: `Record`\<`string`, `unknown`\>
 
-Defined in: [src/lib/errors/record-process-error.ts:27](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/record-process-error.ts#L27)
+Defined in: [src/lib/errors/record-process-error.ts:29](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/record-process-error.ts#L29)
 
 ***
 
@@ -80,7 +88,7 @@ Defined in: [src/lib/errors/record-process-error.ts:27](https://github.com/wynan
 
 > `optional` **jobId?**: `string`
 
-Defined in: [src/lib/errors/record-process-error.ts:28](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/record-process-error.ts#L28)
+Defined in: [src/lib/errors/record-process-error.ts:30](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/record-process-error.ts#L30)
 
 ***
 
@@ -88,7 +96,7 @@ Defined in: [src/lib/errors/record-process-error.ts:28](https://github.com/wynan
 
 > `optional` **jobName?**: `string`
 
-Defined in: [src/lib/errors/record-process-error.ts:29](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/record-process-error.ts#L29)
+Defined in: [src/lib/errors/record-process-error.ts:31](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/record-process-error.ts#L31)
 
 ***
 
@@ -96,17 +104,17 @@ Defined in: [src/lib/errors/record-process-error.ts:29](https://github.com/wynan
 
 > **problemType**: `string`
 
-Defined in: [src/lib/errors/record-process-error.ts:17](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/record-process-error.ts#L17)
+Defined in: [src/lib/errors/record-process-error.ts:18](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/record-process-error.ts#L18)
 
 ***
 
-### relatedFailedAuditLogId?
+### relatedDeadLetterId?
 
-> `optional` **relatedFailedAuditLogId?**: `string`
+> `optional` **relatedDeadLetterId?**: `string`
 
-Defined in: [src/lib/errors/record-process-error.ts:33](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/record-process-error.ts#L33)
+Defined in: [src/lib/errors/record-process-error.ts:35](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/record-process-error.ts#L35)
 
-Alias for [failedAuditLogId](#failedauditlogid).
+Alias for [deadLetterId](#deadletterid).
 
 ***
 
@@ -114,7 +122,7 @@ Alias for [failedAuditLogId](#failedauditlogid).
 
 > `optional` **requestId?**: `string`
 
-Defined in: [src/lib/errors/record-process-error.ts:22](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/record-process-error.ts#L22)
+Defined in: [src/lib/errors/record-process-error.ts:23](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/record-process-error.ts#L23)
 
 ***
 
@@ -122,7 +130,7 @@ Defined in: [src/lib/errors/record-process-error.ts:22](https://github.com/wynan
 
 > **source**: [`ProcessErrorSource`](../type-aliases/ProcessErrorSource.md)
 
-Defined in: [src/lib/errors/record-process-error.ts:23](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/record-process-error.ts#L23)
+Defined in: [src/lib/errors/record-process-error.ts:24](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/record-process-error.ts#L24)
 
 ***
 
@@ -130,7 +138,7 @@ Defined in: [src/lib/errors/record-process-error.ts:23](https://github.com/wynan
 
 > **status**: `number`
 
-Defined in: [src/lib/errors/record-process-error.ts:19](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/record-process-error.ts#L19)
+Defined in: [src/lib/errors/record-process-error.ts:20](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/record-process-error.ts#L20)
 
 ***
 
@@ -138,7 +146,7 @@ Defined in: [src/lib/errors/record-process-error.ts:19](https://github.com/wynan
 
 > **title**: `string`
 
-Defined in: [src/lib/errors/record-process-error.ts:18](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/record-process-error.ts#L18)
+Defined in: [src/lib/errors/record-process-error.ts:19](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/record-process-error.ts#L19)
 
 ***
 
@@ -146,4 +154,4 @@ Defined in: [src/lib/errors/record-process-error.ts:18](https://github.com/wynan
 
 > `optional` **userId?**: `string`
 
-Defined in: [src/lib/errors/record-process-error.ts:24](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/errors/record-process-error.ts#L24)
+Defined in: [src/lib/errors/record-process-error.ts:25](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/errors/record-process-error.ts#L25)

@@ -31,8 +31,12 @@ tests {
     expect(res.getStatus()).to.equal(201);
     expect(res.getHeader("content-type")).to.contain("application/vnd.vellum.result+json");
     const body = res.getBody();
-    expect(body.data.id).to.be.a("string").and.not.empty;
+    expect(body.data.documentId).to.be.a("string").and.not.empty;
+    expect(body.data.communicationId).to.be.a("string").and.not.empty;
+    expect(body.data.fileId).to.be.a("string").and.not.empty;
+    expect(body.data.sha256).to.match(/^[a-f0-9]{64}$/);
     expect(body.data.warning).to.contain("separate channel");
-    bru.setVar("documentId", body.data.id);
+    bru.setVar("documentId", body.data.documentId);
+    bru.setVar("communicationId", body.data.communicationId);
   });
 }

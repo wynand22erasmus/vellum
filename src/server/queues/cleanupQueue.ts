@@ -1,5 +1,5 @@
 /**
- * BullMQ queue for scheduled file and record scrubbing.
+ * BullMQ queue for scheduled file and record purging.
  *
  * @packageDocumentation
  */
@@ -9,6 +9,6 @@ import { redisConnection } from '../../lib/redis.ts';
 
 /**
  * BullMQ queue name: `cleanup-queue`.
- * Scheduled jobs: `scrub-files` (hourly), `scrub-records` (monthly).
+ * Scheduled jobs: `purge-files` (hourly), `purge-records` (monthly).
  */
 export const cleanupQueue = new Queue('cleanup-queue', { connection: redisConnection });

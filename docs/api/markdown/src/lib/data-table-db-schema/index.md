@@ -19,4 +19,3 @@ so column filters stay aligned with database types.
 - [DB\_COLUMN\_DESCRIPTORS](variables/DB_COLUMN_DESCRIPTORS.md)
 - [DB\_MODEL\_NAMES](variables/DB_MODEL_NAMES.md)
 - [DERIVED\_COLUMN\_DESCRIPTORS](variables/DERIVED_COLUMN_DESCRIPTORS.md)
-- [TABLE\_ROW\_DB\_MODEL](variables/TABLE_ROW_DB_MODEL.md)

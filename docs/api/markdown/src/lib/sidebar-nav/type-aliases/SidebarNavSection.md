@@ -2,7 +2,7 @@
 
 > **SidebarNavSection** = `object`
 
-Defined in: [src/lib/sidebar-nav.ts:26](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/sidebar-nav.ts#L26)
+Defined in: [src/lib/sidebar-nav.ts:26](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/sidebar-nav.ts#L26)
 
 Labeled sidebar block (Admin, Development) with optional parent link.
 
@@ -12,7 +12,7 @@ Labeled sidebar block (Admin, Development) with optional parent link.
 
 > **children**: [`SidebarLinkItem`](SidebarLinkItem.md)[]
 
-Defined in: [src/lib/sidebar-nav.ts:31](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/sidebar-nav.ts#L31)
+Defined in: [src/lib/sidebar-nav.ts:31](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/sidebar-nav.ts#L31)
 
 ***
 
@@ -20,7 +20,7 @@ Defined in: [src/lib/sidebar-nav.ts:31](https://github.com/wynand22erasmus/vellu
 
 > `optional` **href?**: `string`
 
-Defined in: [src/lib/sidebar-nav.ts:30](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/sidebar-nav.ts#L30)
+Defined in: [src/lib/sidebar-nav.ts:30](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/sidebar-nav.ts#L30)
 
 When set, the section title row links here (e.g. Admin → `/admin` overview).
 
@@ -30,7 +30,7 @@ When set, the section title row links here (e.g. Admin → `/admin` overview).
 
 > **id**: `string`
 
-Defined in: [src/lib/sidebar-nav.ts:27](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/sidebar-nav.ts#L27)
+Defined in: [src/lib/sidebar-nav.ts:27](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/sidebar-nav.ts#L27)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [src/lib/sidebar-nav.ts:27](https://github.com/wynand22erasmus/vellu
 
 > **label**: `string`
 
-Defined in: [src/lib/sidebar-nav.ts:28](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/sidebar-nav.ts#L28)
+Defined in: [src/lib/sidebar-nav.ts:28](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/sidebar-nav.ts#L28)

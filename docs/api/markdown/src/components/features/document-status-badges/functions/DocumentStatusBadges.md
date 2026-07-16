@@ -2,7 +2,7 @@
 
 > **DocumentStatusBadges**(`__namedParameters`): `Element`
 
-Defined in: [src/components/features/document-status-badges.tsx:38](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/components/features/document-status-badges.tsx#L38)
+Defined in: [src/components/features/document-status-badges.tsx:37](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/components/features/document-status-badges.tsx#L37)
 
 Render link, file, download, and deletion badges for a document row.
 

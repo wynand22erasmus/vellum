@@ -1,6 +1,6 @@
 # Interface: IEmailProvider
 
-Defined in: [src/lib/email/IEmailProvider.ts:24](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/email/IEmailProvider.ts#L24)
+Defined in: [src/lib/email/IEmailProvider.ts:24](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/email/IEmailProvider.ts#L24)
 
 Sends transactional email (implemented by Mailpit SMTP or AWS SES).
 
@@ -10,7 +10,7 @@ Sends transactional email (implemented by Mailpit SMTP or AWS SES).
 
 > **send**(`payload`): `Promise`\<`void`\>
 
-Defined in: [src/lib/email/IEmailProvider.ts:30](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/email/IEmailProvider.ts#L30)
+Defined in: [src/lib/email/IEmailProvider.ts:30](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/email/IEmailProvider.ts#L30)
 
 Delivers one message.
 

@@ -10,7 +10,7 @@ import { PAGE_LABELS } from '@/lib/page-labels';
 import { dbColumn } from '@/components/data-table/column-helpers';
 import { Badge } from '@/components/ui/badge';
 import { useAdminListState } from '@/hooks/use-admin-list-state';
-import { type AdminUserRow, useAdminUsersQuery } from '@/lib/queries/admin';
+import { type User, useAdminUsersQuery } from '@/lib/queries/admin';
 import { AdminListPage } from '@/pages/admin/admin-list-page';
 
 /** Admin users at `/admin/users`. */
@@ -18,18 +18,18 @@ export function AdminUsersPage() {
   const listState = useAdminListState();
   const query = useAdminUsersQuery(listState.queryParams);
 
-  const columns = useMemo<ColumnDef<AdminUserRow>[]>(
+  const columns = useMemo<ColumnDef<User>[]>(
     () => [
-      dbColumn<AdminUserRow>('User', 'email', 'Email'),
-      dbColumn<AdminUserRow>('User', 'kind', 'Role', {
+      dbColumn<User>('User', 'email', 'Email'),
+      dbColumn<User>('User', 'kind', 'Role', {
         cell: ({ getValue }) => <Badge variant="secondary">{String(getValue())}</Badge>,
       }),
-      dbColumn<AdminUserRow>('User', 'emailVerified', 'Verified', {
+      dbColumn<User>('User', 'emailVerified', 'Verified', {
         cell: ({ row }) => (row.original.emailVerified ? 'Yes' : 'No'),
       }),
-      dbColumn<AdminUserRow>('User', 'firstName', 'First'),
-      dbColumn<AdminUserRow>('User', 'lastName', 'Last'),
-      dbColumn<AdminUserRow>('User', 'createdAt', 'Created'),
+      dbColumn<User>('User', 'firstName', 'First'),
+      dbColumn<User>('User', 'lastName', 'Last'),
+      dbColumn<User>('User', 'createdAt', 'Created'),
     ],
     [],
   );

@@ -27,7 +27,7 @@ describe('upsertDevUser', () => {
   it('assigns ADMIN when email is in default admin list', async () => {
     vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
     vi.mocked(prisma.user.upsert).mockResolvedValue({
-      id: 'dev:admin@example.com',
+      userId: 'dev:admin@example.com',
       email: 'admin@example.com',
       emailVerified: true,
       kind: 'ADMIN',

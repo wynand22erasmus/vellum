@@ -85,7 +85,7 @@ Deferred items from the competitive feature analysis (June 2026). These were con
 ### ~~Document deduplication on upload~~
 
 - ~~Store identical files once in S3; multiple document rows reference the same object key.~~
-- **Shipped:** `DocumentFile` + SHA-256 dedup (roadmap items 7–8).
+- **Shipped:** `File` + SHA-256 dedup (roadmap items 7–8).
 
 ## Explicitly out of scope (do not copy)
 

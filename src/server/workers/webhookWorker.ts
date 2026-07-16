@@ -6,6 +6,8 @@
 
 import { Worker } from 'bullmq';
 import { randomUUID } from 'node:crypto';
+import { createDeadLetter } from '../../lib/dead-letter.ts';
+import { DeadLetterPipeline } from '../../../generated/enums.ts';
 import { prisma } from '../../lib/prisma.ts';
 import { env } from '../../lib/env.ts';
 import { buildWebhookPayload } from '../../lib/webhooks/build-webhook-payload.ts';
@@ -44,7 +46,7 @@ export const webhookWorker = new Worker(
     }
 
     const auditLog = await prisma.auditLog.findUnique({
-      where: { id: data.auditLogId },
+      where: { auditLogId: data.auditLogId },
     });
 
     if (!auditLog) {
@@ -139,11 +141,10 @@ webhookWorker.on('failed', async (job, err) => {
   const jobData = job.data as WebhookDeliveryJobData;
 
   try {
-    await prisma.failedWebhookDelivery.create({
-      data: {
-        payload: jobData as object,
-        error: err instanceof Error ? err.message : String(err),
-      },
+    await createDeadLetter({
+      pipeline: DeadLetterPipeline.WEBHOOK,
+      payload: jobData,
+      error: err instanceof Error ? err.message : String(err),
     });
   } catch {
     // Fall through to process error pipeline

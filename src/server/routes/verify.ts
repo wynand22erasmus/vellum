@@ -9,14 +9,15 @@ import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import argon2 from 'argon2';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
+import { RecipientOtpChannel } from '../../../generated/enums.ts';
 import { asyncHandler } from '../middleware/asyncHandler.ts';
 import { AppError } from '../../lib/errors/app-error.ts';
 import { validationErrorFromZod } from '../../lib/errors/validation-detail.ts';
 import { isCaptchaRequired, verifyHcaptcha } from '../../lib/captcha/verifyHcaptcha.ts';
 import {
-  documentUserLinkWithFileInclude,
-  toDocumentContext,
-  type DocumentContext,
+  communicationGraphInclude,
+  toCommunicationContext,
+  type CommunicationContext,
 } from '../../lib/documents/types.ts';
 import { env } from '../../lib/env.ts';
 import { completeDownload } from '../../lib/recipient-otp/completeDownload.ts';
@@ -54,11 +55,17 @@ const otpResendSchema = z.object({
 /** @internal */
 function logFileDownloadFailed(
   reason: string,
-  options: { documentId?: string; ip?: string; userAgent?: string } = {},
+  options: {
+    documentId?: string;
+    communicationId?: string;
+    ip?: string;
+    userAgent?: string;
+  } = {},
 ): void {
   logEvent({
     eventType: 'FILE_DOWNLOAD_FAILED',
     documentId: options.documentId,
+    communicationId: options.communicationId,
     ip: options.ip,
     userAgent: options.userAgent,
     metadata: { reason },
@@ -137,7 +144,7 @@ async function loadDocumentForVerify(
   now: Date,
   requestMeta?: { ip?: string; userAgent?: string },
 ): Promise<{
-  doc: DocumentContext;
+  doc: CommunicationContext;
   consumptionConfig: { reverifyWindowMs: number; maxReverifyAttempts: number };
 }> {
   const consumptionConfig = {
@@ -145,9 +152,9 @@ async function loadDocumentForVerify(
     maxReverifyAttempts: env.maxReverifyAttempts,
   };
 
-  const link = await prisma.documentUserLink.findUnique({
+  const link = await prisma.communication.findFirst({
     where: { downloadToken: token },
-    include: documentUserLinkWithFileInclude,
+    include: communicationGraphInclude,
   });
 
   if (!link) {
@@ -157,24 +164,36 @@ async function loadDocumentForVerify(
     );
   }
 
-  const doc = toDocumentContext(link);
+  const doc = toCommunicationContext(link);
 
   if (doc.revokedAt) {
-    logFileDownloadFailed('revoked', { documentId: doc.id, ...requestMeta });
+    logFileDownloadFailed('revoked', {
+      documentId: doc.documentId,
+      communicationId: doc.communicationId,
+      ...requestMeta,
+    });
     throw AppError.gone('This download link has been revoked.', {
       actionRequired: 'Contact the sender for a new transfer.',
     });
   }
 
   if (!doc.s3Key) {
-    logFileDownloadFailed('file_scrubbed', { documentId: doc.id, ...requestMeta });
+    logFileDownloadFailed('file_purged', {
+      documentId: doc.documentId,
+      communicationId: doc.communicationId,
+      ...requestMeta,
+    });
     throw AppError.gone(
       'The source file has been permanently deleted per the retention policy.',
     );
   }
 
   if (new Date() > doc.linkExpiresAt) {
-    logFileDownloadFailed('expired_link', { documentId: doc.id, ...requestMeta });
+    logFileDownloadFailed('expired_link', {
+      documentId: doc.documentId,
+      communicationId: doc.communicationId,
+      ...requestMeta,
+    });
     throw AppError.gone('This link has expired.', {
       actionRequired: 'Please log in to your Vellum dashboard to request a new link.',
     });
@@ -182,13 +201,21 @@ async function loadDocumentForVerify(
 
   const rejection = getVerifyRejection(doc, now, consumptionConfig);
   if (rejection === 'download_limit_reached') {
-    logFileDownloadFailed('download_limit_reached', { documentId: doc.id, ...requestMeta });
+    logFileDownloadFailed('download_limit_reached', {
+      documentId: doc.documentId,
+      communicationId: doc.communicationId,
+      ...requestMeta,
+    });
     throw AppError.gone('This document has reached its download limit.', {
       actionRequired: 'Please log in to your Vellum dashboard to request a new link.',
     });
   }
   if (rejection === 'link_consumed') {
-    logFileDownloadFailed('link_consumed', { documentId: doc.id, ...requestMeta });
+    logFileDownloadFailed('link_consumed', {
+      documentId: doc.documentId,
+      communicationId: doc.communicationId,
+      ...requestMeta,
+    });
     throw AppError.gone(
       'This link has already been used. If your download did not start, request a new link from the dashboard.',
       {
@@ -229,14 +256,15 @@ verifyRouter.post(
       const correlationId = randomUUID();
       logEvent({
         eventType: 'FILE_DOWNLOAD_FAILED',
-        documentId: doc.id,
+        documentId: doc.documentId,
+        communicationId: doc.communicationId,
         correlationId,
         metadata: { correlationId, reason: 'Incorrect password' },
         ip: req.ip,
         userAgent: req.headers['user-agent'],
       });
       req.errorCorrelationId = correlationId;
-      req.errorDocumentId = doc.id;
+      req.errorCommunicationId = doc.communicationId;
       throw AppError.unauthorized(
         'The file password does not match. Use the password provided separately by the sender.',
       );
@@ -249,10 +277,11 @@ verifyRouter.post(
         doc,
       });
 
-      if (channel !== 'authenticator') {
+      if (channel !== RecipientOtpChannel.AUTHENTICATOR) {
         logEvent({
           eventType: 'RECIPIENT_OTP_SENT',
-          documentId: doc.id,
+          documentId: doc.documentId,
+          communicationId: doc.communicationId,
           ip: req.ip,
           userAgent: req.headers['user-agent'],
           metadata: { channel, otpSessionId },
@@ -297,7 +326,8 @@ verifyRouter.post(
     if (!otpResult.ok) {
       logEvent({
         eventType: 'RECIPIENT_OTP_FAILED',
-        documentId: doc.id,
+        documentId: doc.documentId,
+        communicationId: doc.communicationId,
         ip: req.ip,
         userAgent: req.headers['user-agent'],
         metadata: { reason: otpResult.reason, otpSessionId },
@@ -314,7 +344,8 @@ verifyRouter.post(
 
     logEvent({
       eventType: 'RECIPIENT_OTP_VERIFIED',
-      documentId: doc.id,
+      documentId: doc.documentId,
+      communicationId: doc.communicationId,
       ip: req.ip,
       userAgent: req.headers['user-agent'],
       metadata: { channel: doc.otpChannel, otpSessionId },
@@ -345,7 +376,7 @@ verifyRouter.post(
       throw AppError.badRequest('Recipient OTP is not enabled for this document.');
     }
 
-    if (doc.otpChannel === 'authenticator') {
+    if (doc.otpChannel === RecipientOtpChannel.AUTHENTICATOR) {
       throw AppError.badRequest('Authenticator codes cannot be resent. Use your authenticator app.');
     }
 
@@ -364,7 +395,8 @@ verifyRouter.post(
 
     logEvent({
       eventType: 'RECIPIENT_OTP_RESENT',
-      documentId: doc.id,
+      documentId: doc.documentId,
+      communicationId: doc.communicationId,
       ip: req.ip,
       userAgent: req.headers['user-agent'],
       metadata: { channel: doc.otpChannel, otpSessionId },

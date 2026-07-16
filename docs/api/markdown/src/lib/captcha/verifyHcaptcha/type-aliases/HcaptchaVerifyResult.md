@@ -2,7 +2,7 @@
 
 > **HcaptchaVerifyResult** = `object`
 
-Defined in: src/lib/captcha/verifyHcaptcha.ts:9
+Defined in: [src/lib/captcha/verifyHcaptcha.ts:9](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/captcha/verifyHcaptcha.ts#L9)
 
 ## Properties
 
@@ -10,7 +10,7 @@ Defined in: src/lib/captcha/verifyHcaptcha.ts:9
 
 > `optional` **errorCodes?**: `string`[]
 
-Defined in: src/lib/captcha/verifyHcaptcha.ts:11
+Defined in: [src/lib/captcha/verifyHcaptcha.ts:11](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/captcha/verifyHcaptcha.ts#L11)
 
 ***
 
@@ -18,4 +18,4 @@ Defined in: src/lib/captcha/verifyHcaptcha.ts:11
 
 > **success**: `boolean`
 
-Defined in: src/lib/captcha/verifyHcaptcha.ts:10
+Defined in: [src/lib/captcha/verifyHcaptcha.ts:10](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/captcha/verifyHcaptcha.ts#L10)

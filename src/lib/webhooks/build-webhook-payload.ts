@@ -10,9 +10,10 @@ import type { AuditEventType, AuditLog } from '../../../generated/client.ts';
 export type WebhookPayload = {
   deliveryId: string;
   eventType: AuditEventType;
-  timestamp: string;
+  createdAt: string;
   auditLogId: string;
   documentId: string | null;
+  communicationId: string | null;
   userId: string | null;
   ipAddress: string | null;
   userAgent: string | null;
@@ -28,7 +29,15 @@ export type WebhookPayload = {
 export function buildWebhookPayload(
   auditLog: Pick<
     AuditLog,
-    'id' | 'eventType' | 'timestamp' | 'documentId' | 'userId' | 'ipAddress' | 'userAgent' | 'metadata'
+    | 'auditLogId'
+    | 'eventType'
+    | 'createdAt'
+    | 'documentId'
+    | 'communicationId'
+    | 'userId'
+    | 'ipAddress'
+    | 'userAgent'
+    | 'metadata'
   >,
   deliveryId: string,
 ): WebhookPayload {
@@ -40,9 +49,10 @@ export function buildWebhookPayload(
   return {
     deliveryId,
     eventType: auditLog.eventType,
-    timestamp: auditLog.timestamp.toISOString(),
-    auditLogId: auditLog.id,
+    createdAt: auditLog.createdAt.toISOString(),
+    auditLogId: auditLog.auditLogId,
     documentId: auditLog.documentId,
+    communicationId: auditLog.communicationId,
     userId: auditLog.userId,
     ipAddress: auditLog.ipAddress,
     userAgent: auditLog.userAgent,

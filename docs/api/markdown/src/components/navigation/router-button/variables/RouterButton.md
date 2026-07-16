@@ -2,6 +2,6 @@
 
 > `const` **RouterButton**: `LinkComponent`\<(`__namedParameters`) => `Element`, `string`\>
 
-Defined in: [src/components/navigation/router-button.tsx:11](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/components/navigation/router-button.tsx#L11)
+Defined in: [src/components/navigation/router-button.tsx:11](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/components/navigation/router-button.tsx#L11)
 
 Button styled as a TanStack Router link.

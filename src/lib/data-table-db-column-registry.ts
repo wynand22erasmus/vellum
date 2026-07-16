@@ -8,7 +8,6 @@ import type { DataTableColumnDataType, DataTableFilterOption } from './data-tabl
 import {
   DB_COLUMN_DESCRIPTORS,
   DERIVED_COLUMN_DESCRIPTORS,
-  TABLE_ROW_DB_MODEL,
   type DbColumnDescriptor,
   type DbModelName,
   type DerivedColumnDescriptor,
@@ -34,9 +33,9 @@ export function listDbColumnsForModel(model: DbModelName): readonly DbColumnDesc
   return Object.values(DB_COLUMN_DESCRIPTORS[model] ?? {});
 }
 
-/** Primary Prisma model for a known table row type name. */
+/** Primary Prisma model for a table row kind (identity mapping). */
 export function dbModelForRowKind(rowKind: TableRowKind): DbModelName {
-  return TABLE_ROW_DB_MODEL[rowKind];
+  return rowKind;
 }
 
 /** Column meta resolved from Prisma registry and optional overrides. */

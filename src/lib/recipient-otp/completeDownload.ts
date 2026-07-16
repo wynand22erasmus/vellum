@@ -5,7 +5,7 @@
  */
 
 import type { Request } from 'express';
-import type { DocumentContext } from '../documents/types.ts';
+import type { CommunicationContext } from '../documents/types.ts';
 import { env } from '../env.ts';
 import {
   computeVerifyConsumptionUpdate,
@@ -27,7 +27,7 @@ export type CompleteDownloadResult = {
  * Issues presigned URL, updates download consumption counters, and logs success audit.
  */
 export async function completeDownload(
-  doc: DocumentContext,
+  doc: CommunicationContext,
   req: Pick<Request, 'ip' | 'headers'>,
   now: Date = new Date(),
   consumptionConfig: VerifyConsumptionConfig = {
@@ -38,19 +38,19 @@ export async function completeDownload(
   const consumptionUpdate = computeVerifyConsumptionUpdate(doc, now, consumptionConfig);
   const downloadUrl = await generatePresignedUrl(doc.s3Key!, doc.fileName);
 
-  await prisma.documentUserLink.update({
-    where: { id: doc.id },
+  await prisma.document.update({
+    where: { documentId: doc.documentId },
     data: {
       verifySuccessCount: consumptionUpdate.verifySuccessCount,
       lastVerifiedAt: consumptionUpdate.lastVerifiedAt,
       downloadCount: consumptionUpdate.downloadCount,
-      isUsed: consumptionUpdate.isUsed,
     },
   });
 
   logEvent({
     eventType: 'FILE_DOWNLOAD_SUCCESS',
-    documentId: doc.id,
+    documentId: doc.documentId,
+    communicationId: doc.communicationId,
     ip: req.ip,
     userAgent: req.headers['user-agent'],
     metadata: {

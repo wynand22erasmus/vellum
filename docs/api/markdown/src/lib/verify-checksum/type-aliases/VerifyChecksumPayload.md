@@ -2,7 +2,7 @@
 
 > **VerifyChecksumPayload** = `object`
 
-Defined in: src/lib/verify-checksum.ts:9
+Defined in: [src/lib/verify-checksum.ts:9](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/verify-checksum.ts#L9)
 
 ## Properties
 
@@ -10,7 +10,7 @@ Defined in: src/lib/verify-checksum.ts:9
 
 > `optional` **fileName?**: `string`
 
-Defined in: src/lib/verify-checksum.ts:11
+Defined in: [src/lib/verify-checksum.ts:11](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/verify-checksum.ts#L11)
 
 ***
 
@@ -18,4 +18,4 @@ Defined in: src/lib/verify-checksum.ts:11
 
 > **sha256**: `string`
 
-Defined in: src/lib/verify-checksum.ts:10
+Defined in: [src/lib/verify-checksum.ts:10](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/verify-checksum.ts#L10)

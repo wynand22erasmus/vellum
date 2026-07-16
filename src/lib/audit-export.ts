@@ -5,11 +5,12 @@
  */
 
 export type AuditLogExportRow = {
-  id: string;
+  auditLogId: string;
   eventType: string;
-  timestamp: string;
+  createdAt: string;
   userId: string | null;
   documentId: string | null;
+  communicationId: string | null;
   ipAddress: string | null;
   userAgent: string | null;
   metadata: unknown;
@@ -29,11 +30,12 @@ function escapeCsvField(value: string): string {
  */
 export function auditLogsToCsv(rows: AuditLogExportRow[]): string {
   const header = [
-    'id',
+    'auditLogId',
     'eventType',
-    'timestamp',
+    'createdAt',
     'userId',
     'documentId',
+    'communicationId',
     'ipAddress',
     'userAgent',
     'metadata',
@@ -45,11 +47,12 @@ export function auditLogsToCsv(rows: AuditLogExportRow[]): string {
     header.join(','),
     ...rows.map((row) =>
       [
-        row.id,
+        row.auditLogId,
         row.eventType,
-        row.timestamp,
+        row.createdAt,
         row.userId ?? '',
         row.documentId ?? '',
+        row.communicationId ?? '',
         row.ipAddress ?? '',
         row.userAgent ?? '',
         row.metadata === null || row.metadata === undefined

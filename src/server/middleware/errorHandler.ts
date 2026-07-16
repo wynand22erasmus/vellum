@@ -27,7 +27,7 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     requestId,
     source: 'http',
     userId: req.user?.id,
-    documentId: req.errorDocumentId,
+    communicationId: req.errorCommunicationId,
     internal,
     correlationId: req.errorCorrelationId,
   });

@@ -2,7 +2,7 @@
 
 > **SftpIngestContext** = `object`
 
-Defined in: src/server/sftp/ingestSftpFile.ts:21
+Defined in: [src/server/sftp/ingestSftpFile.ts:20](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/sftp/ingestSftpFile.ts#L20)
 
 ## Properties
 
@@ -10,7 +10,7 @@ Defined in: src/server/sftp/ingestSftpFile.ts:21
 
 > **filePath**: `string`
 
-Defined in: src/server/sftp/ingestSftpFile.ts:22
+Defined in: [src/server/sftp/ingestSftpFile.ts:21](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/sftp/ingestSftpFile.ts#L21)
 
 ***
 
@@ -18,7 +18,7 @@ Defined in: src/server/sftp/ingestSftpFile.ts:22
 
 > **manifestPath**: `string`
 
-Defined in: src/server/sftp/ingestSftpFile.ts:23
+Defined in: [src/server/sftp/ingestSftpFile.ts:22](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/sftp/ingestSftpFile.ts#L22)
 
 ***
 
@@ -26,4 +26,4 @@ Defined in: src/server/sftp/ingestSftpFile.ts:23
 
 > `optional` **sftpUser?**: `string`
 
-Defined in: src/server/sftp/ingestSftpFile.ts:24
+Defined in: [src/server/sftp/ingestSftpFile.ts:23](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/sftp/ingestSftpFile.ts#L23)

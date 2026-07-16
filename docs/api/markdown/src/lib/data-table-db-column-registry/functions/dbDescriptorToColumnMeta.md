@@ -2,7 +2,7 @@
 
 > **dbDescriptorToColumnMeta**(`descriptor`): [`DataTableColumnMeta`](../../../components/data-table/column-meta/type-aliases/DataTableColumnMeta.md)
 
-Defined in: [src/lib/data-table-db-column-registry.ts:53](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-db-column-registry.ts#L53)
+Defined in: [src/lib/data-table-db-column-registry.ts:52](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-db-column-registry.ts#L52)
 
 Converts a DB/derived descriptor into column meta.
 

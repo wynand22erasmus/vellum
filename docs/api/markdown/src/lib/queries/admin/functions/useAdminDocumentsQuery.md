@@ -1,10 +1,10 @@
 # Function: useAdminDocumentsQuery()
 
-> **useAdminDocumentsQuery**(`params?`): `UseQueryResult`\<`NoInfer`\<[`AdminListResult`](../../fetch-json/type-aliases/AdminListResult.md)\<[`AdminDocumentRow`](../type-aliases/AdminDocumentRow.md)\>\>, `Error`\>
+> **useAdminDocumentsQuery**(`params?`): `UseQueryResult`\<`NoInfer`\<[`AdminListResult`](../../fetch-json/type-aliases/AdminListResult.md)\<[`Document`](../../../db-api-types/type-aliases/Document.md)\>\>, `Error`\>
 
-Defined in: [src/lib/queries/admin.ts:139](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/queries/admin.ts#L139)
+Defined in: [src/lib/queries/admin.ts:136](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/queries/admin.ts#L136)
 
-Load paginated admin documents.
+Load paginated admin document envelopes.
 
 ## Parameters
 
@@ -14,4 +14,4 @@ Load paginated admin documents.
 
 ## Returns
 
-`UseQueryResult`\<`NoInfer`\<[`AdminListResult`](../../fetch-json/type-aliases/AdminListResult.md)\<[`AdminDocumentRow`](../type-aliases/AdminDocumentRow.md)\>\>, `Error`\>
+`UseQueryResult`\<`NoInfer`\<[`AdminListResult`](../../fetch-json/type-aliases/AdminListResult.md)\<[`Document`](../../../db-api-types/type-aliases/Document.md)\>\>, `Error`\>

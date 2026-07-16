@@ -2,7 +2,7 @@
 
 > **VerifyConsumptionConfig** = `object`
 
-Defined in: src/lib/verify-consumption.ts:26
+Defined in: [src/lib/verify-consumption.ts:24](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/verify-consumption.ts#L24)
 
 ## Properties
 
@@ -10,7 +10,7 @@ Defined in: src/lib/verify-consumption.ts:26
 
 > **maxReverifyAttempts**: `number`
 
-Defined in: src/lib/verify-consumption.ts:28
+Defined in: [src/lib/verify-consumption.ts:26](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/verify-consumption.ts#L26)
 
 ***
 
@@ -18,4 +18,4 @@ Defined in: src/lib/verify-consumption.ts:28
 
 > **reverifyWindowMs**: `number`
 
-Defined in: src/lib/verify-consumption.ts:27
+Defined in: [src/lib/verify-consumption.ts:25](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/verify-consumption.ts#L25)

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-07T16:05:56.972Z",
+  "generatedAt": "2026-06-21T10:31:40.785Z",
   "minCoveragePercent": 95,
   "files": [
     {
@@ -145,7 +145,7 @@
         {
           "name": "ADMIN_AUDIT_EVENT_TYPE_OPTIONS",
           "kind": "variable",
-          "line": 25,
+          "line": 33,
           "status": "complete"
         }
       ]
@@ -356,7 +356,7 @@
         {
           "name": "auditLogsToCsv",
           "kind": "function",
-          "line": 30,
+          "line": 31,
           "status": "complete"
         },
         {
@@ -541,49 +541,49 @@
         {
           "name": "getDbColumnDescriptor",
           "kind": "function",
-          "line": 20,
+          "line": 19,
           "status": "complete"
         },
         {
           "name": "getDerivedColumnDescriptor",
           "kind": "function",
-          "line": 28,
+          "line": 27,
           "status": "complete"
         },
         {
           "name": "listDbColumnsForModel",
           "kind": "function",
-          "line": 33,
+          "line": 32,
           "status": "complete"
         },
         {
           "name": "dbModelForRowKind",
           "kind": "function",
-          "line": 38,
+          "line": 37,
           "status": "complete"
         },
         {
           "name": "dbDescriptorToColumnMeta",
           "kind": "function",
-          "line": 53,
+          "line": 52,
           "status": "complete"
         },
         {
           "name": "resolveDbColumnMeta",
           "kind": "function",
-          "line": 67,
+          "line": 66,
           "status": "complete"
         },
         {
           "name": "mergeColumnMetaWithDb",
           "kind": "function",
-          "line": 109,
+          "line": 108,
           "status": "complete"
         },
         {
           "name": "ResolvedDbColumnMeta",
           "kind": "type",
-          "line": 43,
+          "line": 42,
           "status": "complete"
         }
       ]
@@ -594,61 +594,55 @@
         {
           "name": "DB_MODEL_NAMES",
           "kind": "variable",
-          "line": 18,
+          "line": 20,
           "status": "complete"
         },
         {
           "name": "DbModelName",
           "kind": "type",
-          "line": 28,
+          "line": 33,
           "status": "complete"
         },
         {
           "name": "DbScalarKind",
           "kind": "type",
-          "line": 31,
+          "line": 36,
           "status": "complete"
         },
         {
           "name": "DbColumnFilterAs",
           "kind": "type",
-          "line": 34,
+          "line": 39,
           "status": "complete"
         },
         {
           "name": "DbColumnDescriptor",
           "kind": "type",
-          "line": 37,
+          "line": 42,
           "status": "complete"
         },
         {
           "name": "DB_COLUMN_DESCRIPTORS",
           "kind": "variable",
-          "line": 62,
+          "line": 67,
           "status": "complete"
         },
         {
           "name": "DerivedColumnDescriptor",
           "kind": "type",
-          "line": 161,
+          "line": 212,
           "status": "complete"
         },
         {
           "name": "DERIVED_COLUMN_DESCRIPTORS",
           "kind": "variable",
-          "line": 166,
-          "status": "complete"
-        },
-        {
-          "name": "TABLE_ROW_DB_MODEL",
-          "kind": "variable",
-          "line": 200,
+          "line": 217,
           "status": "complete"
         },
         {
           "name": "TableRowKind",
           "kind": "type",
-          "line": 212,
+          "line": 258,
           "status": "complete"
         }
       ]
@@ -663,9 +657,21 @@
           "status": "complete"
         },
         {
-          "name": "AUDIT_EVENT_TYPE_FILTER_OPTIONS",
+          "name": "RECIPIENT_OTP_CHANNEL_FILTER_OPTIONS",
           "kind": "variable",
           "line": 16,
+          "status": "complete"
+        },
+        {
+          "name": "AUDIT_EVENT_TYPE_FILTER_OPTIONS",
+          "kind": "variable",
+          "line": 24,
+          "status": "complete"
+        },
+        {
+          "name": "DEAD_LETTER_PIPELINE_FILTER_OPTIONS",
+          "kind": "variable",
+          "line": 48,
           "status": "complete"
         }
       ]
@@ -848,6 +854,130 @@
       ]
     },
     {
+      "path": "src/lib/db-api-types.ts",
+      "exports": [
+        {
+          "name": "User",
+          "kind": "type",
+          "line": 11,
+          "status": "complete"
+        },
+        {
+          "name": "File",
+          "kind": "type",
+          "line": 24,
+          "status": "complete"
+        },
+        {
+          "name": "FileDocumentSummary",
+          "kind": "type",
+          "line": 39,
+          "status": "complete"
+        },
+        {
+          "name": "FileDetail",
+          "kind": "type",
+          "line": 48,
+          "status": "complete"
+        },
+        {
+          "name": "Recipient",
+          "kind": "type",
+          "line": 53,
+          "status": "complete"
+        },
+        {
+          "name": "RecipientDetail",
+          "kind": "type",
+          "line": 65,
+          "status": "complete"
+        },
+        {
+          "name": "Communication",
+          "kind": "type",
+          "line": 70,
+          "status": "complete"
+        },
+        {
+          "name": "CommunicationAuditLogSummary",
+          "kind": "type",
+          "line": 82,
+          "status": "complete"
+        },
+        {
+          "name": "CommunicationDetail",
+          "kind": "type",
+          "line": 90,
+          "status": "complete"
+        },
+        {
+          "name": "Document",
+          "kind": "type",
+          "line": 96,
+          "status": "complete"
+        },
+        {
+          "name": "DocumentCommunicationSummary",
+          "kind": "type",
+          "line": 119,
+          "status": "complete"
+        },
+        {
+          "name": "DocumentAuditLogSummary",
+          "kind": "type",
+          "line": 128,
+          "status": "complete"
+        },
+        {
+          "name": "DocumentDetail",
+          "kind": "type",
+          "line": 137,
+          "status": "complete"
+        },
+        {
+          "name": "AuditLog",
+          "kind": "type",
+          "line": 144,
+          "status": "complete"
+        },
+        {
+          "name": "DeadLetter",
+          "kind": "type",
+          "line": 159,
+          "status": "complete"
+        },
+        {
+          "name": "ProcessError",
+          "kind": "type",
+          "line": 170,
+          "status": "complete"
+        },
+        {
+          "name": "WebhookDelivery",
+          "kind": "type",
+          "line": 187,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/dead-letter.ts",
+      "exports": [
+        {
+          "name": "createDeadLetter",
+          "kind": "function",
+          "line": 19,
+          "status": "complete"
+        },
+        {
+          "name": "CreateDeadLetterInput",
+          "kind": "type",
+          "line": 12,
+          "status": "complete"
+        }
+      ]
+    },
+    {
       "path": "src/lib/dev-embed.ts",
       "exports": [
         {
@@ -871,19 +1001,19 @@
         {
           "name": "devServiceIframeSrc",
           "kind": "function",
-          "line": 65,
+          "line": 68,
           "status": "complete"
         },
         {
           "name": "buildDevServiceLinks",
           "kind": "function",
-          "line": 84,
+          "line": 87,
           "status": "complete"
         },
         {
           "name": "isDevEmbedPath",
           "kind": "function",
-          "line": 97,
+          "line": 100,
           "status": "complete"
         },
         {
@@ -962,13 +1092,13 @@
         {
           "name": "resolveNavTrail",
           "kind": "function",
-          "line": 102,
+          "line": 105,
           "status": "complete"
         },
         {
           "name": "findDevServiceLink",
           "kind": "function",
-          "line": 166,
+          "line": 169,
           "status": "complete"
         },
         {
@@ -985,19 +1115,19 @@
         {
           "name": "pageLabelForPath",
           "kind": "function",
-          "line": 167,
+          "line": 223,
           "status": "complete"
         },
         {
           "name": "trailLabel",
           "kind": "function",
-          "line": 182,
+          "line": 238,
           "status": "complete"
         },
         {
           "name": "panelDescription",
           "kind": "function",
-          "line": 191,
+          "line": 247,
           "status": "complete"
         },
         {
@@ -1015,7 +1145,7 @@
         {
           "name": "ADMIN_INDEX_TILES",
           "kind": "variable",
-          "line": 111,
+          "line": 143,
           "status": "complete"
         }
       ]
@@ -1049,7 +1179,7 @@
         {
           "name": "buildWorkosRedirectUri",
           "kind": "function",
-          "line": 67,
+          "line": 69,
           "status": "complete"
         }
       ]
@@ -1077,7 +1207,7 @@
         {
           "name": "revokeDocument",
           "kind": "function",
-          "line": 23,
+          "line": 21,
           "status": "complete"
         },
         {
@@ -1105,7 +1235,7 @@
         {
           "name": "sidebarLinkIcon",
           "kind": "function",
-          "line": 52,
+          "line": 58,
           "status": "complete"
         }
       ]
@@ -1128,7 +1258,7 @@
         {
           "name": "displayUserName",
           "kind": "function",
-          "line": 140,
+          "line": 155,
           "status": "complete"
         },
         {
@@ -1279,18 +1409,47 @@
       ]
     },
     {
+      "path": "src/lib/verify-checksum.ts",
+      "exports": [
+        {
+          "name": "storeVerifyChecksum",
+          "kind": "function",
+          "line": 15,
+          "status": "complete"
+        },
+        {
+          "name": "readVerifyChecksum",
+          "kind": "function",
+          "line": 20,
+          "status": "complete"
+        },
+        {
+          "name": "sha256sumVerifyHint",
+          "kind": "function",
+          "line": 36,
+          "status": "complete"
+        },
+        {
+          "name": "VerifyChecksumPayload",
+          "kind": "type",
+          "line": 9,
+          "status": "missing"
+        }
+      ]
+    },
+    {
       "path": "src/lib/verify-consumption.ts",
       "exports": [
         {
           "name": "getVerifyRejection",
           "kind": "function",
-          "line": 38,
+          "line": 36,
           "status": "complete"
         },
         {
           "name": "computeVerifyConsumptionUpdate",
           "kind": "function",
-          "line": 66,
+          "line": 60,
           "status": "complete"
         },
         {
@@ -1302,19 +1461,19 @@
         {
           "name": "VerifyConsumptionUpdate",
           "kind": "type",
-          "line": 17,
+          "line": 16,
           "status": "complete"
         },
         {
           "name": "VerifyConsumptionConfig",
           "kind": "type",
-          "line": 26,
+          "line": 24,
           "status": "missing"
         },
         {
           "name": "VerifyRejectionReason",
           "kind": "type",
-          "line": 31,
+          "line": 29,
           "status": "missing"
         }
       ]
@@ -1386,7 +1545,7 @@
         {
           "name": "VerifyCompletePage",
           "kind": "function",
-          "line": 12,
+          "line": 16,
           "status": "complete"
         }
       ]
@@ -1397,7 +1556,7 @@
         {
           "name": "VerifyPage",
           "kind": "function",
-          "line": 38,
+          "line": 40,
           "status": "complete"
         }
       ]
@@ -1471,7 +1630,7 @@
         {
           "name": "createApp",
           "kind": "function",
-          "line": 39,
+          "line": 40,
           "status": "complete"
         }
       ]
@@ -1482,19 +1641,13 @@
         {
           "name": "BrandLogo",
           "kind": "function",
-          "line": 17,
+          "line": 16,
           "status": "complete"
         },
         {
           "name": "BrandTitle",
           "kind": "function",
-          "line": 40,
-          "status": "complete"
-        },
-        {
-          "name": "BrandLogoProps",
-          "kind": "type",
-          "line": 11,
+          "line": 39,
           "status": "complete"
         }
       ]
@@ -1545,13 +1698,7 @@
         {
           "name": "ColumnFilterControl",
           "kind": "function",
-          "line": 27,
-          "status": "complete"
-        },
-        {
-          "name": "ColumnFilterControlProps",
-          "kind": "type",
-          "line": 17,
+          "line": 26,
           "status": "complete"
         }
       ]
@@ -1632,19 +1779,13 @@
         {
           "name": "DataTableColumnHeader",
           "kind": "function",
-          "line": 137,
+          "line": 136,
           "status": "complete"
         },
         {
           "name": "DataTableFilterChip",
           "kind": "function",
-          "line": 188,
-          "status": "complete"
-        },
-        {
-          "name": "DataTableColumnHeaderProps",
-          "kind": "type",
-          "line": 128,
+          "line": 187,
           "status": "complete"
         }
       ]
@@ -1655,13 +1796,7 @@
         {
           "name": "DataTableToolbar",
           "kind": "function",
-          "line": 39,
-          "status": "complete"
-        },
-        {
-          "name": "DataTableToolbarProps",
-          "kind": "type",
-          "line": 32,
+          "line": 38,
           "status": "complete"
         }
       ]
@@ -1672,13 +1807,7 @@
         {
           "name": "DataTable",
           "kind": "function",
-          "line": 89,
-          "status": "complete"
-        },
-        {
-          "name": "DataTableProps",
-          "kind": "type",
-          "line": 43,
+          "line": 88,
           "status": "complete"
         }
       ]
@@ -1701,13 +1830,7 @@
         {
           "name": "DateTimeColumnFilter",
           "kind": "function",
-          "line": 87,
-          "status": "complete"
-        },
-        {
-          "name": "DateTimeColumnFilterProps",
-          "kind": "type",
-          "line": 37,
+          "line": 86,
           "status": "complete"
         }
       ]
@@ -1736,25 +1859,25 @@
         {
           "name": "DataTableColumnHeader",
           "kind": "function",
-          "line": 137,
+          "line": 136,
           "status": "complete"
         },
         {
           "name": "DataTableFilterChip",
           "kind": "function",
-          "line": 188,
+          "line": 187,
           "status": "complete"
         },
         {
           "name": "DataTableToolbar",
           "kind": "function",
-          "line": 39,
+          "line": 38,
           "status": "complete"
         },
         {
           "name": "DataTable",
           "kind": "function",
-          "line": 89,
+          "line": 88,
           "status": "complete"
         }
       ]
@@ -1847,7 +1970,7 @@
         {
           "name": "DocumentStatusBadges",
           "kind": "function",
-          "line": 38,
+          "line": 37,
           "status": "complete"
         },
         {
@@ -1865,6 +1988,17 @@
           "name": "EmbeddedPrismaStudio",
           "kind": "function",
           "line": 14,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/components/features/file-sha256-display.tsx",
+      "exports": [
+        {
+          "name": "FileSha256Display",
+          "kind": "function",
+          "line": 24,
           "status": "complete"
         }
       ]
@@ -1920,25 +2054,19 @@
         {
           "name": "AppSurface",
           "kind": "function",
-          "line": 37,
-          "status": "complete"
-        },
-        {
-          "name": "AppSurfaceProps",
-          "kind": "type",
-          "line": 31,
+          "line": 36,
           "status": "complete"
         },
         {
           "name": "elevatedSurfaceClassName",
           "kind": "variable",
-          "line": 47,
+          "line": 46,
           "status": "complete"
         },
         {
           "name": "surfaceBandClassName",
           "kind": "variable",
-          "line": 51,
+          "line": 50,
           "status": "complete"
         }
       ]
@@ -1949,37 +2077,25 @@
         {
           "name": "AuthMobileBrandHeader",
           "kind": "function",
-          "line": 96,
+          "line": 95,
           "status": "complete"
         },
         {
           "name": "AuthLegalFooter",
           "kind": "function",
-          "line": 108,
+          "line": 107,
           "status": "complete"
         },
         {
           "name": "AuthCard",
           "kind": "function",
-          "line": 155,
+          "line": 153,
           "status": "complete"
         },
         {
           "name": "AuthLayout",
           "kind": "function",
-          "line": 196,
-          "status": "complete"
-        },
-        {
-          "name": "AuthLayoutProps",
-          "kind": "type",
-          "line": 26,
-          "status": "complete"
-        },
-        {
-          "name": "AuthCardProps",
-          "kind": "type",
-          "line": 143,
+          "line": 194,
           "status": "complete"
         }
       ]
@@ -2018,13 +2134,7 @@
         {
           "name": "EmptyState",
           "kind": "function",
-          "line": 17,
-          "status": "complete"
-        },
-        {
-          "name": "EmptyStateProps",
-          "kind": "type",
-          "line": 10,
+          "line": 16,
           "status": "complete"
         }
       ]
@@ -2046,13 +2156,7 @@
         {
           "name": "NavIndexTile",
           "kind": "function",
-          "line": 21,
-          "status": "complete"
-        },
-        {
-          "name": "NavIndexTileProps",
-          "kind": "type",
-          "line": 13,
+          "line": 20,
           "status": "complete"
         }
       ]
@@ -2074,13 +2178,7 @@
         {
           "name": "PageContainer",
           "kind": "function",
-          "line": 22,
-          "status": "complete"
-        },
-        {
-          "name": "PageContainerProps",
-          "kind": "type",
-          "line": 12,
+          "line": 21,
           "status": "complete"
         }
       ]
@@ -2141,13 +2239,7 @@
         {
           "name": "TableLoadingSkeleton",
           "kind": "function",
-          "line": 17,
-          "status": "complete"
-        },
-        {
-          "name": "TableLoadingSkeletonProps",
-          "kind": "type",
-          "line": 11,
+          "line": 16,
           "status": "complete"
         }
       ]
@@ -2507,19 +2599,13 @@
         {
           "name": "MultiSelectCombobox",
           "kind": "function",
-          "line": 35,
+          "line": 34,
           "status": "complete"
         },
         {
           "name": "MultiSelectComboboxOption",
           "kind": "type",
           "line": 19,
-          "status": "complete"
-        },
-        {
-          "name": "MultiSelectComboboxProps",
-          "kind": "type",
-          "line": 22,
           "status": "complete"
         }
       ]
@@ -2615,153 +2701,147 @@
       "path": "src/components/ui/sidebar.tsx",
       "exports": [
         {
-          "name": "SidebarContextProps",
-          "kind": "type",
-          "line": 39,
-          "status": "complete"
-        },
-        {
           "name": "Sidebar",
           "kind": "function",
-          "line": 159,
+          "line": 158,
           "status": "complete"
         },
         {
           "name": "SidebarContent",
           "kind": "function",
-          "line": 386,
+          "line": 385,
           "status": "complete"
         },
         {
           "name": "SidebarFooter",
           "kind": "function",
-          "line": 359,
+          "line": 358,
           "status": "complete"
         },
         {
           "name": "SidebarGroup",
           "kind": "function",
-          "line": 401,
+          "line": 400,
           "status": "complete"
         },
         {
           "name": "SidebarGroupAction",
           "kind": "function",
-          "line": 434,
+          "line": 433,
           "status": "complete"
         },
         {
           "name": "SidebarGroupContent",
           "kind": "function",
-          "line": 455,
+          "line": 454,
           "status": "complete"
         },
         {
           "name": "SidebarGroupLabel",
           "kind": "function",
-          "line": 413,
+          "line": 412,
           "status": "complete"
         },
         {
           "name": "SidebarHeader",
           "kind": "function",
-          "line": 344,
+          "line": 343,
           "status": "complete"
         },
         {
           "name": "SidebarInput",
           "kind": "function",
-          "line": 329,
+          "line": 328,
           "status": "complete"
         },
         {
           "name": "SidebarInset",
           "kind": "function",
-          "line": 315,
+          "line": 314,
           "status": "complete"
         },
         {
           "name": "SidebarMenu",
           "kind": "function",
-          "line": 470,
+          "line": 469,
           "status": "complete"
         },
         {
           "name": "SidebarMenuAction",
           "kind": "function",
-          "line": 567,
+          "line": 566,
           "status": "complete"
         },
         {
           "name": "SidebarMenuBadge",
           "kind": "function",
-          "line": 594,
+          "line": 593,
           "status": "complete"
         },
         {
           "name": "SidebarMenuButton",
           "kind": "function",
-          "line": 516,
+          "line": 515,
           "status": "complete"
         },
         {
           "name": "SidebarMenuItem",
           "kind": "function",
-          "line": 482,
+          "line": 481,
           "status": "complete"
         },
         {
           "name": "SidebarMenuSkeleton",
           "kind": "function",
-          "line": 612,
+          "line": 611,
           "status": "complete"
         },
         {
           "name": "SidebarMenuSub",
           "kind": "function",
-          "line": 651,
+          "line": 650,
           "status": "complete"
         },
         {
           "name": "SidebarMenuSubButton",
           "kind": "function",
-          "line": 681,
+          "line": 680,
           "status": "complete"
         },
         {
           "name": "SidebarMenuSubItem",
           "kind": "function",
-          "line": 666,
+          "line": 665,
           "status": "complete"
         },
         {
           "name": "SidebarProvider",
           "kind": "function",
-          "line": 62,
+          "line": 61,
           "status": "complete"
         },
         {
           "name": "SidebarRail",
           "kind": "function",
-          "line": 289,
+          "line": 288,
           "status": "complete"
         },
         {
           "name": "SidebarSeparator",
           "kind": "function",
-          "line": 371,
+          "line": 370,
           "status": "complete"
         },
         {
           "name": "SidebarTrigger",
           "kind": "function",
-          "line": 262,
+          "line": 261,
           "status": "complete"
         },
         {
           "name": "useSidebar",
           "kind": "function",
-          "line": 52,
+          "line": 51,
           "status": "complete"
         }
       ]
@@ -3160,21 +3240,27 @@
       "path": "src/lib/compensation/document.ts",
       "exports": [
         {
+          "name": "deleteCommunicationIfExists",
+          "kind": "function",
+          "line": 19,
+          "status": "complete"
+        },
+        {
           "name": "deleteDocumentIfExists",
           "kind": "function",
-          "line": 21,
+          "line": 28,
           "status": "complete"
         },
         {
-          "name": "revertDocumentLinkState",
+          "name": "deleteFileIfExists",
           "kind": "function",
-          "line": 31,
+          "line": 38,
           "status": "complete"
         },
         {
-          "name": "DocumentLinkSnapshot",
+          "name": "RegenerateLinkSnapshot",
           "kind": "interface",
-          "line": 10,
+          "line": 11,
           "status": "complete"
         }
       ]
@@ -3185,13 +3271,19 @@
         {
           "name": "toOrphanExtension",
           "kind": "function",
-          "line": 22,
+          "line": 23,
           "status": "complete"
         },
         {
           "name": "compensationFailedError",
           "kind": "function",
-          "line": 41,
+          "line": 42,
+          "status": "complete"
+        },
+        {
+          "name": "orphanResourceKey",
+          "kind": "function",
+          "line": 55,
           "status": "complete"
         },
         {
@@ -3208,13 +3300,13 @@
         {
           "name": "reconcileOrphansFromProcessErrors",
           "kind": "function",
-          "line": 73,
+          "line": 100,
           "status": "complete"
         },
         {
           "name": "ReconcileResult",
           "kind": "interface",
-          "line": 16,
+          "line": 20,
           "status": "complete"
         }
       ]
@@ -3227,6 +3319,191 @@
           "kind": "function",
           "line": 14,
           "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/documents/createCommunication.ts",
+      "exports": [
+        {
+          "name": "createCommunication",
+          "kind": "function",
+          "line": 30,
+          "status": "complete"
+        },
+        {
+          "name": "revokeActiveCommunications",
+          "kind": "function",
+          "line": 72,
+          "status": "complete"
+        },
+        {
+          "name": "CreateCommunicationInput",
+          "kind": "type",
+          "line": 16,
+          "status": "missing"
+        },
+        {
+          "name": "CreateCommunicationResult",
+          "kind": "type",
+          "line": 24,
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/documents/createDelivery.ts",
+      "exports": [
+        {
+          "name": "createDelivery",
+          "kind": "function",
+          "line": 41,
+          "status": "complete"
+        },
+        {
+          "name": "CreateDeliveryInput",
+          "kind": "type",
+          "line": 15,
+          "status": "missing"
+        },
+        {
+          "name": "CreateDeliveryResult",
+          "kind": "type",
+          "line": 32,
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/documents/createDocument.ts",
+      "exports": [
+        {
+          "name": "createDocument",
+          "kind": "function",
+          "line": 24,
+          "status": "complete"
+        },
+        {
+          "name": "CreateDocumentInput",
+          "kind": "type",
+          "line": 14,
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/documents/ingestFile.ts",
+      "exports": [
+        {
+          "name": "computeSha256",
+          "kind": "function",
+          "line": 20,
+          "status": "complete"
+        },
+        {
+          "name": "ingestFile",
+          "kind": "function",
+          "line": 36,
+          "status": "complete"
+        },
+        {
+          "name": "IngestFileInput",
+          "kind": "type",
+          "line": 24,
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/documents/types.ts",
+      "exports": [
+        {
+          "name": "toCommunicationContext",
+          "kind": "function",
+          "line": 45,
+          "status": "complete"
+        },
+        {
+          "name": "communicationGraphInclude",
+          "kind": "variable",
+          "line": 11,
+          "status": "complete"
+        },
+        {
+          "name": "CommunicationGraph",
+          "kind": "type",
+          "line": 20,
+          "status": "missing"
+        },
+        {
+          "name": "CommunicationContext",
+          "kind": "type",
+          "line": 28,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/documents/uploadSchemas.ts",
+      "exports": [
+        {
+          "name": "parseBatchRecipients",
+          "kind": "function",
+          "line": 87,
+          "status": "complete"
+        },
+        {
+          "name": "recipientOtpChannelSchema",
+          "kind": "variable",
+          "line": 11,
+          "status": "missing"
+        },
+        {
+          "name": "uploadFieldsSchema",
+          "kind": "variable",
+          "line": 51,
+          "status": "complete"
+        },
+        {
+          "name": "batchRecipientSchema",
+          "kind": "variable",
+          "line": 68,
+          "status": "complete"
+        },
+        {
+          "name": "BatchRecipientInput",
+          "kind": "type",
+          "line": 84,
+          "status": "missing"
+        },
+        {
+          "name": "uploadZod",
+          "kind": "module",
+          "line": 1,
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/documents/upsertRecipient.ts",
+      "exports": [
+        {
+          "name": "upsertRecipient",
+          "kind": "function",
+          "line": 31,
+          "status": "complete"
+        },
+        {
+          "name": "UpsertRecipientInput",
+          "kind": "type",
+          "line": 14,
+          "status": "missing"
+        },
+        {
+          "name": "UpsertRecipientResult",
+          "kind": "type",
+          "line": 21,
+          "status": "missing"
         }
       ]
     },
@@ -3389,19 +3666,19 @@
         {
           "name": "recordProcessError",
           "kind": "function",
-          "line": 45,
+          "line": 47,
           "status": "complete"
         },
         {
           "name": "RecordProcessErrorInput",
           "kind": "interface",
-          "line": 16,
+          "line": 17,
           "status": "complete"
         },
         {
           "name": "ProcessErrorSource",
           "kind": "type",
-          "line": 13,
+          "line": 14,
           "status": "complete"
         },
         {
@@ -3445,7 +3722,7 @@
           "status": "complete"
         },
         {
-          "name": "linkFailedAuditLogToProcessError",
+          "name": "linkDeadLetterToProcessError",
           "kind": "function",
           "line": 29,
           "status": "complete"
@@ -3453,19 +3730,19 @@
         {
           "name": "linkAuditLogByCorrelationId",
           "kind": "function",
-          "line": 42,
+          "line": 45,
           "status": "complete"
         },
         {
           "name": "linkProcessErrorByCorrelationId",
           "kind": "function",
-          "line": 59,
+          "line": 62,
           "status": "complete"
         },
         {
           "name": "correlationIdFromAuditJob",
           "kind": "function",
-          "line": 79,
+          "line": 82,
           "status": "complete"
         }
       ]
@@ -3551,25 +3828,25 @@
         {
           "name": "recordProcessError",
           "kind": "function",
-          "line": 45,
+          "line": 47,
           "status": "complete"
         },
         {
           "name": "recordProcessErrorFromProblem",
           "kind": "function",
-          "line": 104,
+          "line": 106,
           "status": "complete"
         },
         {
           "name": "ProcessErrorSource",
           "kind": "type",
-          "line": 13,
+          "line": 14,
           "status": "complete"
         },
         {
           "name": "RecordProcessErrorInput",
           "kind": "interface",
-          "line": 16,
+          "line": 17,
           "status": "complete"
         }
       ]
@@ -3942,49 +4219,169 @@
         {
           "name": "useAdminListPageQuery",
           "kind": "function",
-          "line": 62,
+          "line": 53,
           "status": "complete"
         },
         {
           "name": "useAdminUsersQuery",
           "kind": "function",
-          "line": 74,
+          "line": 65,
+          "status": "complete"
+        },
+        {
+          "name": "useAdminFilesQuery",
+          "kind": "function",
+          "line": 73,
+          "status": "complete"
+        },
+        {
+          "name": "useAdminFileQuery",
+          "kind": "function",
+          "line": 81,
+          "status": "complete"
+        },
+        {
+          "name": "useAdminRecipientsQuery",
+          "kind": "function",
+          "line": 93,
+          "status": "complete"
+        },
+        {
+          "name": "useAdminRecipientQuery",
+          "kind": "function",
+          "line": 101,
+          "status": "complete"
+        },
+        {
+          "name": "useAdminCommunicationsQuery",
+          "kind": "function",
+          "line": 113,
+          "status": "complete"
+        },
+        {
+          "name": "useAdminCommunicationQuery",
+          "kind": "function",
+          "line": 122,
           "status": "complete"
         },
         {
           "name": "useAdminDocumentsQuery",
           "kind": "function",
-          "line": 82,
+          "line": 136,
           "status": "complete"
         },
         {
           "name": "useAdminDocumentQuery",
           "kind": "function",
-          "line": 91,
+          "line": 144,
           "status": "complete"
         },
         {
           "name": "useRevokeDocumentMutation",
           "kind": "function",
-          "line": 103,
+          "line": 156,
           "status": "complete"
         },
         {
-          "name": "AdminUserRow",
+          "name": "AuditLog",
           "kind": "type",
-          "line": 17,
+          "line": 144,
           "status": "complete"
         },
         {
-          "name": "AdminDocumentRow",
+          "name": "Communication",
           "kind": "type",
-          "line": 29,
+          "line": 70,
           "status": "complete"
         },
         {
-          "name": "AdminDocumentDetail",
+          "name": "CommunicationAuditLogSummary",
           "kind": "type",
-          "line": 47,
+          "line": 82,
+          "status": "complete"
+        },
+        {
+          "name": "CommunicationDetail",
+          "kind": "type",
+          "line": 90,
+          "status": "complete"
+        },
+        {
+          "name": "DeadLetter",
+          "kind": "type",
+          "line": 159,
+          "status": "complete"
+        },
+        {
+          "name": "Document",
+          "kind": "type",
+          "line": 96,
+          "status": "complete"
+        },
+        {
+          "name": "DocumentAuditLogSummary",
+          "kind": "type",
+          "line": 128,
+          "status": "complete"
+        },
+        {
+          "name": "DocumentCommunicationSummary",
+          "kind": "type",
+          "line": 119,
+          "status": "complete"
+        },
+        {
+          "name": "DocumentDetail",
+          "kind": "type",
+          "line": 137,
+          "status": "complete"
+        },
+        {
+          "name": "File",
+          "kind": "type",
+          "line": 24,
+          "status": "complete"
+        },
+        {
+          "name": "FileDetail",
+          "kind": "type",
+          "line": 48,
+          "status": "complete"
+        },
+        {
+          "name": "FileDocumentSummary",
+          "kind": "type",
+          "line": 39,
+          "status": "complete"
+        },
+        {
+          "name": "ProcessError",
+          "kind": "type",
+          "line": 170,
+          "status": "complete"
+        },
+        {
+          "name": "Recipient",
+          "kind": "type",
+          "line": 53,
+          "status": "complete"
+        },
+        {
+          "name": "RecipientDetail",
+          "kind": "type",
+          "line": 65,
+          "status": "complete"
+        },
+        {
+          "name": "User",
+          "kind": "type",
+          "line": 11,
+          "status": "complete"
+        },
+        {
+          "name": "WebhookDelivery",
+          "kind": "type",
+          "line": 187,
           "status": "complete"
         }
       ]
@@ -3995,19 +4392,19 @@
         {
           "name": "useDocumentsQuery",
           "kind": "function",
-          "line": 27,
+          "line": 15,
           "status": "complete"
         },
         {
-          "name": "useRequestDocumentLinkMutation",
+          "name": "useRequestCommunicationMutation",
           "kind": "function",
-          "line": 38,
+          "line": 26,
           "status": "complete"
         },
         {
-          "name": "DocumentRow",
+          "name": "Document",
           "kind": "type",
-          "line": 12,
+          "line": 96,
           "status": "complete"
         }
       ]
@@ -4035,37 +4432,31 @@
         {
           "name": "buildAdminListQuery",
           "kind": "function",
-          "line": 21,
-          "status": "complete"
-        },
-        {
-          "name": "adminListQuery",
-          "kind": "function",
-          "line": 39,
+          "line": 23,
           "status": "complete"
         },
         {
           "name": "ListParams",
           "kind": "type",
-          "line": 7,
+          "line": 9,
           "status": "complete"
         },
         {
           "name": "AdminListParams",
           "kind": "type",
-          "line": 13,
+          "line": 15,
           "status": "complete"
         },
         {
           "name": "ADMIN_DEFAULT_PAGE_SIZE",
           "kind": "variable",
-          "line": 18,
+          "line": 20,
           "status": "complete"
         },
         {
           "name": "queryKeys",
           "kind": "variable",
-          "line": 44,
+          "line": 41,
           "status": "complete"
         }
       ]
@@ -4076,7 +4467,7 @@
         {
           "name": "completeDownload",
           "kind": "function",
-          "line": 28,
+          "line": 29,
           "status": "complete"
         },
         {
@@ -4093,25 +4484,25 @@
         {
           "name": "isRecipientOtpRequired",
           "kind": "function",
-          "line": 25,
+          "line": 26,
           "status": "complete"
         },
         {
           "name": "startRecipientOtp",
           "kind": "function",
-          "line": 32,
+          "line": 33,
           "status": "complete"
         },
         {
           "name": "resendRecipientOtp",
           "kind": "function",
-          "line": 70,
+          "line": 72,
           "status": "complete"
         },
         {
           "name": "verifyRecipientOtp",
           "kind": "function",
-          "line": 107,
+          "line": 109,
           "status": "complete"
         }
       ]
@@ -4122,43 +4513,43 @@
         {
           "name": "generateOtpCode",
           "kind": "function",
-          "line": 31,
+          "line": 32,
           "status": "complete"
         },
         {
           "name": "createOtpSession",
           "kind": "function",
-          "line": 42,
+          "line": 43,
           "status": "complete"
         },
         {
           "name": "getOtpSession",
           "kind": "function",
-          "line": 70,
+          "line": 73,
           "status": "complete"
         },
         {
           "name": "verifyOtpCode",
           "kind": "function",
-          "line": 84,
+          "line": 87,
           "status": "complete"
         },
         {
           "name": "resendOtpCode",
           "kind": "function",
-          "line": 109,
+          "line": 112,
           "status": "complete"
         },
         {
           "name": "incrementOtpAttempts",
           "kind": "function",
-          "line": 134,
+          "line": 137,
           "status": "complete"
         },
         {
           "name": "deleteOtpSession",
           "kind": "function",
-          "line": 151,
+          "line": 154,
           "status": "complete"
         },
         {
@@ -4286,6 +4677,76 @@
       ]
     },
     {
+      "path": "src/lib/retention/expiry.ts",
+      "exports": [
+        {
+          "name": "isCommunicationExpired",
+          "kind": "function",
+          "line": 12,
+          "status": "missing"
+        },
+        {
+          "name": "isDocumentExpired",
+          "kind": "function",
+          "line": 19,
+          "status": "missing"
+        },
+        {
+          "name": "isFileStorageExpired",
+          "kind": "function",
+          "line": 23,
+          "status": "missing"
+        },
+        {
+          "name": "isFileRecordExpired",
+          "kind": "function",
+          "line": 27,
+          "status": "missing"
+        },
+        {
+          "name": "canDeleteCommunication",
+          "kind": "function",
+          "line": 31,
+          "status": "missing"
+        },
+        {
+          "name": "canDeleteDocument",
+          "kind": "function",
+          "line": 45,
+          "status": "missing"
+        },
+        {
+          "name": "canDeleteFile",
+          "kind": "function",
+          "line": 61,
+          "status": "missing"
+        },
+        {
+          "name": "canDeleteRecipient",
+          "kind": "function",
+          "line": 72,
+          "status": "missing"
+        },
+        {
+          "name": "DocumentWithFile",
+          "kind": "type",
+          "line": 10,
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/retention/purge.ts",
+      "exports": [
+        {
+          "name": "purgeExpiredRecords",
+          "kind": "function",
+          "line": 18,
+          "status": "complete"
+        }
+      ]
+    },
+    {
       "path": "src/lib/sms/twilioClient.ts",
       "exports": [
         {
@@ -4379,12 +4840,96 @@
       ]
     },
     {
+      "path": "src/lib/webhooks/build-webhook-payload.ts",
+      "exports": [
+        {
+          "name": "buildWebhookPayload",
+          "kind": "function",
+          "line": 29,
+          "status": "complete"
+        },
+        {
+          "name": "WebhookPayload",
+          "kind": "type",
+          "line": 10,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/webhooks/sign-payload.ts",
+      "exports": [
+        {
+          "name": "signWebhookPayload",
+          "kind": "function",
+          "line": 17,
+          "status": "complete"
+        },
+        {
+          "name": "verifyWebhookSignature",
+          "kind": "function",
+          "line": 29,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/lib/webhooks/webhook-url-registry.ts",
+      "exports": [
+        {
+          "name": "webhookUrlForEventType",
+          "kind": "function",
+          "line": 39,
+          "status": "complete"
+        },
+        {
+          "name": "WEBHOOK_URL_ENV_BY_EVENT_TYPE",
+          "kind": "variable",
+          "line": 11,
+          "status": "complete"
+        }
+      ]
+    },
+    {
       "path": "src/pages/admin/admin-audit-logs-page.tsx",
       "exports": [
         {
           "name": "AdminAuditLogsPage",
           "kind": "function",
-          "line": 27,
+          "line": 18,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/admin/admin-communication-detail-page.tsx",
+      "exports": [
+        {
+          "name": "AdminCommunicationDetailPage",
+          "kind": "function",
+          "line": 22,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/admin/admin-communications-page.tsx",
+      "exports": [
+        {
+          "name": "AdminCommunicationsPage",
+          "kind": "function",
+          "line": 20,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/admin/admin-dead-letters-page.tsx",
+      "exports": [
+        {
+          "name": "AdminDeadLettersPage",
+          "kind": "function",
+          "line": 16,
           "status": "complete"
         }
       ]
@@ -4412,23 +4957,23 @@
       ]
     },
     {
-      "path": "src/pages/admin/admin-failed-audit-logs-page.tsx",
+      "path": "src/pages/admin/admin-file-detail-page.tsx",
       "exports": [
         {
-          "name": "AdminFailedAuditLogsPage",
+          "name": "AdminFileDetailPage",
           "kind": "function",
-          "line": 23,
+          "line": 22,
           "status": "complete"
         }
       ]
     },
     {
-      "path": "src/pages/admin/admin-failed-process-errors-page.tsx",
+      "path": "src/pages/admin/admin-files-page.tsx",
       "exports": [
         {
-          "name": "AdminFailedProcessErrorsPage",
+          "name": "AdminFilesPage",
           "kind": "function",
-          "line": 23,
+          "line": 19,
           "status": "complete"
         }
       ]
@@ -4467,7 +5012,29 @@
         {
           "name": "AdminProcessErrorsPage",
           "kind": "function",
-          "line": 25,
+          "line": 16,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/admin/admin-recipient-detail-page.tsx",
+      "exports": [
+        {
+          "name": "AdminRecipientDetailPage",
+          "kind": "function",
+          "line": 23,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/admin/admin-recipients-page.tsx",
+      "exports": [
+        {
+          "name": "AdminRecipientsPage",
+          "kind": "function",
+          "line": 20,
           "status": "complete"
         }
       ]
@@ -4484,12 +5051,23 @@
       ]
     },
     {
+      "path": "src/pages/admin/admin-webhook-deliveries-page.tsx",
+      "exports": [
+        {
+          "name": "AdminWebhookDeliveriesPage",
+          "kind": "function",
+          "line": 16,
+          "status": "complete"
+        }
+      ]
+    },
+    {
       "path": "src/pages/dev/dev-embed-page.tsx",
       "exports": [
         {
           "name": "DevEmbedPage",
           "kind": "function",
-          "line": 26,
+          "line": 27,
           "status": "complete"
         }
       ]
@@ -4501,6 +5079,17 @@
           "name": "DevIndexPage",
           "kind": "function",
           "line": 13,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/pages/dev/dev-webhooks-page.tsx",
+      "exports": [
+        {
+          "name": "DevWebhooksPage",
+          "kind": "function",
+          "line": 16,
           "status": "complete"
         }
       ]
@@ -4599,19 +5188,19 @@
         {
           "name": "logEvent",
           "kind": "function",
-          "line": 32,
+          "line": 35,
           "status": "complete"
         },
         {
           "name": "auditQueue",
           "kind": "variable",
-          "line": 15,
+          "line": 16,
           "status": "complete"
         },
         {
           "name": "LogEventData",
           "kind": "interface",
-          "line": 18,
+          "line": 19,
           "status": "complete"
         }
       ]
@@ -4656,6 +5245,29 @@
       ]
     },
     {
+      "path": "src/server/queues/webhookQueue.ts",
+      "exports": [
+        {
+          "name": "enqueueWebhookDelivery",
+          "kind": "function",
+          "line": 36,
+          "status": "complete"
+        },
+        {
+          "name": "webhookQueue",
+          "kind": "variable",
+          "line": 14,
+          "status": "complete"
+        },
+        {
+          "name": "WebhookDeliveryJobData",
+          "kind": "interface",
+          "line": 25,
+          "status": "complete"
+        }
+      ]
+    },
+    {
       "path": "src/server/routes/admin.ts",
       "exports": [
         {
@@ -4673,6 +5285,17 @@
           "name": "authRouter",
           "kind": "variable",
           "line": 28,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/routes/dev.ts",
+      "exports": [
+        {
+          "name": "devRouter",
+          "kind": "variable",
+          "line": 16,
           "status": "complete"
         }
       ]
@@ -4705,7 +5328,7 @@
         {
           "name": "documentsRouter",
           "kind": "variable",
-          "line": 19,
+          "line": 20,
           "status": "complete"
         }
       ]
@@ -4772,7 +5395,7 @@
         {
           "name": "uploadRouter",
           "kind": "variable",
-          "line": 81,
+          "line": 36,
           "status": "complete"
         }
       ]
@@ -4783,7 +5406,98 @@
         {
           "name": "verifyRouter",
           "kind": "variable",
-          "line": 165,
+          "line": 231,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/sftp/inboxWatcher.ts",
+      "exports": [
+        {
+          "name": "ensureSftpDirectories",
+          "kind": "function",
+          "line": 27,
+          "status": "complete"
+        },
+        {
+          "name": "scanSftpInboxOnce",
+          "kind": "function",
+          "line": 102,
+          "status": "complete"
+        },
+        {
+          "name": "startSftpInboxWatcher",
+          "kind": "function",
+          "line": 128,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/sftp/ingestSftpFile.ts",
+      "exports": [
+        {
+          "name": "ingestSftpFile",
+          "kind": "function",
+          "line": 93,
+          "status": "complete"
+        },
+        {
+          "name": "SftpIngestContext",
+          "kind": "type",
+          "line": 20,
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "path": "src/server/sftp/mimeFromExtension.ts",
+      "exports": [
+        {
+          "name": "mimeFromFileName",
+          "kind": "function",
+          "line": 33,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/sftp/parseManifest.ts",
+      "exports": [
+        {
+          "name": "parseManifestJson",
+          "kind": "function",
+          "line": 28,
+          "status": "complete"
+        },
+        {
+          "name": "manifestPathForFile",
+          "kind": "function",
+          "line": 37,
+          "status": "complete"
+        },
+        {
+          "name": "sftpManifestSchema",
+          "kind": "variable",
+          "line": 10,
+          "status": "complete"
+        },
+        {
+          "name": "SftpManifest",
+          "kind": "type",
+          "line": 21,
+          "status": "missing"
+        }
+      ]
+    },
+    {
+      "path": "src/server/sftp/startSftpIngestion.ts",
+      "exports": [
+        {
+          "name": "startSftpIngestion",
+          "kind": "function",
+          "line": 11,
           "status": "complete"
         }
       ]
@@ -4794,7 +5508,7 @@
         {
           "name": "auditWorker",
           "kind": "variable",
-          "line": 24,
+          "line": 27,
           "status": "complete"
         }
       ]
@@ -4805,16 +5519,16 @@
         {
           "name": "emailWorker",
           "kind": "variable",
-          "line": 22,
+          "line": 26,
           "status": "complete"
         }
       ]
     },
     {
-      "path": "src/server/workers/fileScrubWorker.ts",
+      "path": "src/server/workers/filePurgeWorker.ts",
       "exports": [
         {
-          "name": "fileScrubWorker",
+          "name": "filePurgeWorker",
           "kind": "variable",
           "line": 24,
           "status": "complete"
@@ -4838,18 +5552,29 @@
         {
           "name": "processErrorWorker",
           "kind": "variable",
-          "line": 20,
+          "line": 22,
           "status": "complete"
         }
       ]
     },
     {
-      "path": "src/server/workers/recordScrubWorker.ts",
+      "path": "src/server/workers/recordPurgeWorker.ts",
       "exports": [
         {
-          "name": "recordScrubWorker",
+          "name": "recordPurgeWorker",
           "kind": "variable",
-          "line": 18,
+          "line": 16,
+          "status": "complete"
+        }
+      ]
+    },
+    {
+      "path": "src/server/workers/webhookWorker.ts",
+      "exports": [
+        {
+          "name": "webhookWorker",
+          "kind": "variable",
+          "line": 36,
           "status": "complete"
         }
       ]
@@ -4878,8 +5603,8 @@
     }
   ],
   "summary": {
-    "total": 644,
-    "documented": 637,
-    "coveragePercent": 98.9
+    "total": 739,
+    "documented": 708,
+    "coveragePercent": 95.8
   }
 }

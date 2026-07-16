@@ -9,70 +9,53 @@ datasource db {
 
 /// Dashboard user role for access control.
 enum UserKind {
-  /// Full access including API documentation at `/docs/`.
   ADMIN
-  /// Standard recipient dashboard access.
   CONSUMER
 }
 
 /// Audit trail event types for compliance and security monitoring.
 enum AuditEventType {
-  /// Dashboard user signed in (dev mock or WorkOS).
   USER_LOGIN
-  /// First download link email sent after upload.
   EMAIL_INITIAL_SENT
-  /// Recipient requested a new access link from the dashboard.
   EMAIL_REGENERATE_SENT
-  /// Successful file download after password verification.
   FILE_DOWNLOAD_SUCCESS
-  /// Failed download attempt (wrong password or expired link).
   FILE_DOWNLOAD_FAILED
-  /// File removed from object storage by the scrub worker.
-  FILE_SCRUBBED
-  /// Download link manually revoked before natural expiry.
+  FILE_PURGED
   LINK_REVOKED
-  /// hCaptcha verification failed on download verify.
   CAPTCHA_FAILED
-  /// One-time recipient code sent (email, SMS, or WhatsApp).
   RECIPIENT_OTP_SENT
-  /// Recipient requested a new OTP code.
   RECIPIENT_OTP_RESENT
-  /// Wrong, expired, or max-attempt recipient OTP.
   RECIPIENT_OTP_FAILED
-  /// Recipient OTP accepted; presigned URL issued.
   RECIPIENT_OTP_VERIFIED
-  /// SFTP inbox received a new data file.
   SFTP_FILE_RECEIVED
-  /// SFTP sidecar manifest parsed and validated.
   SFTP_METADATA_VALIDATED
-  /// SFTP file passed ClamAV scan.
   SFTP_VIRUS_SCAN_PASSED
-  /// SFTP pipeline created a recipient download link.
   SFTP_DOCUMENT_CREATED
-  /// SFTP file stored in object storage.
   SFTP_STORAGE_UPLOADED
-  /// SFTP initial-link email job enqueued.
   SFTP_EMAIL_QUEUED
-  /// SFTP source file archived after successful ingest.
   SFTP_INGESTION_COMPLETED
-  /// SFTP ingest failed at any pipeline step.
   SFTP_INGESTION_FAILED
 }
 
-/// Recipient OTP delivery channel configured per document upload.
+/// Queue pipeline that produced a dead-letter row.
+enum DeadLetterPipeline {
+  AUDIT
+  PROCESS_ERROR
+  WEBHOOK
+}
+
+/// Recipient OTP delivery channel configured per recipient identity.
 enum RecipientOtpChannel {
-  email
-  sms
-  whatsapp
-  authenticator
+  EMAIL
+  SMS
+  WHATSAPP
+  AUTHENTICATOR
 }
 
 /// Local copy of dashboard users (WorkOS or dev login).
 model User {
-  /// WorkOS user id, or `dev:{email}` for development auth.
-  id                String   @id
+  userId            String   @id
   email             String   @unique
-  /// Must be `true` before dashboard sign-in (WorkOS or dev verification link).
   emailVerified     Boolean  @default(false)
   kind              UserKind @default(CONSUMER)
   firstName         String?
@@ -81,177 +64,162 @@ model User {
   lastSignInAt      DateTime?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-
-  @@map("users")
 }
 
 /// Shared file asset stored once in S3 (deduplicated by sha256).
-model DocumentFile {
-  id              String    @id @default(uuid())
-  /// SHA-256 hex digest (64 chars) — deduplication key.
+model File {
+  fileId          String    @id @default(uuid())
   sha256          String    @unique
-  /// S3/MinIO object key; null after scrub or before upload completes.
   s3Key           String?
   fileName        String
-  /// When the object may be deleted from storage.
   fileExpiresAt   DateTime
-  /// When the database row (and linked recipient rows) may be purged.
   recordExpiresAt DateTime
   deletedAt       DateTime?
-  createdAt       DateTime  @default(now())
   byteSize        Int?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  userLinks DocumentUserLink[]
-
-  @@map("document_files")
+  documents Document[]
 }
 
-/// Per-recipient download link and credentials for a shared {@link DocumentFile}.
-model DocumentUserLink {
-  id              String    @id @default(uuid())
-  documentFileId  String
-  documentFile    DocumentFile @relation(fields: [documentFileId], references: [id], onDelete: Cascade)
-  recipientEmail  String
-  /// Argon2 hash of the per-file download password (knowledge factor).
-  passwordHash    String
-  /// Opaque token embedded in the verify URL (possession factor).
-  downloadToken   String    @unique
+/// Logical recipient identity (source-system key + delivery contact + OTP prefs).
+model Recipient {
+  recipientId            String               @id @default(uuid())
+  sourceSystemKey        String               @unique
+  email                  String
+  phoneNumber            String?
+  otpChannel             RecipientOtpChannel?
+  authenticatorSecretEnc String?
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
 
-  /// When the email verify link stops working.
+  documents Document[]
+
+  @@index([email])
+}
+
+/// Delivery envelope: file + recipient + password + download consumption.
+model Document {
+  documentId         String    @id @default(uuid())
+  fileId             String
+  file               File      @relation(fields: [fileId], references: [fileId], onDelete: Restrict)
+  recipientId        String
+  recipient          Recipient @relation(fields: [recipientId], references: [recipientId], onDelete: Restrict)
+  passwordHash       String
+  maxDownloads       Int       @default(1)
+  downloadCount      Int       @default(0)
+  verifySuccessCount Int       @default(0)
+  lastVerifiedAt     DateTime?
+  batchId            String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  communications Communication[]
+  auditLogs      AuditLog[]
+
+  @@index([fileId, recipientId])
+  @@index([batchId])
+}
+
+/// Outbound communication record (verify URL token + link expiry).
+model Communication {
+  communicationId String    @id @default(uuid())
+  documentId      String
+  document        Document  @relation(fields: [documentId], references: [documentId], onDelete: Restrict)
+  downloadToken   String    @unique
   linkExpiresAt   DateTime
-  /// Maximum successful download consumptions allowed (see verify flow).
-  maxDownloads    Int       @default(1)
-  /// Successful download consumptions consumed so far.
-  downloadCount   Int       @default(0)
-  /// Re-verify attempts in the current download window.
-  verifySuccessCount Int    @default(0)
-  /// Start of the current re-verify window (`null` when idle).
-  lastVerifiedAt  DateTime?
-  isUsed          Boolean   @default(false)
-  /// Set when an admin or integrator revokes the link.
   revokedAt       DateTime?
-  /// Optional second factor channel when `RECIPIENT_OTP_ENABLED=true`.
-  otpChannel      RecipientOtpChannel?
-  /// E.164 phone for SMS/WhatsApp OTP (required when otpChannel is sms or whatsapp).
-  recipientPhone  String?
-  /// AES-256-GCM encrypted TOTP secret when otpChannel is authenticator.
-  totpSecretEnc   String?
-  /// Groups links created in a single batch upload request.
-  batchId         String?
   createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   auditLogs AuditLog[]
 
-  @@index([recipientEmail])
-  @@index([documentFileId])
-  @@index([batchId])
-  @@map("document_user_links")
+  @@index([documentId])
 }
 
-/// Immutable audit events tied to documents and users.
+/// Immutable audit events tied to documents, communications, and users.
 model AuditLog {
-  id          String         @id @default(uuid())
-  eventType   AuditEventType
-  timestamp   DateTime       @default(now())
-
-  userId      String?
-  /// References {@link DocumentUserLink.id} (legacy column name for API compatibility).
-  documentId  String?
-  documentUserLink DocumentUserLink? @relation(fields: [documentId], references: [id], onDelete: SetNull)
-
-  ipAddress   String?
-  userAgent   String?
-  metadata    Json?
-
-  /// Linked {@link ProcessError} when audit and error pipelines share an incident.
-  processErrorId String?
-
-  /// Retention horizon for compliance (see `REPORTING_LIFETIME_YEARS`).
-  expiresAt   DateTime
+  auditLogId      String         @id @default(uuid())
+  eventType       AuditEventType
+  createdAt       DateTime       @default(now())
+  userId          String?
+  documentId      String?
+  document        Document?      @relation(fields: [documentId], references: [documentId], onDelete: Restrict)
+  communicationId String?
+  communication   Communication? @relation(fields: [communicationId], references: [communicationId], onDelete: Restrict)
+  ipAddress       String?
+  userAgent       String?
+  metadata        Json?
+  processErrorId  String?
+  expiresAt       DateTime
 
   @@index([processErrorId])
+  @@index([documentId])
+  @@index([communicationId])
+  @@index([createdAt])
 }
 
-/// Dead-letter store when audit queue processing fails.
-model FailedAuditLog {
-  id        String   @id @default(uuid())
-  payload   Json
-  error     String
-  createdAt DateTime @default(now())
-  retried   Boolean  @default(false)
+/// Dead-letter store when async queue processing fails.
+model DeadLetter {
+  deadLetterId String             @id @default(uuid())
+  pipeline     DeadLetterPipeline
+  payload      Json
+  error        String
+  retried      Boolean            @default(false)
+  linkedTable  String?
+  linkedId     String?
+  createdAt    DateTime           @default(now())
 
-  /// Linked {@link ProcessError} recorded for the same audit failure.
-  processErrorId String?
-
-  @@index([processErrorId])
+  @@index([pipeline])
+  @@index([pipeline, createdAt])
+  @@index([retried])
+  @@index([linkedTable, linkedId])
 }
 
 /// Operational failures recorded via the RFC 9457 error pipeline.
 model ProcessError {
-  id          String    @id @default(uuid())
-  problemType String
-  title       String
-  status      Int
-  detail      String
-  instance    String?
-  requestId   String?
-  source      String
-  userId      String?
-  documentId  String?
-  extensions  Json?
-  internal    Json?
-  reconciledAt DateTime?
-  reconcileAttempts Int @default(0)
-  createdAt   DateTime  @default(now())
+  processErrorId    String    @id @default(uuid())
+  problemType       String
+  title             String
+  status            Int
+  detail            String
+  instance          String?
+  requestId         String?
+  source            String
+  userId            String?
+  documentId        String?
+  communicationId   String?
+  deadLetterId      String?
+  extensions        Json?
+  internal          Json?
+  reconciledAt      DateTime?
+  reconcileAttempts Int       @default(0)
+  createdAt         DateTime  @default(now())
+  auditLogId        String?
+  correlationId     String?
 
-  /// When this error was recorded alongside a {@link FailedAuditLog}.
-  failedAuditLogId String?
-  /// When correlated to a successful {@link AuditLog} write.
-  auditLogId       String?
-  /// Shared UUID when HTTP path triggers audit + process error in one request.
-  correlationId    String?
-
-  @@index([failedAuditLogId])
+  @@index([deadLetterId])
   @@index([auditLogId])
   @@index([correlationId])
-}
-
-/// Dead-letter store when process-error queue processing fails.
-model FailedProcessError {
-  id        String   @id @default(uuid())
-  payload   Json
-  error     String
-  createdAt DateTime @default(now())
-  retried   Boolean  @default(false)
+  @@index([documentId])
+  @@index([communicationId])
 }
 
 /// Outbound webhook delivery attempt (one row per HTTP try).
 model WebhookDelivery {
-  id             String         @id @default(uuid())
-  /// Same id as `X-Vellum-Delivery-Id` header.
-  deliveryId     String         @unique
-  auditLogId     String
-  eventType      AuditEventType
-  targetUrl      String
-  payload        Json
-  responseStatus Int?
-  /// Truncated response body from the target.
-  responseBody   String?
-  success        Boolean
-  /// Attempt number (1-based).
-  attempt        Int
-  createdAt      DateTime       @default(now())
+  webhookDeliveryId String         @id @default(uuid())
+  deliveryId        String         @unique
+  auditLogId        String
+  eventType         AuditEventType
+  targetUrl         String
+  payload           Json
+  responseStatus    Int?
+  responseBody      String?
+  success           Boolean
+  attempt           Int
+  createdAt         DateTime       @default(now())
 
   @@index([auditLogId])
   @@index([eventType])
   @@index([createdAt])
-}
-
-/// Dead-letter store when webhook delivery exhausts retries.
-model FailedWebhookDelivery {
-  id        String   @id @default(uuid())
-  payload   Json
-  error     String
-  createdAt DateTime @default(now())
-  retried   Boolean  @default(false)
 }

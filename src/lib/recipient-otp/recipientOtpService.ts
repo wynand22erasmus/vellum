@@ -5,8 +5,8 @@
  */
 
 import { verifySync } from 'otplib';
-import type { RecipientOtpChannel } from '../../../generated/client.ts';
-import type { DocumentContext } from '../documents/types.ts';
+import { RecipientOtpChannel } from '../../../generated/enums.ts';
+import type { CommunicationContext } from '../documents/types.ts';
 import { EmailService } from '../email/EmailService.ts';
 import { env } from '../env.ts';
 import { sendSmsOtp, sendWhatsAppOtp } from '../sms/twilioClient.ts';
@@ -23,7 +23,7 @@ import {
 const emailService = new EmailService();
 
 /** Whether recipient OTP is required for the given document row. */
-export function isRecipientOtpRequired(doc: Pick<DocumentContext, 'otpChannel'>): boolean {
+export function isRecipientOtpRequired(doc: Pick<CommunicationContext, 'otpChannel'>): boolean {
   return env.recipientOtpEnabled && doc.otpChannel !== null;
 }
 
@@ -32,32 +32,33 @@ export function isRecipientOtpRequired(doc: Pick<DocumentContext, 'otpChannel'>)
  */
 export async function startRecipientOtp(input: {
   sessionId: string;
-  doc: DocumentContext;
+  doc: CommunicationContext;
 }): Promise<{ channel: RecipientOtpChannel; expiresInSeconds: number }> {
   const channel = input.doc.otpChannel!;
   const { code } = await createOtpSession({
     sessionId: input.sessionId,
-    documentId: input.doc.id,
+    documentId: input.doc.documentId,
+    communicationId: input.doc.communicationId,
     channel,
   });
 
-  if (channel === 'email' && code) {
+  if (channel === RecipientOtpChannel.EMAIL && code) {
     await emailService.sendRecipientOtp(
-      input.doc.recipientEmail,
+      input.doc.email,
       code,
       input.doc.fileName,
       env.otpTtlSeconds,
     );
-  } else if (channel === 'sms' && code && input.doc.recipientPhone) {
+  } else if (channel === RecipientOtpChannel.SMS && code && input.doc.phoneNumber) {
     await sendSmsOtp(
-      input.doc.recipientPhone,
+      input.doc.phoneNumber,
       code,
       input.doc.fileName,
       env.otpTtlSeconds,
     );
-  } else if (channel === 'whatsapp' && code && input.doc.recipientPhone) {
+  } else if (channel === RecipientOtpChannel.WHATSAPP && code && input.doc.phoneNumber) {
     await sendWhatsAppOtp(
-      input.doc.recipientPhone,
+      input.doc.phoneNumber,
       code,
       input.doc.fileName,
       env.otpTtlSeconds,
@@ -70,7 +71,7 @@ export async function startRecipientOtp(input: {
 /** Resends OTP for the given session (not supported for authenticator). */
 export async function resendRecipientOtp(input: {
   sessionId: string;
-  doc: DocumentContext;
+  doc: CommunicationContext;
 }): Promise<void> {
   const result = await resendOtpCode(input.sessionId);
   if (!result.ok || !result.code) {
@@ -78,23 +79,23 @@ export async function resendRecipientOtp(input: {
   }
 
   const channel = input.doc.otpChannel!;
-  if (channel === 'email') {
+  if (channel === RecipientOtpChannel.EMAIL) {
     await emailService.sendRecipientOtp(
-      input.doc.recipientEmail,
+      input.doc.email,
       result.code,
       input.doc.fileName,
       env.otpTtlSeconds,
     );
-  } else if (channel === 'sms' && input.doc.recipientPhone) {
+  } else if (channel === RecipientOtpChannel.SMS && input.doc.phoneNumber) {
     await sendSmsOtp(
-      input.doc.recipientPhone,
+      input.doc.phoneNumber,
       result.code,
       input.doc.fileName,
       env.otpTtlSeconds,
     );
-  } else if (channel === 'whatsapp' && input.doc.recipientPhone) {
+  } else if (channel === RecipientOtpChannel.WHATSAPP && input.doc.phoneNumber) {
     await sendWhatsAppOtp(
-      input.doc.recipientPhone,
+      input.doc.phoneNumber,
       result.code,
       input.doc.fileName,
       env.otpTtlSeconds,
@@ -103,26 +104,26 @@ export async function resendRecipientOtp(input: {
 }
 
 /**
- * Verifies submitted OTP (Redis code or TOTP) for a session tied to a document.
+ * Verifies submitted OTP (Redis code or TOTP) for a session tied to a document link.
  */
 export async function verifyRecipientOtp(input: {
   sessionId: string;
   code: string;
-  doc: DocumentContext;
+  doc: CommunicationContext;
 }): Promise<{ ok: boolean; reason?: 'expired' | 'max_attempts' | 'invalid' | 'missing_secret' }> {
   const session = await getOtpSession(input.sessionId);
-  if (!session || session.documentId !== input.doc.id) {
+  if (!session || session.communicationId !== input.doc.communicationId) {
     return { ok: false, reason: 'expired' };
   }
 
-  if (input.doc.otpChannel === 'authenticator') {
+  if (input.doc.otpChannel === RecipientOtpChannel.AUTHENTICATOR) {
     if (session.attempts >= env.otpMaxAttempts) {
       return { ok: false, reason: 'max_attempts' };
     }
-    if (!input.doc.totpSecretEnc) {
+    if (!input.doc.authenticatorSecretEnc) {
       return { ok: false, reason: 'missing_secret' };
     }
-    const secret = decryptTotpSecret(input.doc.totpSecretEnc);
+    const secret = decryptTotpSecret(input.doc.authenticatorSecretEnc);
     const { valid } = verifySync({ token: input.code, secret });
     if (!valid) {
       const { maxAttemptsReached } = await incrementOtpAttempts(input.sessionId);

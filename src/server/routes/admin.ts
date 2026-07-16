@@ -10,7 +10,7 @@ import { asyncHandler } from '../middleware/asyncHandler.ts';
 import { AppError } from '../../lib/errors/app-error.ts';
 import { validationErrorFromZod } from '../../lib/errors/validation-detail.ts';
 import { prisma } from '../../lib/prisma.ts';
-import { AuditEventType, UserKind } from '../../../generated/enums.ts';
+import { AuditEventType, DeadLetterPipeline, UserKind } from '../../../generated/enums.ts';
 import { env } from '../../lib/env.ts';
 import { auditLogsToCsv } from '../../lib/audit-export.ts';
 import { ok } from './http-helpers.ts';
@@ -33,7 +33,7 @@ const ALL_AUDIT_EVENT_TYPES = [
   AuditEventType.EMAIL_REGENERATE_SENT,
   AuditEventType.FILE_DOWNLOAD_SUCCESS,
   AuditEventType.FILE_DOWNLOAD_FAILED,
-  AuditEventType.FILE_SCRUBBED,
+  AuditEventType.FILE_PURGED,
   AuditEventType.LINK_REVOKED,
   AuditEventType.CAPTCHA_FAILED,
   AuditEventType.RECIPIENT_OTP_SENT,
@@ -49,6 +49,36 @@ const ALL_AUDIT_EVENT_TYPES = [
   AuditEventType.SFTP_INGESTION_COMPLETED,
   AuditEventType.SFTP_INGESTION_FAILED,
 ] as const;
+
+const ALL_DEAD_LETTER_PIPELINES = [
+  DeadLetterPipeline.AUDIT,
+  DeadLetterPipeline.PROCESS_ERROR,
+  DeadLetterPipeline.WEBHOOK,
+] as const;
+
+const auditLogSelect = {
+  auditLogId: true,
+  eventType: true,
+  createdAt: true,
+  userId: true,
+  documentId: true,
+  communicationId: true,
+  ipAddress: true,
+  userAgent: true,
+  metadata: true,
+  expiresAt: true,
+  processErrorId: true,
+} as const;
+
+const latestCommunicationSelect = {
+  orderBy: { createdAt: 'desc' as const },
+  take: 1,
+  select: {
+    communicationId: true,
+    linkExpiresAt: true,
+    revokedAt: true,
+  },
+};
 
 function parseAuditExportLimit(raw: unknown): number {
   const parsed = z.coerce.number().int().min(1).max(env.auditExportMaxLimit).safeParse(raw);
@@ -136,41 +166,186 @@ function parsePaginationQuery(query: Record<string, unknown>) {
   return parsed.data;
 }
 
-function mapDocumentRow(
+function mapAuditLogRow(log: {
+  auditLogId: string;
+  eventType: AuditEventType;
+  createdAt: Date;
+  userId: string | null;
+  documentId: string | null;
+  communicationId: string | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  metadata: unknown;
+  expiresAt: Date;
+  processErrorId: string | null;
+}) {
+  return {
+    auditLogId: log.auditLogId,
+    eventType: log.eventType,
+    createdAt: log.createdAt.toISOString(),
+    userId: log.userId,
+    documentId: log.documentId,
+    communicationId: log.communicationId,
+    ipAddress: log.ipAddress,
+    userAgent: log.userAgent,
+    metadata: log.metadata,
+    expiresAt: log.expiresAt.toISOString(),
+    processErrorId: log.processErrorId,
+  };
+}
+
+function mapCommunicationSummary(link: {
+  communicationId: string;
+  linkExpiresAt: Date;
+  revokedAt: Date | null;
+  createdAt: Date;
+}) {
+  return {
+    communicationId: link.communicationId,
+    linkExpiresAt: link.linkExpiresAt.toISOString(),
+    revokedAt: link.revokedAt?.toISOString() ?? null,
+    createdAt: link.createdAt.toISOString(),
+  };
+}
+
+function mapDocumentEnvelopeRow(
   doc: {
-    id: string;
-    fileName: string;
-    recipientEmail: string;
-    linkExpiresAt: Date;
-    fileExpiresAt: Date;
-    recordExpiresAt: Date;
-    isUsed: boolean;
+    documentId: string;
+    fileId: string;
     maxDownloads: number;
     downloadCount: number;
-    revokedAt: Date | null;
+    batchId: string | null;
+    createdAt: Date;
+    file: {
+      fileName: string;
+      fileExpiresAt: Date;
+      recordExpiresAt: Date;
+      s3Key: string | null;
+      deletedAt: Date | null;
+    };
+    recipient: {
+      email: string;
+    };
+    communications: Array<{
+      communicationId: string;
+      linkExpiresAt: Date;
+      revokedAt: Date | null;
+    }>;
+  },
+  now: Date,
+) {
+  const link = doc.communications[0] ?? null;
+  const linkExpiresAt = link?.linkExpiresAt ?? doc.createdAt;
+
+  return {
+    documentId: doc.documentId,
+    fileId: doc.fileId,
+    fileName: doc.file.fileName,
+    recipientEmail: doc.recipient.email,
+    linkExpiresAt: linkExpiresAt.toISOString(),
+    fileExpiresAt: doc.file.fileExpiresAt.toISOString(),
+    recordExpiresAt: doc.file.recordExpiresAt.toISOString(),
+    maxDownloads: doc.maxDownloads,
+    downloadCount: doc.downloadCount,
+    downloadsRemaining: Math.max(0, doc.maxDownloads - doc.downloadCount),
+    revokedAt: link?.revokedAt?.toISOString() ?? null,
+    deletedAt: doc.file.deletedAt?.toISOString() ?? null,
+    createdAt: doc.createdAt.toISOString(),
+    batchId: doc.batchId,
+    communicationId: link?.communicationId ?? null,
+    storageAttached: !!doc.file.s3Key,
+    linkActive:
+      link !== null &&
+      now <= link.linkExpiresAt &&
+      !!doc.file.s3Key &&
+      !link.revokedAt,
+    fileAvailable: !!doc.file.s3Key && now <= doc.file.fileExpiresAt && !doc.file.deletedAt,
+  };
+}
+
+function mapFileRow(
+  file: {
+    fileId: string;
+    sha256: string;
     s3Key: string | null;
+    fileName: string;
+    fileExpiresAt: Date;
+    recordExpiresAt: Date;
     deletedAt: Date | null;
     createdAt: Date;
+    byteSize: number | null;
+    _count?: { documents: number };
   },
   now: Date,
 ) {
   return {
-    id: doc.id,
-    fileName: doc.fileName,
-    recipientEmail: doc.recipientEmail,
-    linkExpiresAt: doc.linkExpiresAt.toISOString(),
-    fileExpiresAt: doc.fileExpiresAt.toISOString(),
-    recordExpiresAt: doc.recordExpiresAt.toISOString(),
-    isUsed: doc.isUsed,
-    maxDownloads: doc.maxDownloads,
-    downloadCount: doc.downloadCount,
-    downloadsRemaining: Math.max(0, doc.maxDownloads - doc.downloadCount),
-    revokedAt: doc.revokedAt?.toISOString() ?? null,
-    deletedAt: doc.deletedAt?.toISOString() ?? null,
-    createdAt: doc.createdAt.toISOString(),
-    storageAttached: !!doc.s3Key,
-    linkActive: now <= doc.linkExpiresAt && !!doc.s3Key && !doc.revokedAt,
-    fileAvailable: !!doc.s3Key && now <= doc.fileExpiresAt,
+    fileId: file.fileId,
+    sha256: file.sha256,
+    fileName: file.fileName,
+    fileExpiresAt: file.fileExpiresAt.toISOString(),
+    recordExpiresAt: file.recordExpiresAt.toISOString(),
+    deletedAt: file.deletedAt?.toISOString() ?? null,
+    createdAt: file.createdAt.toISOString(),
+    byteSize: file.byteSize,
+    storageAttached: !!file.s3Key,
+    fileAvailable: !!file.s3Key && now <= file.fileExpiresAt && !file.deletedAt,
+    documentCount: file._count?.documents ?? 0,
+  };
+}
+
+function mapRecipientRow(recipient: {
+  recipientId: string;
+  sourceSystemKey: string;
+  email: string;
+  phoneNumber: string | null;
+  otpChannel: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  _count?: { documents: number };
+}) {
+  return {
+    recipientId: recipient.recipientId,
+    sourceSystemKey: recipient.sourceSystemKey,
+    email: recipient.email,
+    phoneNumber: recipient.phoneNumber,
+    otpChannel: recipient.otpChannel,
+    createdAt: recipient.createdAt.toISOString(),
+    updatedAt: recipient.updatedAt.toISOString(),
+    documentCount: recipient._count?.documents ?? 0,
+  };
+}
+
+function mapCommunicationListRow(link: {
+  communicationId: string;
+  documentId: string;
+  linkExpiresAt: Date;
+  revokedAt: Date | null;
+  createdAt: Date;
+  document: {
+    file: {
+      fileName: string;
+    };
+    recipient: {
+      email: string;
+    };
+  };
+}) {
+  return {
+    communicationId: link.communicationId,
+    documentId: link.documentId,
+    linkExpiresAt: link.linkExpiresAt.toISOString(),
+    revokedAt: link.revokedAt?.toISOString() ?? null,
+    createdAt: link.createdAt.toISOString(),
+    fileName: link.document.file.fileName,
+    recipientEmail: link.document.recipient.email,
+    document: {
+      file: {
+        fileName: link.document.file.fileName,
+      },
+      recipient: {
+        email: link.document.recipient.email,
+      },
+    },
   };
 }
 
@@ -183,10 +358,16 @@ adminRouter.get(
     const fileName = trimQueryString(req.query.fileName, 255);
 
     const where = {
-      ...(recipientEmail ? { recipientEmail } : {}),
+      ...(recipientEmail
+        ? {
+            recipient: {
+              email: recipientEmail,
+            },
+          }
+        : {}),
       ...(fileName
         ? {
-            documentFile: {
+            file: {
               fileName: {
                 contains: fileName,
                 mode: 'insensitive' as const,
@@ -197,22 +378,20 @@ adminRouter.get(
     };
 
     const [total, rows] = await Promise.all([
-      prisma.documentUserLink.count({ where }),
-      prisma.documentUserLink.findMany({
+      prisma.document.count({ where }),
+      prisma.document.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         take: limit,
         skip: offset,
         select: {
-          id: true,
-          recipientEmail: true,
-          linkExpiresAt: true,
-          isUsed: true,
+          documentId: true,
+          fileId: true,
           maxDownloads: true,
           downloadCount: true,
-          revokedAt: true,
+          batchId: true,
           createdAt: true,
-          documentFile: {
+          file: {
             select: {
               fileName: true,
               fileExpiresAt: true,
@@ -221,32 +400,19 @@ adminRouter.get(
               deletedAt: true,
             },
           },
+          recipient: {
+            select: {
+              email: true,
+            },
+          },
+          communications: latestCommunicationSelect,
         },
       }),
     ]);
 
     const now = new Date();
     ok(req, res, {
-      documents: rows.map((row) =>
-        mapDocumentRow(
-          {
-            id: row.id,
-            fileName: row.documentFile.fileName,
-            recipientEmail: row.recipientEmail,
-            linkExpiresAt: row.linkExpiresAt,
-            fileExpiresAt: row.documentFile.fileExpiresAt,
-            recordExpiresAt: row.documentFile.recordExpiresAt,
-            isUsed: row.isUsed,
-            maxDownloads: row.maxDownloads,
-            downloadCount: row.downloadCount,
-            revokedAt: row.revokedAt,
-            s3Key: row.documentFile.s3Key,
-            deletedAt: row.documentFile.deletedAt,
-            createdAt: row.createdAt,
-          },
-          now,
-        ),
-      ),
+      Document: rows.map((row) => mapDocumentEnvelopeRow(row, now)),
       total,
       limit,
       offset,
@@ -258,18 +424,16 @@ adminRouter.get(
   '/documents/:id',
   asyncHandler(async (req, res) => {
     const id = routeParam(req.params.id);
-    const link = await prisma.documentUserLink.findUnique({
-      where: { id },
+    const document = await prisma.document.findUnique({
+      where: { documentId: id },
       select: {
-        id: true,
-        recipientEmail: true,
-        linkExpiresAt: true,
-        isUsed: true,
+        documentId: true,
+        fileId: true,
         maxDownloads: true,
         downloadCount: true,
-        revokedAt: true,
+        batchId: true,
         createdAt: true,
-        documentFile: {
+        file: {
           select: {
             fileName: true,
             fileExpiresAt: true,
@@ -279,62 +443,447 @@ adminRouter.get(
             sha256: true,
           },
         },
-        auditLogs: {
-          orderBy: { timestamp: 'desc' },
+        recipient: {
+          select: {
+            recipientId: true,
+            sourceSystemKey: true,
+            email: true,
+            phoneNumber: true,
+            otpChannel: true,
+          },
+        },
+        communications: {
+          orderBy: { createdAt: 'desc' },
           take: 500,
           select: {
-            id: true,
-            eventType: true,
-            timestamp: true,
-            userId: true,
+            communicationId: true,
+            linkExpiresAt: true,
+            revokedAt: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+
+    if (!document) {
+      throw AppError.notFound(`Document with id "${id}" was not found.`);
+    }
+
+    const communicationIds = document.communications.map((link) => link.communicationId);
+    const auditLogs = await prisma.auditLog.findMany({
+      where: {
+        OR: [
+          { documentId: id },
+          ...(communicationIds.length > 0 ? [{ communicationId: { in: communicationIds } }] : []),
+        ],
+      },
+      orderBy: [{ createdAt: 'desc' }, { auditLogId: 'desc' }],
+      take: 500,
+      select: auditLogSelect,
+    });
+
+    const now = new Date();
+    const { communications, file, recipient, ...documentRest } = document;
+
+    ok(req, res, {
+      Document: {
+        ...mapDocumentEnvelopeRow(
+          {
+            ...documentRest,
+            file: {
+              fileName: file.fileName,
+              fileExpiresAt: file.fileExpiresAt,
+              recordExpiresAt: file.recordExpiresAt,
+              s3Key: file.s3Key,
+              deletedAt: file.deletedAt,
+            },
+            recipient: {
+              email: recipient.email,
+            },
+            communications: communications.map((link) => ({
+              communicationId: link.communicationId,
+              linkExpiresAt: link.linkExpiresAt,
+              revokedAt: link.revokedAt,
+            })),
+          },
+          now,
+        ),
+        sha256: file.sha256,
+        recipient,
+        Communication: communications.map(mapCommunicationSummary),
+        AuditLog: auditLogs.map(mapAuditLogRow),
+      },
+    });
+  }),
+);
+
+adminRouter.get(
+  '/files',
+  asyncHandler(async (req, res) => {
+    const parsed = parsePaginationQuery(req.query as Record<string, unknown>);
+    const { limit, offset } = parsed;
+    const fileName = trimQueryString(req.query.fileName, 255);
+    const sha256 = trimQueryString(req.query.sha256, 64);
+
+    const where = {
+      ...(fileName
+        ? {
+            fileName: {
+              contains: fileName,
+              mode: 'insensitive' as const,
+            },
+          }
+        : {}),
+      ...(sha256 ? { sha256 } : {}),
+    };
+
+    const [total, rows] = await Promise.all([
+      prisma.file.count({ where }),
+      prisma.file.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip: offset,
+        select: {
+          fileId: true,
+          sha256: true,
+          s3Key: true,
+          fileName: true,
+          fileExpiresAt: true,
+          recordExpiresAt: true,
+          deletedAt: true,
+          createdAt: true,
+          byteSize: true,
+          _count: { select: { documents: true } },
+        },
+      }),
+    ]);
+
+    const now = new Date();
+    ok(req, res, {
+      File: rows.map((row) => mapFileRow(row, now)),
+      total,
+      limit,
+      offset,
+    });
+  }),
+);
+
+adminRouter.get(
+  '/files/:id',
+  asyncHandler(async (req, res) => {
+    const id = routeParam(req.params.id);
+    const file = await prisma.file.findUnique({
+      where: { fileId: id },
+      select: {
+        fileId: true,
+        sha256: true,
+        s3Key: true,
+        fileName: true,
+        fileExpiresAt: true,
+        recordExpiresAt: true,
+        deletedAt: true,
+        createdAt: true,
+        byteSize: true,
+        documents: {
+          orderBy: { createdAt: 'desc' },
+          take: 500,
+          select: {
             documentId: true,
-            ipAddress: true,
-            userAgent: true,
-            metadata: true,
-            expiresAt: true,
+            createdAt: true,
+            maxDownloads: true,
+            downloadCount: true,
+            recipient: {
+              select: {
+                email: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!file) {
+      throw AppError.notFound(`File with id "${id}" was not found.`);
+    }
+
+    const now = new Date();
+    const { documents, ...fileRest } = file;
+
+    ok(req, res, {
+      File: {
+        ...mapFileRow({ ...fileRest, _count: { documents: documents.length } }, now),
+        Document: documents.map((document) => ({
+          documentId: document.documentId,
+          recipientEmail: document.recipient.email,
+          createdAt: document.createdAt.toISOString(),
+          maxDownloads: document.maxDownloads,
+          downloadCount: document.downloadCount,
+        })),
+      },
+    });
+  }),
+);
+
+adminRouter.get(
+  '/recipients',
+  asyncHandler(async (req, res) => {
+    const parsed = parsePaginationQuery(req.query as Record<string, unknown>);
+    const { limit, offset } = parsed;
+    const email = trimQueryString(req.query.email, 320);
+    const sourceSystemKey = trimQueryString(req.query.sourceSystemKey, 255);
+
+    const where = {
+      ...(email
+        ? {
+            email: {
+              contains: email,
+              mode: 'insensitive' as const,
+            },
+          }
+        : {}),
+      ...(sourceSystemKey ? { sourceSystemKey } : {}),
+    };
+
+    const [total, rows] = await Promise.all([
+      prisma.recipient.count({ where }),
+      prisma.recipient.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip: offset,
+        select: {
+          recipientId: true,
+          sourceSystemKey: true,
+          email: true,
+          phoneNumber: true,
+          otpChannel: true,
+          createdAt: true,
+          updatedAt: true,
+          _count: { select: { documents: true } },
+        },
+      }),
+    ]);
+
+    ok(req, res, {
+      Recipient: rows.map(mapRecipientRow),
+      total,
+      limit,
+      offset,
+    });
+  }),
+);
+
+adminRouter.get(
+  '/recipients/:id',
+  asyncHandler(async (req, res) => {
+    const id = routeParam(req.params.id);
+    const recipient = await prisma.recipient.findUnique({
+      where: { recipientId: id },
+      select: {
+        recipientId: true,
+        sourceSystemKey: true,
+        email: true,
+        phoneNumber: true,
+        otpChannel: true,
+        createdAt: true,
+        updatedAt: true,
+        documents: {
+          orderBy: { createdAt: 'desc' },
+          take: 500,
+          select: {
+            documentId: true,
+            fileId: true,
+            maxDownloads: true,
+            downloadCount: true,
+            batchId: true,
+            createdAt: true,
+            file: {
+              select: {
+                fileName: true,
+                fileExpiresAt: true,
+                recordExpiresAt: true,
+                s3Key: true,
+                deletedAt: true,
+              },
+            },
+            communications: latestCommunicationSelect,
+          },
+        },
+      },
+    });
+
+    if (!recipient) {
+      throw AppError.notFound(`Recipient with id "${id}" was not found.`);
+    }
+
+    const now = new Date();
+    const { documents, ...recipientRest } = recipient;
+
+    ok(req, res, {
+      Recipient: {
+        ...mapRecipientRow({ ...recipientRest, _count: { documents: documents.length } }),
+        Document: documents.map((document) =>
+          mapDocumentEnvelopeRow(
+            {
+              ...document,
+              recipient: { email: recipient.email },
+            },
+            now,
+          ),
+        ),
+      },
+    });
+  }),
+);
+
+adminRouter.get(
+  '/communications',
+  asyncHandler(async (req, res) => {
+    const parsed = parsePaginationQuery(req.query as Record<string, unknown>);
+    const { limit, offset } = parsed;
+    const documentId = trimQueryString(req.query.documentId, 64);
+    const recipientEmail = trimQueryString(req.query.recipientEmail, 320);
+    const fileName = trimQueryString(req.query.fileName, 255);
+
+    const where = {
+      ...(documentId ? { documentId } : {}),
+      ...(recipientEmail || fileName
+        ? {
+            document: {
+              ...(recipientEmail
+                ? {
+                    recipient: {
+                      email: recipientEmail,
+                    },
+                  }
+                : {}),
+              ...(fileName
+                ? {
+                    file: {
+                      fileName: {
+                        contains: fileName,
+                        mode: 'insensitive' as const,
+                      },
+                    },
+                  }
+                : {}),
+            },
+          }
+        : {}),
+    };
+
+    const [total, rows] = await Promise.all([
+      prisma.communication.count({ where }),
+      prisma.communication.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip: offset,
+        select: {
+          communicationId: true,
+          documentId: true,
+          linkExpiresAt: true,
+          revokedAt: true,
+          createdAt: true,
+          document: {
+            select: {
+              file: {
+                select: {
+                  fileName: true,
+                },
+              },
+              recipient: {
+                select: {
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+    ]);
+
+    ok(req, res, {
+      Communication: rows.map(mapCommunicationListRow),
+      total,
+      limit,
+      offset,
+    });
+  }),
+);
+
+adminRouter.get(
+  '/communications/:id',
+  asyncHandler(async (req, res) => {
+    const id = routeParam(req.params.id);
+    const link = await prisma.communication.findUnique({
+      where: { communicationId: id },
+      select: {
+        communicationId: true,
+        documentId: true,
+        linkExpiresAt: true,
+        revokedAt: true,
+        createdAt: true,
+        updatedAt: true,
+        document: {
+          select: {
+            documentId: true,
+            maxDownloads: true,
+            downloadCount: true,
+            createdAt: true,
+            file: {
+              select: {
+                fileName: true,
+                fileExpiresAt: true,
+                recordExpiresAt: true,
+                s3Key: true,
+                deletedAt: true,
+              },
+            },
+            recipient: {
+              select: {
+                recipientId: true,
+                email: true,
+                sourceSystemKey: true,
+              },
+            },
           },
         },
       },
     });
 
     if (!link) {
-      throw AppError.notFound(`Document with id "${routeParam(req.params.id)}" was not found.`);
+      throw AppError.notFound(`Document link with id "${id}" was not found.`);
     }
 
+    const auditLogs = await prisma.auditLog.findMany({
+      where: {
+        OR: [{ communicationId: id }, { documentId: link.documentId }],
+      },
+      orderBy: [{ createdAt: 'desc' }, { auditLogId: 'desc' }],
+      take: 500,
+      select: auditLogSelect,
+    });
+
     const now = new Date();
-    const { auditLogs, documentFile, ...linkRest } = link;
     ok(req, res, {
-      document: {
-        ...mapDocumentRow(
-          {
-            id: linkRest.id,
-            fileName: documentFile.fileName,
-            recipientEmail: linkRest.recipientEmail,
-            linkExpiresAt: linkRest.linkExpiresAt,
-            fileExpiresAt: documentFile.fileExpiresAt,
-            recordExpiresAt: documentFile.recordExpiresAt,
-            isUsed: linkRest.isUsed,
-            maxDownloads: linkRest.maxDownloads,
-            downloadCount: linkRest.downloadCount,
-            revokedAt: linkRest.revokedAt,
-            s3Key: documentFile.s3Key,
-            deletedAt: documentFile.deletedAt,
-            createdAt: linkRest.createdAt,
-          },
-          now,
-        ),
-        sha256: documentFile.sha256,
-        auditLogs: auditLogs.map((log) => ({
-          id: log.id,
-          eventType: log.eventType,
-          timestamp: log.timestamp.toISOString(),
-          userId: log.userId,
-          documentId: log.documentId,
-          ipAddress: log.ipAddress,
-          userAgent: log.userAgent,
-          metadata: log.metadata,
-          expiresAt: log.expiresAt.toISOString(),
-        })),
+      Communication: {
+        communicationId: link.communicationId,
+        documentId: link.documentId,
+        linkExpiresAt: link.linkExpiresAt.toISOString(),
+        revokedAt: link.revokedAt?.toISOString() ?? null,
+        createdAt: link.createdAt.toISOString(),
+        updatedAt: link.updatedAt.toISOString(),
+        fileName: link.document.file.fileName,
+        recipientEmail: link.document.recipient.email,
+        linkActive:
+          now <= link.linkExpiresAt &&
+          !!link.document.file.s3Key &&
+          !link.revokedAt &&
+          now <= link.document.file.fileExpiresAt &&
+          !link.document.file.deletedAt,
+        AuditLog: auditLogs.map(mapAuditLogRow),
       },
     });
   }),
@@ -375,7 +924,7 @@ adminRouter.get(
         take: limit,
         skip: offset,
         select: {
-          id: true,
+          userId: true,
           email: true,
           emailVerified: true,
           kind: true,
@@ -389,7 +938,7 @@ adminRouter.get(
     ]);
 
     ok(req, res, {
-      users: users.map((u) => ({
+      User: users.map((u) => ({
         ...u,
         lastSignInAt: u.lastSignInAt?.toISOString() ?? null,
         createdAt: u.createdAt.toISOString(),
@@ -417,6 +966,7 @@ adminRouter.get(
     );
 
     const documentId = trimQueryString(req.query.documentId, 64);
+    const communicationId = trimQueryString(req.query.communicationId, 64);
     const userId = trimQueryString(req.query.userId, 128);
 
     const dateRange = parseDateRangeQuery(req.query as Record<string, unknown>);
@@ -429,10 +979,11 @@ adminRouter.get(
     const where = {
       ...(eventTypes?.length ? { eventType: { in: eventTypes } } : {}),
       ...(documentId ? { documentId } : {}),
+      ...(communicationId ? { communicationId } : {}),
       ...(userId ? { userId } : {}),
       ...(!includeExpired ? { expiresAt: { gt: now } } : {}),
       ...((from || to) && {
-        timestamp: {
+        createdAt: {
           ...(from ? { gte: from } : {}),
           ...(to ? { lte: to } : {}),
         },
@@ -456,53 +1007,32 @@ adminRouter.get(
       offset = parsed.offset;
     }
 
-    const [total, logs] = await Promise.all([
-      prisma.auditLog.count({
-        where: {
-          ...(eventTypes?.length ? { eventType: { in: eventTypes } } : {}),
-          ...(documentId ? { documentId } : {}),
-          ...(userId ? { userId } : {}),
-          ...(!includeExpired ? { expiresAt: { gt: now } } : {}),
-          ...((from || to) && {
-            timestamp: {
-              ...(from ? { gte: from } : {}),
-              ...(to ? { lte: to } : {}),
-            },
-          }),
+    const countWhere = {
+      ...(eventTypes?.length ? { eventType: { in: eventTypes } } : {}),
+      ...(documentId ? { documentId } : {}),
+      ...(communicationId ? { communicationId } : {}),
+      ...(userId ? { userId } : {}),
+      ...(!includeExpired ? { expiresAt: { gt: now } } : {}),
+      ...((from || to) && {
+        createdAt: {
+          ...(from ? { gte: from } : {}),
+          ...(to ? { lte: to } : {}),
         },
       }),
+    };
+
+    const [total, logs] = await Promise.all([
+      prisma.auditLog.count({ where: countWhere }),
       prisma.auditLog.findMany({
         where,
-        orderBy: [{ timestamp: 'desc' }, { id: 'desc' }],
+        orderBy: [{ createdAt: 'desc' }, { auditLogId: 'desc' }],
         take: limit,
         ...(useOffset ? { skip: offset } : {}),
-        select: {
-          id: true,
-          eventType: true,
-          timestamp: true,
-          userId: true,
-          documentId: true,
-          ipAddress: true,
-          userAgent: true,
-          metadata: true,
-          expiresAt: true,
-          processErrorId: true,
-        },
+        select: auditLogSelect,
       }),
     ]);
 
-    const rows = logs.map((log) => ({
-      id: log.id,
-      eventType: log.eventType,
-      timestamp: log.timestamp.toISOString(),
-      userId: log.userId,
-      documentId: log.documentId,
-      ipAddress: log.ipAddress,
-      userAgent: log.userAgent,
-      metadata: log.metadata,
-      expiresAt: log.expiresAt.toISOString(),
-      processErrorId: log.processErrorId,
-    }));
+    const rows = logs.map(mapAuditLogRow);
 
     if (wantsCsvExport(req)) {
       res.setHeader('Content-Type', 'text/csv; charset=utf-8');
@@ -511,10 +1041,10 @@ adminRouter.get(
       return;
     }
 
-    const nextCursor = rows.length === limit ? rows[rows.length - 1]?.id ?? null : null;
+    const nextCursor = rows.length === limit ? rows[rows.length - 1]?.auditLogId ?? null : null;
 
     ok(req, res, {
-      auditLogs: rows,
+      AuditLog: rows,
       total,
       limit,
       ...(useOffset ? { offset } : {}),
@@ -524,10 +1054,16 @@ adminRouter.get(
 );
 
 adminRouter.get(
-  '/failed-audit-logs',
+  '/dead-letters',
   asyncHandler(async (req, res) => {
     const parsed = parsePaginationQuery(req.query as Record<string, unknown>);
     const { limit, offset } = parsed;
+    const pipelines = parseEnumListQuery(
+      req.query.pipeline,
+      ALL_DEAD_LETTER_PIPELINES,
+      'pipeline',
+      64,
+    );
     const errorFilter = trimQueryString(req.query.error, 500);
     const retried = parseBooleanQuery(req.query.retried);
     const dateRange = parseDateRangeQuery(req.query);
@@ -537,6 +1073,7 @@ adminRouter.get(
     const { from, to } = dateRange;
 
     const where = {
+      ...(pipelines?.length ? { pipeline: { in: pipelines } } : {}),
       ...(errorFilter
         ? {
             error: {
@@ -555,31 +1092,35 @@ adminRouter.get(
     };
 
     const [total, rows] = await Promise.all([
-      prisma.failedAuditLog.count({ where }),
-      prisma.failedAuditLog.findMany({
+      prisma.deadLetter.count({ where }),
+      prisma.deadLetter.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         take: limit,
         skip: offset,
         select: {
-          id: true,
+          deadLetterId: true,
+          pipeline: true,
           payload: true,
           error: true,
           createdAt: true,
           retried: true,
-          processErrorId: true,
+          linkedTable: true,
+          linkedId: true,
         },
       }),
     ]);
 
     ok(req, res, {
-      failedAuditLogs: rows.map((r) => ({
-        id: r.id,
+      DeadLetter: rows.map((r) => ({
+        deadLetterId: r.deadLetterId,
+        pipeline: r.pipeline,
         payload: r.payload,
         error: r.error,
         createdAt: r.createdAt.toISOString(),
         retried: r.retried,
-        processErrorId: r.processErrorId,
+        linkedTable: r.linkedTable,
+        linkedId: r.linkedId,
       })),
       total,
       limit,
@@ -638,8 +1179,8 @@ adminRouter.get(
     }
 
     ok(req, res, {
-      processErrors: filtered.map((r) => ({
-        id: r.id,
+      ProcessError: filtered.map((r) => ({
+        processErrorId: r.processErrorId,
         problemType: r.problemType,
         title: r.title,
         status: r.status,
@@ -649,8 +1190,9 @@ adminRouter.get(
         source: r.source,
         userId: r.userId,
         documentId: r.documentId,
+        communicationId: r.communicationId,
         extensions: r.extensions,
-        failedAuditLogId: r.failedAuditLogId,
+        deadLetterId: r.deadLetterId,
         auditLogId: r.auditLogId,
         correlationId: r.correlationId,
         reconciledAt: r.reconciledAt?.toISOString() ?? null,
@@ -660,145 +1202,6 @@ adminRouter.get(
       total: hasOrphans !== undefined ? filtered.length : total,
       limit,
       offset,
-    });
-  }),
-);
-
-function mapDocumentFileRow(
-  file: {
-    id: string;
-    sha256: string;
-    s3Key: string | null;
-    fileName: string;
-    fileExpiresAt: Date;
-    recordExpiresAt: Date;
-    deletedAt: Date | null;
-    createdAt: Date;
-    byteSize: number | null;
-    _count?: { userLinks: number };
-  },
-  now: Date,
-) {
-  return {
-    id: file.id,
-    sha256: file.sha256,
-    fileName: file.fileName,
-    fileExpiresAt: file.fileExpiresAt.toISOString(),
-    recordExpiresAt: file.recordExpiresAt.toISOString(),
-    deletedAt: file.deletedAt?.toISOString() ?? null,
-    createdAt: file.createdAt.toISOString(),
-    byteSize: file.byteSize,
-    storageAttached: !!file.s3Key,
-    fileAvailable: !!file.s3Key && now <= file.fileExpiresAt && !file.deletedAt,
-    linkCount: file._count?.userLinks ?? 0,
-  };
-}
-
-adminRouter.get(
-  '/document-files',
-  asyncHandler(async (req, res) => {
-    const parsed = parsePaginationQuery(req.query as Record<string, unknown>);
-    const { limit, offset } = parsed;
-    const fileName = trimQueryString(req.query.fileName, 255);
-    const sha256 = trimQueryString(req.query.sha256, 64);
-
-    const where = {
-      ...(fileName
-        ? {
-            fileName: {
-              contains: fileName,
-              mode: 'insensitive' as const,
-            },
-          }
-        : {}),
-      ...(sha256 ? { sha256 } : {}),
-    };
-
-    const [total, rows] = await Promise.all([
-      prisma.documentFile.count({ where }),
-      prisma.documentFile.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        take: limit,
-        skip: offset,
-        select: {
-          id: true,
-          sha256: true,
-          s3Key: true,
-          fileName: true,
-          fileExpiresAt: true,
-          recordExpiresAt: true,
-          deletedAt: true,
-          createdAt: true,
-          byteSize: true,
-          _count: { select: { userLinks: true } },
-        },
-      }),
-    ]);
-
-    const now = new Date();
-    ok(req, res, {
-      documentFiles: rows.map((row) => mapDocumentFileRow(row, now)),
-      total,
-      limit,
-      offset,
-    });
-  }),
-);
-
-adminRouter.get(
-  '/document-files/:id',
-  asyncHandler(async (req, res) => {
-    const id = routeParam(req.params.id);
-    const file = await prisma.documentFile.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        sha256: true,
-        s3Key: true,
-        fileName: true,
-        fileExpiresAt: true,
-        recordExpiresAt: true,
-        deletedAt: true,
-        createdAt: true,
-        byteSize: true,
-        userLinks: {
-          orderBy: { createdAt: 'desc' },
-          take: 500,
-          select: {
-            id: true,
-            recipientEmail: true,
-            linkExpiresAt: true,
-            isUsed: true,
-            maxDownloads: true,
-            downloadCount: true,
-            revokedAt: true,
-            createdAt: true,
-          },
-        },
-      },
-    });
-
-    if (!file) {
-      throw AppError.notFound(`Document file with id "${id}" was not found.`);
-    }
-
-    const now = new Date();
-    const { userLinks, ...fileRest } = file;
-    ok(req, res, {
-      documentFile: {
-        ...mapDocumentFileRow({ ...fileRest, _count: { userLinks: userLinks.length } }, now),
-        userLinks: userLinks.map((link) => ({
-          id: link.id,
-          recipientEmail: link.recipientEmail,
-          linkExpiresAt: link.linkExpiresAt.toISOString(),
-          isUsed: link.isUsed,
-          maxDownloads: link.maxDownloads,
-          downloadCount: link.downloadCount,
-          revokedAt: link.revokedAt?.toISOString() ?? null,
-          createdAt: link.createdAt.toISOString(),
-        })),
-      },
     });
   }),
 );
@@ -842,7 +1245,7 @@ adminRouter.get(
         take: limit,
         skip: offset,
         select: {
-          id: true,
+          webhookDeliveryId: true,
           deliveryId: true,
           auditLogId: true,
           eventType: true,
@@ -858,8 +1261,8 @@ adminRouter.get(
     ]);
 
     ok(req, res, {
-      webhookDeliveries: rows.map((row) => ({
-        id: row.id,
+      WebhookDelivery: rows.map((row) => ({
+        webhookDeliveryId: row.webhookDeliveryId,
         deliveryId: row.deliveryId,
         auditLogId: row.auditLogId,
         eventType: row.eventType,
@@ -870,132 +1273,6 @@ adminRouter.get(
         success: row.success,
         attempt: row.attempt,
         createdAt: row.createdAt.toISOString(),
-      })),
-      total,
-      limit,
-      offset,
-    });
-  }),
-);
-
-adminRouter.get(
-  '/failed-webhook-deliveries',
-  asyncHandler(async (req, res) => {
-    const parsed = parsePaginationQuery(req.query as Record<string, unknown>);
-    const { limit, offset } = parsed;
-    const errorFilter = trimQueryString(req.query.error, 500);
-    const retried = parseBooleanQuery(req.query.retried);
-    const dateRange = parseDateRangeQuery(req.query);
-    if ('error' in dateRange) {
-      throw AppError.badRequest(dateRange.error ?? 'Invalid date range.');
-    }
-    const { from, to } = dateRange;
-
-    const where = {
-      ...(errorFilter
-        ? {
-            error: {
-              contains: errorFilter,
-              mode: 'insensitive' as const,
-            },
-          }
-        : {}),
-      ...(retried !== undefined ? { retried } : {}),
-      ...((from || to) && {
-        createdAt: {
-          ...(from ? { gte: from } : {}),
-          ...(to ? { lte: to } : {}),
-        },
-      }),
-    };
-
-    const [total, rows] = await Promise.all([
-      prisma.failedWebhookDelivery.count({ where }),
-      prisma.failedWebhookDelivery.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        take: limit,
-        skip: offset,
-        select: {
-          id: true,
-          payload: true,
-          error: true,
-          createdAt: true,
-          retried: true,
-        },
-      }),
-    ]);
-
-    ok(req, res, {
-      failedWebhookDeliveries: rows.map((r) => ({
-        id: r.id,
-        payload: r.payload,
-        error: r.error,
-        createdAt: r.createdAt.toISOString(),
-        retried: r.retried,
-      })),
-      total,
-      limit,
-      offset,
-    });
-  }),
-);
-
-adminRouter.get(
-  '/failed-process-errors',
-  asyncHandler(async (req, res) => {
-    const parsed = parsePaginationQuery(req.query as Record<string, unknown>);
-    const { limit, offset } = parsed;
-    const errorFilter = trimQueryString(req.query.error, 500);
-    const retried = parseBooleanQuery(req.query.retried);
-    const dateRange = parseDateRangeQuery(req.query);
-    if ('error' in dateRange) {
-      throw AppError.badRequest(dateRange.error ?? 'Invalid date range.');
-    }
-    const { from, to } = dateRange;
-
-    const where = {
-      ...(errorFilter
-        ? {
-            error: {
-              contains: errorFilter,
-              mode: 'insensitive' as const,
-            },
-          }
-        : {}),
-      ...(retried !== undefined ? { retried } : {}),
-      ...((from || to) && {
-        createdAt: {
-          ...(from ? { gte: from } : {}),
-          ...(to ? { lte: to } : {}),
-        },
-      }),
-    };
-
-    const [total, rows] = await Promise.all([
-      prisma.failedProcessError.count({ where }),
-      prisma.failedProcessError.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        take: limit,
-        skip: offset,
-        select: {
-          id: true,
-          payload: true,
-          error: true,
-          createdAt: true,
-          retried: true,
-        },
-      }),
-    ]);
-
-    ok(req, res, {
-      failedProcessErrors: rows.map((r) => ({
-        id: r.id,
-        payload: r.payload,
-        error: r.error,
-        createdAt: r.createdAt.toISOString(),
-        retried: r.retried,
       })),
       total,
       limit,

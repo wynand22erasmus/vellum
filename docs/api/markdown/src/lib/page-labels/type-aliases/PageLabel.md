@@ -2,7 +2,7 @@
 
 > **PageLabel** = `object`
 
-Defined in: [src/lib/page-labels.ts:8](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/page-labels.ts#L8)
+Defined in: [src/lib/page-labels.ts:8](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/page-labels.ts#L8)
 
 Nav label, optional breadcrumb override, and page copy for a dashboard route.
 
@@ -12,7 +12,7 @@ Nav label, optional breadcrumb override, and page copy for a dashboard route.
 
 > **description**: `string`
 
-Defined in: [src/lib/page-labels.ts:12](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/page-labels.ts#L12)
+Defined in: [src/lib/page-labels.ts:12](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/page-labels.ts#L12)
 
 ***
 
@@ -20,7 +20,7 @@ Defined in: [src/lib/page-labels.ts:12](https://github.com/wynand22erasmus/vellu
 
 > `optional` **href?**: `string`
 
-Defined in: [src/lib/page-labels.ts:15](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/page-labels.ts#L15)
+Defined in: [src/lib/page-labels.ts:15](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/page-labels.ts#L15)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [src/lib/page-labels.ts:15](https://github.com/wynand22erasmus/vellu
 
 > **nav**: `string`
 
-Defined in: [src/lib/page-labels.ts:9](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/page-labels.ts#L9)
+Defined in: [src/lib/page-labels.ts:9](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/page-labels.ts#L9)
 
 ***
 
@@ -36,7 +36,7 @@ Defined in: [src/lib/page-labels.ts:9](https://github.com/wynand22erasmus/vellum
 
 > `optional` **panelDescription?**: `string`
 
-Defined in: [src/lib/page-labels.ts:14](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/page-labels.ts#L14)
+Defined in: [src/lib/page-labels.ts:14](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/page-labels.ts#L14)
 
 Centered auth card copy when it adds detail beyond the trail.
 
@@ -46,6 +46,6 @@ Centered auth card copy when it adds detail beyond the trail.
 
 > `optional` **trail?**: `string`
 
-Defined in: [src/lib/page-labels.ts:11](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/page-labels.ts#L11)
+Defined in: [src/lib/page-labels.ts:11](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/page-labels.ts#L11)
 
 Breadcrumb label when different from nav (e.g. Dashboard → Home).

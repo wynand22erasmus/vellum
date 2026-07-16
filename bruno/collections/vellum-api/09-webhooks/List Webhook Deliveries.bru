@@ -20,7 +20,7 @@ tests {
     expect(res.getHeader("content-type")).to.contain("application/vnd.vellum.result+json");
     const body = res.getBody();
     expect(body.type).to.contain("/results/ok");
-    expect(body.data.deliveries).to.be.an("array");
+    expect(body.data.WebhookDelivery).to.be.an("array");
     expect(body.data.total).to.be.a("number");
   });
 }

@@ -90,7 +90,10 @@ const ADMIN_SECTION_LABELS: Record<string, string> = {
   documents: PAGE_LABELS.adminDocuments.nav,
   users: PAGE_LABELS.adminUsers.nav,
   'audit-logs': PAGE_LABELS.adminAuditLogs.nav,
-  'failed-audit-logs': PAGE_LABELS.adminFailedAuditLogs.nav,
+  'dead-letters': PAGE_LABELS.adminDeadLetters.nav,
+  'failed-audit-logs': PAGE_LABELS.adminDeadLetters.nav,
+  'failed-process-errors': PAGE_LABELS.adminDeadLetters.nav,
+  'failed-webhook-deliveries': PAGE_LABELS.adminDeadLetters.nav,
 };
 
 /**

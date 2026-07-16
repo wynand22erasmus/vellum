@@ -6,8 +6,8 @@
 
 import { Worker } from 'bullmq';
 import {
-  documentUserLinkWithFileInclude,
-  toDocumentContext,
+  communicationGraphInclude,
+  toCommunicationContext,
 } from '../../lib/documents/types.ts';
 import { prisma } from '../../lib/prisma.ts';
 import { EmailService } from '../../lib/email/EmailService.ts';
@@ -21,31 +21,31 @@ import { redisConnection } from '../../lib/redis.ts';
 const emailService = new EmailService();
 
 /**
- * Processes `email-queue` jobs: loads the document, sends mail, enqueues audit trail.
+ * Processes `email-queue` jobs: loads the document link, sends mail, enqueues audit trail.
  */
 export const emailWorker = new Worker(
   'email-queue',
   async (job) => {
-    const { docId, type, requestedBy } = job.data as {
-      docId: string;
+    const { communicationId, type, requestedBy } = job.data as {
+      communicationId: string;
       type: 'INITIAL' | 'REGENERATE';
       requestedBy?: string;
     };
 
-    const link = await prisma.documentUserLink.findUnique({
-      where: { id: docId },
-      include: documentUserLinkWithFileInclude,
+    const link = await prisma.communication.findUnique({
+      where: { communicationId },
+      include: communicationGraphInclude,
     });
     if (!link) {
       throw AppError.notFound(
-        `Document link ${docId} was not found while processing the email queue job.`,
+        `Document link ${communicationId} was not found while processing the email queue job.`,
       );
     }
 
-    const doc = toDocumentContext(link);
+    const doc = toCommunicationContext(link);
 
     await emailService.sendDownloadLink(
-      doc.recipientEmail,
+      doc.email,
       doc.downloadToken,
       doc.fileName,
     );
@@ -53,7 +53,8 @@ export const emailWorker = new Worker(
     logEvent({
       eventType:
         type === 'INITIAL' ? 'EMAIL_INITIAL_SENT' : 'EMAIL_REGENERATE_SENT',
-      documentId: docId,
+      documentId: doc.documentId,
+      communicationId: doc.communicationId,
       metadata: { type, requestedBy },
     });
   },
@@ -68,7 +69,7 @@ emailWorker.on('failed', (job, err) => {
     status: problem.status,
     detail: problem.detail ?? problem.title,
     source: 'worker',
-    documentId: (job?.data as { docId?: string })?.docId,
+    communicationId: (job?.data as { communicationId?: string })?.communicationId,
     jobId: job?.id,
     jobName: job?.name,
     internal,

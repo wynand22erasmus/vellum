@@ -16,15 +16,15 @@ import { PageContainer } from '@/components/layout/page-container';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
-  type DocumentRow,
+  type Document,
   useDocumentsQuery,
-  useRequestDocumentLinkMutation,
+  useRequestCommunicationMutation,
 } from '@/lib/queries/documents';
 
 /** Authenticated recipient dashboard at `/dashboard`. */
 export function DashboardPage() {
   const { data: documents = [], isLoading, error } = useDocumentsQuery();
-  const requestLink = useRequestDocumentLinkMutation();
+  const requestLink = useRequestCommunicationMutation();
 
   async function handleRequestLink(id: string) {
     try {
@@ -35,23 +35,22 @@ export function DashboardPage() {
     }
   }
 
-  const columns = useMemo<ColumnDef<DocumentRow>[]>(
+  const columns = useMemo<ColumnDef<Document>[]>(
     () => [
-      dbColumn<DocumentRow>('DocumentFile', 'fileName', 'File'),
-      dbColumn<DocumentRow>('DocumentUserLink', 'createdAt', 'Received'),
-      dbColumn<DocumentRow>('DocumentUserLink', 'status', 'Status', {
+      dbColumn<Document>('File', 'fileName', 'File'),
+      dbColumn<Document>('Document', 'createdAt', 'Received'),
+      dbColumn<Document>('Document', 'status', 'Status', {
         cell: ({ row }) => (
           <DocumentStatusBadges
             linkActive={row.original.linkActive}
             fileAvailable={row.original.fileAvailable}
-            isUsed={row.original.isUsed}
             maxDownloads={row.original.maxDownloads}
             downloadCount={row.original.downloadCount}
             downloadsRemaining={row.original.downloadsRemaining}
           />
         ),
       }),
-      disableColumnInteractions<DocumentRow>({
+      disableColumnInteractions<Document>({
         id: 'actions',
         header: '',
         cell: ({ row }) => (
@@ -59,7 +58,7 @@ export function DashboardPage() {
             variant="outline"
             size="sm"
             disabled={!row.original.fileAvailable || requestLink.isPending}
-            onClick={() => void handleRequestLink(row.original.id)}
+            onClick={() => void handleRequestLink(row.original.documentId)}
           >
             Send access link
           </Button>

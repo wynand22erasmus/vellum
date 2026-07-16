@@ -6,9 +6,10 @@
 
 import { Queue } from 'bullmq';
 import type { AuditEventType } from '../../../generated/client.ts';
+import { createDeadLetter } from '../../lib/dead-letter.ts';
+import { DeadLetterPipeline } from '../../../generated/enums.ts';
 import { problemFromError } from '../../lib/errors/problem-from-error.ts';
 import { recordProcessError } from '../../lib/errors/record-process-error.ts';
-import { prisma } from '../../lib/prisma.ts';
 import { redisConnection } from '../../lib/redis.ts';
 
 /** BullMQ queue name: `audit-queue`. Processed by `auditWorker`. */
@@ -17,12 +18,14 @@ export const auditQueue = new Queue('audit-queue', { connection: redisConnection
 /** Payload for a single audit event job (`log-event`). */
 export interface LogEventData {
   eventType: AuditEventType;
+  /** Envelope id for document-level events (e.g. LINK_REVOKED). */
   documentId?: string;
+  /** Specific outbound communication id for link-level events. */
+  communicationId?: string;
   userId?: string;
   metadata?: Record<string, unknown>;
   ip?: string;
   userAgent?: string;
-  /** Shared incident UUID for linking to `ProcessError` rows. */
   correlationId?: string;
 }
 
@@ -31,15 +34,14 @@ export interface LogEventData {
  */
 export function logEvent(data: LogEventData): void {
   auditQueue.add('log-event', data).catch(async (err) => {
-    let failedAuditLogId: string | undefined;
+    let deadLetterId: string | undefined;
     try {
-      const failedAuditLog = await prisma.failedAuditLog.create({
-        data: {
-          payload: data as object,
-          error: err instanceof Error ? err.message : String(err),
-        },
+      const deadLetter = await createDeadLetter({
+        pipeline: DeadLetterPipeline.AUDIT,
+        payload: data,
+        error: err instanceof Error ? err.message : String(err),
       });
-      failedAuditLogId = failedAuditLog.id;
+      deadLetterId = deadLetter.deadLetterId;
     } catch {
       // Continue to unified observability pipeline
     }
@@ -52,10 +54,11 @@ export function logEvent(data: LogEventData): void {
       detail: problem.detail ?? problem.title,
       source: 'queue',
       documentId: data.documentId,
+      communicationId: data.communicationId,
       userId: data.userId,
       internal: { ...internal, auditPayload: data },
       ...(data.correlationId ? { correlationId: data.correlationId } : {}),
-      ...(failedAuditLogId ? { failedAuditLogId } : {}),
+      ...(deadLetterId ? { deadLetterId } : {}),
     });
   });
 }

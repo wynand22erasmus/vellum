@@ -162,7 +162,7 @@ Recipients sign in to see documents sent to their email address.
 | Action | What it does |
 |--------|----------------|
 | **View list** | File name, received date, status badges |
-| **Status badges** | Link active/expired, file available/scrubbed, download usage (e.g. “1 of 2 downloads used”) |
+| **Status badges** | Link active/expired, file available/purged, download usage (e.g. “1 of 2 downloads used”) |
 | **Send access link** | Emails a fresh verify link; does **not** download the file or bypass the password step |
 
 Sign-in modes:
@@ -194,19 +194,19 @@ Administrators have `kind: ADMIN` (emails in `DEFAULT_ADMIN_EMAILS` on first sig
 
 Read-only UI for every Postgres table. Open **Admin** in the sidebar or visit `/admin` for the overview tiles.
 
-| Table | Route | API |
-|-------|-------|-----|
-| Document files (`document_files`) | `/admin/document-files` | `GET /api/admin/document-files` |
-| Document links (`document_user_links`) | `/admin/documents` | `GET /api/admin/documents` |
-| Users (`users`) | `/admin/users` | `GET /api/admin/users` |
-| Audit logs | `/admin/audit-logs` | `GET /api/admin/audit-logs` |
-| Failed audit logs | `/admin/failed-audit-logs` | `GET /api/admin/failed-audit-logs` |
-| Process errors | `/admin/process-errors` | `GET /api/admin/process-errors` |
-| Failed process errors | `/admin/failed-process-errors` | `GET /api/admin/failed-process-errors` |
-| Webhook deliveries | `/admin/webhook-deliveries` | `GET /api/admin/webhook-deliveries` |
-| Failed webhook deliveries | `/admin/failed-webhook-deliveries` | `GET /api/admin/failed-webhook-deliveries` |
+| Table | Admin UI | List API response key |
+|-------|----------|----------------------|
+| Files (`File`) | `/admin/files` | `GET /api/admin/files` → `{ File: [...] }` |
+| Recipients (`Recipient`) | `/admin/recipients` | `GET /api/admin/recipients` → `{ Recipient: [...] }` |
+| Documents (`Document`) | `/admin/documents` | `GET /api/admin/documents` → `{ Document: [...] }` |
+| Communications (`Communication`) | `/admin/communications` | `GET /api/admin/communications` → `{ Communication: [...] }` |
+| Users (`User`) | `/admin/users` | `GET /api/admin/users` → `{ User: [...] }` |
+| Audit logs | `/admin/audit-logs` | `GET /api/admin/audit-logs` → `{ AuditLog: [...] }` |
+| Dead letters | `/admin/dead-letters` | `GET /api/admin/dead-letters` → `{ DeadLetter: [...] }` |
+| Process errors | `/admin/process-errors` | `GET /api/admin/process-errors` → `{ ProcessError: [...] }` |
+| Webhook deliveries | `/admin/webhook-deliveries` | `GET /api/admin/webhook-deliveries` → `{ WebhookDelivery: [...] }` |
 
-List views support pagination (`limit`, `offset`). Document files and document links also expose detail pages (`/admin/document-files/:id`, `/admin/documents/:id`).
+List views support pagination (`limit`, `offset`). Files, documents, recipients, and communications also expose detail pages (`/admin/files/:id`, `/admin/documents/:id`, `/admin/communications/:id`).
 
 Requires admin session. API backing routes live under `GET /api/admin/*`. Secrets (download tokens, password hashes, object keys) are never shown.
 
@@ -222,7 +222,7 @@ Requires admin session. API backing routes live under `GET /api/admin/*`. Secret
 | `offset` | Offset pagination (JSON only, when no cursor) |
 | `eventType` | Filter by one or more event types |
 | `documentId`, `userId` | Scope to a document or user |
-| `from`, `to` | ISO date range on `timestamp` |
+| `from`, `to` | ISO date range on `createdAt` |
 | `includeExpired` | Include rows past retention (`false` by default) |
 
 Event catalog and future webhook hooks: [EVENTS_AND_WEBHOOKS.md](./EVENTS_AND_WEBHOOKS.md).
@@ -304,4 +304,4 @@ Extended test matrix: [e2e-test-plan.md](./e2e-test-plan.md).
 | [EVENTS_AND_WEBHOOKS.md](./EVENTS_AND_WEBHOOKS.md) | Audit events and webhook specification |
 | [e2e-test-plan.md](./e2e-test-plan.md) | Automated test coverage by area |
 | [bruno/README.md](../bruno/README.md) | API collection and CLI usage |
-| [Vellum_Comprehensive_Design_Document.md](./Vellum_Comprehensive_Design_Document.md) | Architecture and security model |
+| [Vellum_Comprehensive_Design_Document.md](./Vellum_Comprehensive_Design_Document.md) | Architecture and security model (v2.1 — current system) |

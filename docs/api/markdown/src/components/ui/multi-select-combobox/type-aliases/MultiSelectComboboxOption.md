@@ -2,7 +2,7 @@
 
 > **MultiSelectComboboxOption** = `object`
 
-Defined in: [src/components/ui/multi-select-combobox.tsx:19](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/components/ui/multi-select-combobox.tsx#L19)
+Defined in: [src/components/ui/multi-select-combobox.tsx:19](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/components/ui/multi-select-combobox.tsx#L19)
 
 Option label/value pair for [MultiSelectCombobox](../functions/MultiSelectCombobox.md).
 
@@ -12,7 +12,7 @@ Option label/value pair for [MultiSelectCombobox](../functions/MultiSelectCombob
 
 > **label**: `string`
 
-Defined in: [src/components/ui/multi-select-combobox.tsx:19](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/components/ui/multi-select-combobox.tsx#L19)
+Defined in: [src/components/ui/multi-select-combobox.tsx:19](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/components/ui/multi-select-combobox.tsx#L19)
 
 ***
 
@@ -20,4 +20,4 @@ Defined in: [src/components/ui/multi-select-combobox.tsx:19](https://github.com/
 
 > **value**: `string`
 
-Defined in: [src/components/ui/multi-select-combobox.tsx:19](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/components/ui/multi-select-combobox.tsx#L19)
+Defined in: [src/components/ui/multi-select-combobox.tsx:19](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/components/ui/multi-select-combobox.tsx#L19)

@@ -2,7 +2,7 @@
 
 > **getVerifyRejection**(`doc`, `now`, `config`): [`VerifyRejectionReason`](../type-aliases/VerifyRejectionReason.md) \| `null`
 
-Defined in: src/lib/verify-consumption.ts:38
+Defined in: [src/lib/verify-consumption.ts:36](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/verify-consumption.ts#L36)
 
 Returns whether verify should be rejected before password check.
 

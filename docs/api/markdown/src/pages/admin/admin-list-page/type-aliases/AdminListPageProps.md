@@ -2,7 +2,7 @@
 
 > **AdminListPageProps**\<`T`\> = `object`
 
-Defined in: [src/pages/admin/admin-list-page.tsx:17](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/pages/admin/admin-list-page.tsx#L17)
+Defined in: [src/pages/admin/admin-list-page.tsx:17](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/pages/admin/admin-list-page.tsx#L17)
 
 Props for [AdminListPage](../functions/AdminListPage.md).
 
@@ -18,7 +18,7 @@ Props for [AdminListPage](../functions/AdminListPage.md).
 
 > `optional` **clientColumnFilters?**: `ColumnFiltersState`
 
-Defined in: [src/pages/admin/admin-list-page.tsx:27](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/pages/admin/admin-list-page.tsx#L27)
+Defined in: [src/pages/admin/admin-list-page.tsx:27](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/pages/admin/admin-list-page.tsx#L27)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [src/pages/admin/admin-list-page.tsx:27](https://github.com/wynand22
 
 > `optional` **columnFilters?**: `ColumnFiltersState`
 
-Defined in: [src/pages/admin/admin-list-page.tsx:26](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/pages/admin/admin-list-page.tsx#L26)
+Defined in: [src/pages/admin/admin-list-page.tsx:26](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/pages/admin/admin-list-page.tsx#L26)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [src/pages/admin/admin-list-page.tsx:26](https://github.com/wynand22
 
 > **columns**: `ColumnDef`\<`T`\>[]
 
-Defined in: [src/pages/admin/admin-list-page.tsx:21](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/pages/admin/admin-list-page.tsx#L21)
+Defined in: [src/pages/admin/admin-list-page.tsx:21](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/pages/admin/admin-list-page.tsx#L21)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: [src/pages/admin/admin-list-page.tsx:21](https://github.com/wynand22
 
 > **description**: `string`
 
-Defined in: [src/pages/admin/admin-list-page.tsx:19](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/pages/admin/admin-list-page.tsx#L19)
+Defined in: [src/pages/admin/admin-list-page.tsx:19](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/pages/admin/admin-list-page.tsx#L19)
 
 ***
 
@@ -50,7 +50,7 @@ Defined in: [src/pages/admin/admin-list-page.tsx:19](https://github.com/wynand22
 
 > `optional` **emptyTitle?**: `string`
 
-Defined in: [src/pages/admin/admin-list-page.tsx:22](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/pages/admin/admin-list-page.tsx#L22)
+Defined in: [src/pages/admin/admin-list-page.tsx:22](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/pages/admin/admin-list-page.tsx#L22)
 
 ***
 
@@ -58,7 +58,7 @@ Defined in: [src/pages/admin/admin-list-page.tsx:22](https://github.com/wynand22
 
 > `optional` **onColumnFiltersChange?**: (`filters`) => `void`
 
-Defined in: [src/pages/admin/admin-list-page.tsx:28](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/pages/admin/admin-list-page.tsx#L28)
+Defined in: [src/pages/admin/admin-list-page.tsx:28](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/pages/admin/admin-list-page.tsx#L28)
 
 #### Parameters
 
@@ -76,7 +76,7 @@ Defined in: [src/pages/admin/admin-list-page.tsx:28](https://github.com/wynand22
 
 > `optional` **onPageChange?**: (`pageIndex`) => `void`
 
-Defined in: [src/pages/admin/admin-list-page.tsx:24](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/pages/admin/admin-list-page.tsx#L24)
+Defined in: [src/pages/admin/admin-list-page.tsx:24](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/pages/admin/admin-list-page.tsx#L24)
 
 #### Parameters
 
@@ -94,7 +94,7 @@ Defined in: [src/pages/admin/admin-list-page.tsx:24](https://github.com/wynand22
 
 > `optional` **pageIndex?**: `number`
 
-Defined in: [src/pages/admin/admin-list-page.tsx:23](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/pages/admin/admin-list-page.tsx#L23)
+Defined in: [src/pages/admin/admin-list-page.tsx:23](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/pages/admin/admin-list-page.tsx#L23)
 
 ***
 
@@ -102,7 +102,7 @@ Defined in: [src/pages/admin/admin-list-page.tsx:23](https://github.com/wynand22
 
 > `optional` **pageSize?**: `number`
 
-Defined in: [src/pages/admin/admin-list-page.tsx:25](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/pages/admin/admin-list-page.tsx#L25)
+Defined in: [src/pages/admin/admin-list-page.tsx:25](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/pages/admin/admin-list-page.tsx#L25)
 
 ***
 
@@ -110,7 +110,7 @@ Defined in: [src/pages/admin/admin-list-page.tsx:25](https://github.com/wynand22
 
 > **query**: `UseQueryResult`\<[`AdminListResult`](../../../../lib/queries/fetch-json/type-aliases/AdminListResult.md)\<`T`\>, `Error`\>
 
-Defined in: [src/pages/admin/admin-list-page.tsx:20](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/pages/admin/admin-list-page.tsx#L20)
+Defined in: [src/pages/admin/admin-list-page.tsx:20](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/pages/admin/admin-list-page.tsx#L20)
 
 ***
 
@@ -118,7 +118,7 @@ Defined in: [src/pages/admin/admin-list-page.tsx:20](https://github.com/wynand22
 
 > `optional` **serverFiltering?**: `boolean`
 
-Defined in: [src/pages/admin/admin-list-page.tsx:29](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/pages/admin/admin-list-page.tsx#L29)
+Defined in: [src/pages/admin/admin-list-page.tsx:29](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/pages/admin/admin-list-page.tsx#L29)
 
 ***
 
@@ -126,4 +126,4 @@ Defined in: [src/pages/admin/admin-list-page.tsx:29](https://github.com/wynand22
 
 > **title**: `string`
 
-Defined in: [src/pages/admin/admin-list-page.tsx:18](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/pages/admin/admin-list-page.tsx#L18)
+Defined in: [src/pages/admin/admin-list-page.tsx:18](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/pages/admin/admin-list-page.tsx#L18)

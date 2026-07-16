@@ -9,4 +9,5 @@ Orphaned resource types and helpers for compensation failures.
 ## Functions
 
 - [compensationFailedError](functions/compensationFailedError.md)
+- [orphanResourceKey](functions/orphanResourceKey.md)
 - [toOrphanExtension](functions/toOrphanExtension.md)

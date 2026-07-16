@@ -80,7 +80,7 @@ Defined in: node\_modules/zod/v4/core/errors.d.cts:29
 
 ### origin
 
-> `readonly` **origin**: `"string"` \| `"number"` \| `"bigint"` \| `string` & `object` \| `"int"` \| `"set"` \| `"date"` \| `"file"` \| `"array"`
+> `readonly` **origin**: `"string"` \| `"number"` \| `"bigint"` \| `"file"` \| `string` & `object` \| `"int"` \| `"set"` \| `"date"` \| `"array"`
 
 Defined in: node\_modules/zod/v4/core/errors.d.cts:28
 

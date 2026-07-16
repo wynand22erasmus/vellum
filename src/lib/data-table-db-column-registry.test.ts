@@ -18,14 +18,14 @@ describe('data-table-db-column-registry', () => {
   it('registers every Prisma model', () => {
     expect(DB_MODEL_NAMES).toEqual([
       'User',
-      'DocumentFile',
-      'DocumentUserLink',
+      'File',
+      'Recipient',
+      'Document',
+      'Communication',
       'AuditLog',
-      'FailedAuditLog',
+      'DeadLetter',
       'ProcessError',
-      'FailedProcessError',
       'WebhookDelivery',
-      'FailedWebhookDelivery',
     ]);
   });
 
@@ -60,7 +60,7 @@ describe('data-table-db-column-registry', () => {
   });
 
   it('maps derived document status facet', () => {
-    const meta = resolveDbColumnMeta('status', undefined, 'DocumentUserLink');
+    const meta = resolveDbColumnMeta('status', undefined, 'Document');
     expect(meta?.dataType).toBe('enum');
     expect(meta?.filterAs).toBe('document-status-facet');
   });
@@ -71,9 +71,9 @@ describe('data-table-db-column-registry', () => {
   });
 
   it('mergeColumnMetaWithDb fills from registry when dataType omitted', () => {
-    const merged = mergeColumnMetaWithDb('recipientEmail', { dbModel: 'DocumentUserLink' }, undefined);
+    const merged = mergeColumnMetaWithDb('email', { dbModel: 'Recipient' }, undefined);
     expect(merged.dataType).toBe('email');
-    expect(merged.dbField).toBe('recipientEmail');
+    expect(merged.dbField).toBe('email');
   });
 
   it('lists all User columns from schema registry', () => {

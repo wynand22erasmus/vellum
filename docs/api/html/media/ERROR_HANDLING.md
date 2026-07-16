@@ -71,7 +71,7 @@ Every handled error is:
 2. Enqueued on `process-errors-queue` → persisted to `ProcessError`
 3. Returned as Problem Details on HTTP JSON paths
 
-Enqueue failures go to `FailedProcessError`.
+Enqueue failures go to `DeadLetter` with `pipeline = PROCESS_ERROR`.
 
 ## Audit events and webhooks
 
@@ -83,10 +83,11 @@ Cross-table fields tie audit pipeline failures and HTTP/process errors to the sa
 
 | Table | Field | Set when |
 |-------|-------|----------|
-| `ProcessError` | `failedAuditLogId` | Audit enqueue or worker failed after `FailedAuditLog` was written |
+| `ProcessError` | `deadLetterId` | Audit enqueue or worker failed after a `DeadLetter` row was written |
 | `ProcessError` | `auditLogId` | Successful audit write linked to this error (via `correlationId` or direct id) |
 | `ProcessError` | `correlationId` | Same HTTP request triggered audit + process error (e.g. verify wrong password) |
-| `FailedAuditLog` | `processErrorId` | Back-filled when the linked `ProcessError` row is persisted |
+| `DeadLetter` | `linkedTable` / `linkedId` | Back-filled when the linked `ProcessError` row is persisted |
+| `DeadLetter.retried` | — | Reserved for future replay worker; filterable in admin UI today |
 | `AuditLog` | `processErrorId` | Back-filled when audit worker or process-error worker resolves the pair |
 
 ### Verify wrong password
@@ -99,9 +100,9 @@ Cross-table fields tie audit pipeline failures and HTTP/process errors to the sa
 
 ### Audit pipeline failure
 
-1. `FailedAuditLog` is created synchronously.
-2. `recordProcessError({ failedAuditLogId })` enqueues the process error.
-3. `processErrorWorker` sets `FailedAuditLog.processErrorId` after insert.
+1. `DeadLetter` (`pipeline = AUDIT`) is created synchronously.
+2. `recordProcessError({ deadLetterId })` enqueues the process error.
+3. `processErrorWorker` sets `DeadLetter.linkedTable` / `linkedId` after insert.
 
 ## Compensation flows
 
@@ -109,8 +110,8 @@ Cross-table fields tie audit pipeline failures and HTTP/process errors to the sa
 |------|-------|-----------------|
 | Upload | validate → `create(s3Key:null)` → S3 put → `update(s3Key)` → email | delete doc + S3 |
 | Request link | snapshot → update token → email | revert link state |
-| Verify | presign → update `isUsed` | N/A (short-lived URL) |
-| File scrub worker | DB null `s3Key` first → S3 delete | restore DB row |
+| Verify | presign → update `downloadCount` | N/A (short-lived URL) |
+| File purge worker | DB null `s3Key` first → S3 delete | restore DB row |
 
 When undo fails, responses include `orphanedResources`, `compensationAttempted`, and `compensationFailed` extensions via `AppError.partialFailure` / `compensationFailedError`.
 

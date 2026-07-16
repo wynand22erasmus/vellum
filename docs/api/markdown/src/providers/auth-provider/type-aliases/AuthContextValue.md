@@ -2,7 +2,7 @@
 
 > **AuthContextValue** = `object`
 
-Defined in: [src/providers/auth-provider.tsx:20](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/providers/auth-provider.tsx#L20)
+Defined in: [src/providers/auth-provider.tsx:20](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/providers/auth-provider.tsx#L20)
 
 Auth context value shared by [useAuthContext](../functions/useAuthContext.md) and [useAuthMe](../functions/useAuthMe.md).
 
@@ -12,7 +12,7 @@ Auth context value shared by [useAuthContext](../functions/useAuthContext.md) an
 
 > **isAdmin**: `boolean`
 
-Defined in: [src/providers/auth-provider.tsx:23](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/providers/auth-provider.tsx#L23)
+Defined in: [src/providers/auth-provider.tsx:23](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/providers/auth-provider.tsx#L23)
 
 ***
 
@@ -20,7 +20,7 @@ Defined in: [src/providers/auth-provider.tsx:23](https://github.com/wynand22eras
 
 > **loading**: `boolean`
 
-Defined in: [src/providers/auth-provider.tsx:22](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/providers/auth-provider.tsx#L22)
+Defined in: [src/providers/auth-provider.tsx:22](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/providers/auth-provider.tsx#L22)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [src/providers/auth-provider.tsx:22](https://github.com/wynand22eras
 
 > **refresh**: () => `Promise`\<[`AuthUser`](../../../lib/auth/types/interfaces/AuthUser.md) \| `null`\>
 
-Defined in: [src/providers/auth-provider.tsx:24](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/providers/auth-provider.tsx#L24)
+Defined in: [src/providers/auth-provider.tsx:24](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/providers/auth-provider.tsx#L24)
 
 #### Returns
 
@@ -40,4 +40,4 @@ Defined in: [src/providers/auth-provider.tsx:24](https://github.com/wynand22eras
 
 > **user**: [`AuthUser`](../../../lib/auth/types/interfaces/AuthUser.md) \| `null`
 
-Defined in: [src/providers/auth-provider.tsx:21](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/providers/auth-provider.tsx#L21)
+Defined in: [src/providers/auth-provider.tsx:21](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/providers/auth-provider.tsx#L21)

@@ -31,14 +31,24 @@ export const PAGE_LABELS = {
     href: '/admin',
   },
   adminDocuments: {
-    nav: 'Document links',
-    description: 'Per-recipient download links, passwords, and lifecycle state.',
+    nav: 'Documents',
+    description: 'Delivery envelopes pairing a file with a recipient (password, download limits).',
     href: '/admin/documents',
   },
-  adminDocumentFiles: {
-    nav: 'Document files',
+  adminFiles: {
+    nav: 'Files',
     description: 'Shared file assets in object storage (deduplicated by SHA-256).',
-    href: '/admin/document-files',
+    href: '/admin/files',
+  },
+  adminRecipients: {
+    nav: 'Recipients',
+    description: 'Recipient identities with delivery contact and OTP channel preferences.',
+    href: '/admin/recipients',
+  },
+  adminCommunications: {
+    nav: 'Communications',
+    description: 'Outbound verify URLs with expiry and revocation state per envelope.',
+    href: '/admin/communications',
   },
   adminUsers: {
     nav: 'Users',
@@ -50,38 +60,36 @@ export const PAGE_LABELS = {
     description: 'Compliance events with optional filters.',
     href: '/admin/audit-logs',
   },
-  adminFailedAuditLogs: {
-    nav: 'Failed audit logs',
-    description: 'Dead-letter payloads when audit enqueue fails.',
-    href: '/admin/failed-audit-logs',
+  adminDeadLetters: {
+    nav: 'Dead letters',
+    description: 'Failed queue payloads from audit, process-error, and webhook pipelines.',
+    href: '/admin/dead-letters',
   },
   adminProcessErrors: {
     nav: 'Process errors',
     description: 'RFC 9457 operational failures from HTTP, workers, and queues.',
     href: '/admin/process-errors',
   },
-  adminFailedProcessErrors: {
-    nav: 'Failed process errors',
-    description: 'Dead-letter payloads when process-error enqueue fails.',
-    href: '/admin/failed-process-errors',
-  },
   adminWebhookDeliveries: {
     nav: 'Webhook deliveries',
     description: 'Outbound audit webhook HTTP attempts.',
     href: '/admin/webhook-deliveries',
   },
-  adminFailedWebhookDeliveries: {
-    nav: 'Failed webhook deliveries',
-    description: 'Dead-letter payloads when webhook delivery exhausts retries.',
-    href: '/admin/failed-webhook-deliveries',
-  },
-  adminDocumentFileDetail: {
-    nav: 'Document file detail',
-    description: 'Shared file metadata and linked recipient rows.',
+  adminFileDetail: {
+    nav: 'File detail',
+    description: 'Shared file metadata and linked document envelopes.',
   },
   adminDocumentDetail: {
     nav: 'Document detail',
-    description: 'Document metadata and audit trail for this upload.',
+    description: 'Envelope metadata, outbound links, and audit trail.',
+  },
+  adminCommunicationDetail: {
+    nav: 'Communication detail',
+    description: 'Verify URL metadata and related audit events.',
+  },
+  adminRecipientDetail: {
+    nav: 'Recipient detail',
+    description: 'Recipient identity and linked document envelopes.',
   },
   development: {
     nav: 'Development',
@@ -134,16 +142,28 @@ export const PAGE_LABELS = {
 /** Admin overview tiles linking to each admin sub-section. */
 export const ADMIN_INDEX_TILES = [
   {
-    id: 'admin-document-files',
-    href: PAGE_LABELS.adminDocumentFiles.href!,
-    label: PAGE_LABELS.adminDocumentFiles.nav,
-    description: PAGE_LABELS.adminDocumentFiles.description,
+    id: 'admin-files',
+    href: PAGE_LABELS.adminFiles.href!,
+    label: PAGE_LABELS.adminFiles.nav,
+    description: PAGE_LABELS.adminFiles.description,
   },
   {
     id: 'admin-documents',
     href: PAGE_LABELS.adminDocuments.href!,
     label: PAGE_LABELS.adminDocuments.nav,
     description: PAGE_LABELS.adminDocuments.description,
+  },
+  {
+    id: 'admin-recipients',
+    href: PAGE_LABELS.adminRecipients.href!,
+    label: PAGE_LABELS.adminRecipients.nav,
+    description: PAGE_LABELS.adminRecipients.description,
+  },
+  {
+    id: 'admin-communications',
+    href: PAGE_LABELS.adminCommunications.href!,
+    label: PAGE_LABELS.adminCommunications.nav,
+    description: PAGE_LABELS.adminCommunications.description,
   },
   {
     id: 'admin-users',
@@ -158,10 +178,10 @@ export const ADMIN_INDEX_TILES = [
     description: PAGE_LABELS.adminAuditLogs.description,
   },
   {
-    id: 'admin-failed-audit',
-    href: PAGE_LABELS.adminFailedAuditLogs.href!,
-    label: PAGE_LABELS.adminFailedAuditLogs.nav,
-    description: PAGE_LABELS.adminFailedAuditLogs.description,
+    id: 'admin-dead-letters',
+    href: PAGE_LABELS.adminDeadLetters.href!,
+    label: PAGE_LABELS.adminDeadLetters.nav,
+    description: PAGE_LABELS.adminDeadLetters.description,
   },
   {
     id: 'admin-process-errors',
@@ -170,22 +190,10 @@ export const ADMIN_INDEX_TILES = [
     description: PAGE_LABELS.adminProcessErrors.description,
   },
   {
-    id: 'admin-failed-process-errors',
-    href: PAGE_LABELS.adminFailedProcessErrors.href!,
-    label: PAGE_LABELS.adminFailedProcessErrors.nav,
-    description: PAGE_LABELS.adminFailedProcessErrors.description,
-  },
-  {
     id: 'admin-webhook-deliveries',
     href: PAGE_LABELS.adminWebhookDeliveries.href!,
     label: PAGE_LABELS.adminWebhookDeliveries.nav,
     description: PAGE_LABELS.adminWebhookDeliveries.description,
-  },
-  {
-    id: 'admin-failed-webhook-deliveries',
-    href: PAGE_LABELS.adminFailedWebhookDeliveries.href!,
-    label: PAGE_LABELS.adminFailedWebhookDeliveries.nav,
-    description: PAGE_LABELS.adminFailedWebhookDeliveries.description,
   },
 ] as const;
 
@@ -194,14 +202,17 @@ const PAGE_LABEL_BY_PATH: Record<string, PageLabel> = {
   '/admin': PAGE_LABELS.admin,
   '/dev': PAGE_LABELS.development,
   '/admin/documents': PAGE_LABELS.adminDocuments,
-  '/admin/document-files': PAGE_LABELS.adminDocumentFiles,
+  '/admin/files': PAGE_LABELS.adminFiles,
+  '/admin/recipients': PAGE_LABELS.adminRecipients,
+  '/admin/communications': PAGE_LABELS.adminCommunications,
   '/admin/users': PAGE_LABELS.adminUsers,
   '/admin/audit-logs': PAGE_LABELS.adminAuditLogs,
-  '/admin/failed-audit-logs': PAGE_LABELS.adminFailedAuditLogs,
+  '/admin/dead-letters': PAGE_LABELS.adminDeadLetters,
+  '/admin/failed-audit-logs': PAGE_LABELS.adminDeadLetters,
   '/admin/process-errors': PAGE_LABELS.adminProcessErrors,
-  '/admin/failed-process-errors': PAGE_LABELS.adminFailedProcessErrors,
+  '/admin/failed-process-errors': PAGE_LABELS.adminDeadLetters,
   '/admin/webhook-deliveries': PAGE_LABELS.adminWebhookDeliveries,
-  '/admin/failed-webhook-deliveries': PAGE_LABELS.adminFailedWebhookDeliveries,
+  '/admin/failed-webhook-deliveries': PAGE_LABELS.adminDeadLetters,
 };
 
 /**

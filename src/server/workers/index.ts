@@ -2,7 +2,7 @@
  * Worker process entrypoint: registers BullMQ schedulers and loads all workers.
  *
  * @packageDocumentation
- * @remarks Run via `npm run worker`. Registers hourly file scrub and monthly record scrub cron jobs.
+ * @remarks Run via `npm run worker`. Registers hourly file purge and monthly record purge cron jobs.
  */
 
 import { cleanupQueue } from '../queues/cleanupQueue.ts';
@@ -11,8 +11,8 @@ import { recordProcessError } from '../../lib/errors/record-process-error.ts';
 import { startSftpIngestion } from '../sftp/startSftpIngestion.ts';
 import './emailWorker.ts';
 import './auditWorker.ts';
-import './fileScrubWorker.ts';
-import './recordScrubWorker.ts';
+import './filePurgeWorker.ts';
+import './recordPurgeWorker.ts';
 import './processErrorWorker.ts';
 import './orphanReconciliationWorker.ts';
 import './webhookWorker.ts';
@@ -20,15 +20,15 @@ import './webhookWorker.ts';
 /** @internal */
 async function registerSchedulers(): Promise<void> {
   await cleanupQueue.upsertJobScheduler(
-    'scrub-files-hourly',
+    'purge-files-hourly',
     { pattern: '0 * * * *' },
-    { name: 'scrub-files', data: {} },
+    { name: 'purge-files', data: {} },
   );
 
   await cleanupQueue.upsertJobScheduler(
-    'scrub-records-monthly',
+    'purge-records-monthly',
     { pattern: '0 0 1 * *' },
-    { name: 'scrub-records', data: {} },
+    { name: 'purge-records', data: {} },
   );
 
   if (env.orphanReconcileEnabled) {

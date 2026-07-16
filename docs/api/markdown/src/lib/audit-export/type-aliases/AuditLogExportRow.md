@@ -2,15 +2,39 @@
 
 > **AuditLogExportRow** = `object`
 
-Defined in: src/lib/audit-export.ts:7
+Defined in: [src/lib/audit-export.ts:7](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/audit-export.ts#L7)
 
 ## Properties
+
+### auditLogId
+
+> **auditLogId**: `string`
+
+Defined in: [src/lib/audit-export.ts:8](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/audit-export.ts#L8)
+
+***
+
+### communicationId
+
+> **communicationId**: `string` \| `null`
+
+Defined in: [src/lib/audit-export.ts:13](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/audit-export.ts#L13)
+
+***
+
+### createdAt
+
+> **createdAt**: `string`
+
+Defined in: [src/lib/audit-export.ts:10](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/audit-export.ts#L10)
+
+***
 
 ### documentId
 
 > **documentId**: `string` \| `null`
 
-Defined in: src/lib/audit-export.ts:12
+Defined in: [src/lib/audit-export.ts:12](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/audit-export.ts#L12)
 
 ***
 
@@ -18,7 +42,7 @@ Defined in: src/lib/audit-export.ts:12
 
 > **eventType**: `string`
 
-Defined in: src/lib/audit-export.ts:9
+Defined in: [src/lib/audit-export.ts:9](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/audit-export.ts#L9)
 
 ***
 
@@ -26,15 +50,7 @@ Defined in: src/lib/audit-export.ts:9
 
 > **expiresAt**: `string`
 
-Defined in: src/lib/audit-export.ts:16
-
-***
-
-### id
-
-> **id**: `string`
-
-Defined in: src/lib/audit-export.ts:8
+Defined in: [src/lib/audit-export.ts:17](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/audit-export.ts#L17)
 
 ***
 
@@ -42,7 +58,7 @@ Defined in: src/lib/audit-export.ts:8
 
 > **ipAddress**: `string` \| `null`
 
-Defined in: src/lib/audit-export.ts:13
+Defined in: [src/lib/audit-export.ts:14](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/audit-export.ts#L14)
 
 ***
 
@@ -50,7 +66,7 @@ Defined in: src/lib/audit-export.ts:13
 
 > **metadata**: `unknown`
 
-Defined in: src/lib/audit-export.ts:15
+Defined in: [src/lib/audit-export.ts:16](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/audit-export.ts#L16)
 
 ***
 
@@ -58,15 +74,7 @@ Defined in: src/lib/audit-export.ts:15
 
 > **processErrorId**: `string` \| `null`
 
-Defined in: src/lib/audit-export.ts:17
-
-***
-
-### timestamp
-
-> **timestamp**: `string`
-
-Defined in: src/lib/audit-export.ts:10
+Defined in: [src/lib/audit-export.ts:18](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/audit-export.ts#L18)
 
 ***
 
@@ -74,7 +82,7 @@ Defined in: src/lib/audit-export.ts:10
 
 > **userAgent**: `string` \| `null`
 
-Defined in: src/lib/audit-export.ts:14
+Defined in: [src/lib/audit-export.ts:15](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/audit-export.ts#L15)
 
 ***
 
@@ -82,4 +90,4 @@ Defined in: src/lib/audit-export.ts:14
 
 > **userId**: `string` \| `null`
 
-Defined in: src/lib/audit-export.ts:11
+Defined in: [src/lib/audit-export.ts:11](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/audit-export.ts#L11)

@@ -1,6 +1,6 @@
 # src/pages/admin/admin-documents-page
 
-Admin documents list.
+Admin documents list (delivery envelopes).
 
 ## Functions
 

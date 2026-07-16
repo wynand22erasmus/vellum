@@ -12,7 +12,28 @@ Runtime configuration is read in `src/lib/env.ts`. Copy `.env.example` (host) or
 
 Built services (`app`, `worker`) publish images named `{VELLUM_PROJECT}-{service}:{VELLUM_ENV}` (for example `vellum-app:development`, `vellum-worker:production`). Third-party images (Postgres, Redis, etc.) keep upstream tags; Compose adds the same `com.vellum.*` labels on those containers for stack identification.
 
-`scripts/compose.sh` validates `VELLUM_ENV` and exports `VELLUM_BUILD_TARGET` before invoking Compose.
+`scripts/compose.sh` validates `VELLUM_ENV` and exports `VELLUM_BUILD_TARGET` before invoking Compose. It also sources `scripts/host-ports.env`, which sets host-published port defaults from **`VELLUM_STAGE`** (`dev` → **85**xx, `test` → **86**xx, `live` → **87**xx).
+
+## Host ports (dev machine)
+
+| Variable | Dev (85**) | Test (86**) | Live (87**) | Description |
+|----------|------------|-------------|-------------|-------------|
+| `VELLUM_STAGE` | `dev` | `test` | `live` | Selects the port block (override individual ports in `.env` if needed) |
+| `VELLUM_PUBLIC_PORT` | 8580 | 8680 | 8780 | Public web entry via host nginx |
+| `APP_HOST_PORT` | 8573 | 8673 | 8773 | Published API port |
+| `WEB_HOST_PORT` | 8574 | 8674 | 8774 | Published Vite UI port |
+| `POSTGRES_HOST_PORT` | 8532 | 8632 | 8732 | Published PostgreSQL |
+| `REDIS_HOST_PORT` | 8579 | 8679 | 8779 | Published Redis |
+| `MINIO_HOST_PORT` | 8500 | 8600 | 8700 | Published MinIO S3 API |
+| `MINIO_CONSOLE_HOST_PORT` | 8501 | 8601 | 8701 | Published MinIO console |
+| `MAILPIT_UI_HOST_PORT` | 8525 | 8625 | 8725 | Published Mailpit UI |
+| `MAILPIT_SMTP_HOST_PORT` | 8510 | 8610 | 8710 | Published Mailpit SMTP |
+| `PRISMA_STUDIO_PORT` | 8555 | 8655 | 8755 | Published Prisma Studio |
+| `DB_ADMIN_PORT` | 8581 | 8681 | 8781 | Published Adminer |
+| `SFTP_PORT` | 8522 | 8622 | 8722 | Published SFTP |
+| `WEBHOOK_HOST_PORT` | 8590 | 8690 | 8790 | Published webhook-tester UI |
+
+Host nginx config: `nginx/vellum-host.conf` (all three entry ports). Container internal ports are unchanged.
 
 ## Application runtime
 
@@ -21,14 +42,14 @@ Built services (`app`, `worker`) publish images named `{VELLUM_PROJECT}-{service
 | `NODE_ENV` | No | `development` | `production` enables static SPA serving and stricter logging |
 | `VELLUM_HOST` | No | `localhost` | Public hostname for links, nginx, and Vite (substitute your domain) |
 | `VELLUM_PUBLIC_SCHEME` | No | `http` | URL scheme when deriving `APP_URL` |
-| `VELLUM_PUBLIC_PORT` | No | `5174` (localhost) / unset (other hosts) | Public port when deriving `APP_URL` (web UI origin for email links) |
+| `VELLUM_PUBLIC_PORT` | No | `8580` (localhost) / unset (other hosts) | Public port when deriving `APP_URL` (web UI origin for email links) |
 | `APP_URL` | No | derived from `VELLUM_*` | Public base URL for links in email (overrides derivation) |
 | `PORT` | No | `3000` | HTTP listen port (production Node server) |
 | `API_KEY` | No | `dev-api-key-change-in-production` | Bearer token for `POST /api/upload` |
 | `DATABASE_URL` | **Yes** | — | PostgreSQL connection string |
 | `REDIS_URL` | No | `redis://localhost:6379` | BullMQ and health checks |
 | `MINIO_ENDPOINT` | No | `http://localhost:9000` | S3 endpoint for server-side I/O (upload, delete) |
-| `MINIO_PUBLIC_ENDPOINT` | No | derived | Browser-reachable URL for presigned downloads. When `MINIO_ENDPOINT` uses hostname `minio` (Compose), defaults to `http://{VELLUM_HOST}:9000` |
+| `MINIO_PUBLIC_ENDPOINT` | No | derived | Browser-reachable URL for presigned downloads. When `MINIO_ENDPOINT` uses hostname `minio` (Compose), defaults to `http://{VELLUM_HOST}:{MINIO_HOST_PORT or 8500}` |
 | `MINIO_ROOT_USER` | No | `minioadmin` | S3 access key |
 | `MINIO_ROOT_PASSWORD` | No | `minioadmin` | S3 secret key |
 | `MINIO_BUCKET_NAME` | No | `vellum-documents` | Object storage bucket |
@@ -45,13 +66,13 @@ Built services (`app`, `worker`) publish images named `{VELLUM_PROJECT}-{service
 | `EMAIL_PROVIDER` | No | `local` | `local` (Mailpit) or `ses` |
 | `MAILPIT_HOST` | No | `localhost` | SMTP host for local provider |
 | `MAILPIT_PORT` | No | `1025` | SMTP port for local provider |
-| `PRISMA_STUDIO_PORT` | No | `5555` | Prisma Studio in the **postgres** container |
-| `DB_ADMIN_PORT` | No | `8081` | Adminer SQL UI in the **postgres** container |
-| `DATABASE_URL_HOST` | No | — | PostgreSQL URL for host-side tools when Compose is not running (`localhost:5432`) |
+| `PRISMA_STUDIO_PORT` | No | `8555` (dev) | Prisma Studio host port in the **postgres** container |
+| `DB_ADMIN_PORT` | No | `8581` (dev) | Adminer SQL UI host port in the **postgres** container |
+| `DATABASE_URL_HOST` | No | — | PostgreSQL URL for host-side tools when Compose is not running (`localhost:8532` for dev) |
 | `MAX_UPLOAD_BYTES` | No | `52428800` (50 MiB) | Upload size limit |
 | `MAX_BATCH_RECIPIENTS` | No | `50` | Max entries in `recipients` for `POST /api/upload/batch` |
 | `SFTP_ENABLED` | No | `false` | When `true`, worker polls the SFTP inbox for file + manifest pairs |
-| `SFTP_PORT` | No | `2222` | Host port for the Compose `sftp` service (atmoz/sftp) |
+| `SFTP_PORT` | No | `8522` (dev) | Host port for the Compose `sftp` service (atmoz/sftp) |
 | `SFTP_PASSWORD` | No | `devpassword` | SFTP user password in Compose (`partner` user) |
 | `SFTP_USER` | No | `partner` | SFTP username label in audit metadata |
 | `SFTP_INBOX_PATH` | No | `/sftp` | Inbox directory watched by the worker (shared volume with SFTP upload root) |
@@ -81,7 +102,7 @@ See [SFTP_INGESTION.md](./SFTP_INGESTION.md) for drop format, audit pipeline, an
 | `TWILIO_ACCOUNT_SID` | If SMS/WhatsApp | — | Twilio account SID |
 | `TWILIO_AUTH_TOKEN` | If SMS/WhatsApp | — | Twilio auth token |
 | `TWILIO_FROM_NUMBER` | If SMS/WhatsApp | — | Twilio sender (E.164; prefix `whatsapp:` for WhatsApp) |
-| `TOTP_ENCRYPTION_KEY` | No | `SESSION_SECRET` | AES key material for `DocumentUserLink.totpSecretEnc` |
+| `TOTP_ENCRYPTION_KEY` | No | `SESSION_SECRET` | AES key material for `Recipient.authenticatorSecretEnc` |
 
 See [ERROR_HANDLING.md](./ERROR_HANDLING.md) for the full error-handling standard.
 

@@ -4,9 +4,10 @@
  * @packageDocumentation
  */
 
+import { createDeadLetter } from '../dead-letter.ts';
+import { DeadLetterPipeline } from '../../../generated/enums.ts';
 import { appendProcessErrorLog } from './process-error-logger.ts';
 import { processErrorQueue, type ProcessErrorJobData } from '../../server/queues/processErrorQueue.ts';
-import { prisma } from '../prisma.ts';
 import type { ProblemDetails } from '../http/problem-details.ts';
 
 /** Origin of a persisted `ProcessError` row. */
@@ -23,14 +24,15 @@ export interface RecordProcessErrorInput {
   source: ProcessErrorSource;
   userId?: string;
   documentId?: string;
+  communicationId?: string;
   extensions?: Record<string, unknown>;
   internal?: Record<string, unknown>;
   jobId?: string;
   jobName?: string;
-  /** Linked `FailedAuditLog` when audit enqueue/worker failed. */
-  failedAuditLogId?: string;
-  /** Alias for {@link failedAuditLogId}. */
-  relatedFailedAuditLogId?: string;
+  /** Linked `DeadLetter` when audit enqueue/worker failed. */
+  deadLetterId?: string;
+  /** Alias for {@link deadLetterId}. */
+  relatedDeadLetterId?: string;
   /** Linked `AuditLog` when correlation is known at record time. */
   auditLogId?: string;
   /** Shared incident UUID across audit and process-error pipelines. */
@@ -43,11 +45,11 @@ export interface RecordProcessErrorInput {
  * @param input - Normalized error fields
  */
 export function recordProcessError(input: RecordProcessErrorInput): void {
-  const failedAuditLogId = input.failedAuditLogId ?? input.relatedFailedAuditLogId;
+  const deadLetterId = input.deadLetterId ?? input.relatedDeadLetterId;
 
   const record = {
     ...input,
-    failedAuditLogId,
+    deadLetterId,
     recordedAt: new Date().toISOString(),
   };
 
@@ -63,24 +65,24 @@ export function recordProcessError(input: RecordProcessErrorInput): void {
     source: input.source,
     userId: input.userId,
     documentId: input.documentId,
+    communicationId: input.communicationId,
     extensions: input.extensions,
     internal: {
       ...(input.internal ?? {}),
       ...(input.jobId ? { jobId: input.jobId } : {}),
       ...(input.jobName ? { jobName: input.jobName } : {}),
     },
-    ...(failedAuditLogId ? { failedAuditLogId } : {}),
+    ...(deadLetterId ? { deadLetterId } : {}),
     ...(input.auditLogId ? { auditLogId: input.auditLogId } : {}),
     ...(input.correlationId ? { correlationId: input.correlationId } : {}),
   };
 
   processErrorQueue.add('persist-process-error', jobData).catch(async (err) => {
     try {
-      await prisma.failedProcessError.create({
-        data: {
-          payload: jobData as object,
-          error: err instanceof Error ? err.message : String(err),
-        },
+      await createDeadLetter({
+        pipeline: DeadLetterPipeline.PROCESS_ERROR,
+        payload: jobData,
+        error: err instanceof Error ? err.message : String(err),
       });
     } catch {
       // Last-resort — nothing more we can do synchronously
@@ -109,9 +111,10 @@ export function recordProcessErrorFromProblem(
     requestId?: string;
     userId?: string;
     documentId?: string;
+    communicationId?: string;
     internal?: Record<string, unknown>;
     correlationId?: string;
-    failedAuditLogId?: string;
+    deadLetterId?: string;
     auditLogId?: string;
     jobId?: string;
     jobName?: string;
@@ -132,10 +135,11 @@ export function recordProcessErrorFromProblem(
     source: ctx.source,
     userId: ctx.userId,
     documentId: ctx.documentId,
+    communicationId: ctx.communicationId,
     extensions,
     internal: ctx.internal,
     correlationId,
-    failedAuditLogId: ctx.failedAuditLogId,
+    deadLetterId: ctx.deadLetterId,
     auditLogId: ctx.auditLogId,
     jobId: ctx.jobId,
     jobName: ctx.jobName,

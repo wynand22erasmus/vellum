@@ -2,7 +2,7 @@
 
 > `const` **PAGE\_LABELS**: `object`
 
-Defined in: [src/lib/page-labels.ts:19](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/page-labels.ts#L19)
+Defined in: [src/lib/page-labels.ts:19](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/page-labels.ts#L19)
 
 Canonical labels and descriptions for known dashboard and auth routes.
 
@@ -40,45 +40,61 @@ Canonical labels and descriptions for known dashboard and auth routes.
 
 > `readonly` **nav**: `"Audit logs"` = `'Audit logs'`
 
+### adminCommunicationDetail
+
+> `readonly` **adminCommunicationDetail**: `object`
+
+#### adminCommunicationDetail.description
+
+> `readonly` **description**: `"Verify URL metadata and related audit events."` = `'Verify URL metadata and related audit events.'`
+
+#### adminCommunicationDetail.nav
+
+> `readonly` **nav**: `"Communication detail"` = `'Communication detail'`
+
+### adminCommunications
+
+> `readonly` **adminCommunications**: `object`
+
+#### adminCommunications.description
+
+> `readonly` **description**: `"Outbound verify URLs with expiry and revocation state per envelope."` = `'Outbound verify URLs with expiry and revocation state per envelope.'`
+
+#### adminCommunications.href
+
+> `readonly` **href**: `"/admin/communications"` = `'/admin/communications'`
+
+#### adminCommunications.nav
+
+> `readonly` **nav**: `"Communications"` = `'Communications'`
+
+### adminDeadLetters
+
+> `readonly` **adminDeadLetters**: `object`
+
+#### adminDeadLetters.description
+
+> `readonly` **description**: `"Failed queue payloads from audit, process-error, and webhook pipelines."` = `'Failed queue payloads from audit, process-error, and webhook pipelines.'`
+
+#### adminDeadLetters.href
+
+> `readonly` **href**: `"/admin/dead-letters"` = `'/admin/dead-letters'`
+
+#### adminDeadLetters.nav
+
+> `readonly` **nav**: `"Dead letters"` = `'Dead letters'`
+
 ### adminDocumentDetail
 
 > `readonly` **adminDocumentDetail**: `object`
 
 #### adminDocumentDetail.description
 
-> `readonly` **description**: `"Document metadata and audit trail for this upload."` = `'Document metadata and audit trail for this upload.'`
+> `readonly` **description**: `"Envelope metadata, outbound links, and audit trail."` = `'Envelope metadata, outbound links, and audit trail.'`
 
 #### adminDocumentDetail.nav
 
 > `readonly` **nav**: `"Document detail"` = `'Document detail'`
-
-### adminDocumentFileDetail
-
-> `readonly` **adminDocumentFileDetail**: `object`
-
-#### adminDocumentFileDetail.description
-
-> `readonly` **description**: `"Shared file metadata and linked recipient rows."` = `'Shared file metadata and linked recipient rows.'`
-
-#### adminDocumentFileDetail.nav
-
-> `readonly` **nav**: `"Document file detail"` = `'Document file detail'`
-
-### adminDocumentFiles
-
-> `readonly` **adminDocumentFiles**: `object`
-
-#### adminDocumentFiles.description
-
-> `readonly` **description**: `"Shared file assets in object storage (deduplicated by SHA-256)."` = `'Shared file assets in object storage (deduplicated by SHA-256).'`
-
-#### adminDocumentFiles.href
-
-> `readonly` **href**: `"/admin/document-files"` = `'/admin/document-files'`
-
-#### adminDocumentFiles.nav
-
-> `readonly` **nav**: `"Document files"` = `'Document files'`
 
 ### adminDocuments
 
@@ -86,7 +102,7 @@ Canonical labels and descriptions for known dashboard and auth routes.
 
 #### adminDocuments.description
 
-> `readonly` **description**: `"Per-recipient download links, passwords, and lifecycle state."` = `'Per-recipient download links, passwords, and lifecycle state.'`
+> `readonly` **description**: `"Delivery envelopes pairing a file with a recipient (password, download limits)."` = `'Delivery envelopes pairing a file with a recipient (password, download limits).'`
 
 #### adminDocuments.href
 
@@ -94,55 +110,35 @@ Canonical labels and descriptions for known dashboard and auth routes.
 
 #### adminDocuments.nav
 
-> `readonly` **nav**: `"Document links"` = `'Document links'`
+> `readonly` **nav**: `"Documents"` = `'Documents'`
 
-### adminFailedAuditLogs
+### adminFileDetail
 
-> `readonly` **adminFailedAuditLogs**: `object`
+> `readonly` **adminFileDetail**: `object`
 
-#### adminFailedAuditLogs.description
+#### adminFileDetail.description
 
-> `readonly` **description**: `"Dead-letter payloads when audit enqueue fails."` = `'Dead-letter payloads when audit enqueue fails.'`
+> `readonly` **description**: `"Shared file metadata and linked document envelopes."` = `'Shared file metadata and linked document envelopes.'`
 
-#### adminFailedAuditLogs.href
+#### adminFileDetail.nav
 
-> `readonly` **href**: `"/admin/failed-audit-logs"` = `'/admin/failed-audit-logs'`
+> `readonly` **nav**: `"File detail"` = `'File detail'`
 
-#### adminFailedAuditLogs.nav
+### adminFiles
 
-> `readonly` **nav**: `"Failed audit logs"` = `'Failed audit logs'`
+> `readonly` **adminFiles**: `object`
 
-### adminFailedProcessErrors
+#### adminFiles.description
 
-> `readonly` **adminFailedProcessErrors**: `object`
+> `readonly` **description**: `"Shared file assets in object storage (deduplicated by SHA-256)."` = `'Shared file assets in object storage (deduplicated by SHA-256).'`
 
-#### adminFailedProcessErrors.description
+#### adminFiles.href
 
-> `readonly` **description**: `"Dead-letter payloads when process-error enqueue fails."` = `'Dead-letter payloads when process-error enqueue fails.'`
+> `readonly` **href**: `"/admin/files"` = `'/admin/files'`
 
-#### adminFailedProcessErrors.href
+#### adminFiles.nav
 
-> `readonly` **href**: `"/admin/failed-process-errors"` = `'/admin/failed-process-errors'`
-
-#### adminFailedProcessErrors.nav
-
-> `readonly` **nav**: `"Failed process errors"` = `'Failed process errors'`
-
-### adminFailedWebhookDeliveries
-
-> `readonly` **adminFailedWebhookDeliveries**: `object`
-
-#### adminFailedWebhookDeliveries.description
-
-> `readonly` **description**: `"Dead-letter payloads when webhook delivery exhausts retries."` = `'Dead-letter payloads when webhook delivery exhausts retries.'`
-
-#### adminFailedWebhookDeliveries.href
-
-> `readonly` **href**: `"/admin/failed-webhook-deliveries"` = `'/admin/failed-webhook-deliveries'`
-
-#### adminFailedWebhookDeliveries.nav
-
-> `readonly` **nav**: `"Failed webhook deliveries"` = `'Failed webhook deliveries'`
+> `readonly` **nav**: `"Files"` = `'Files'`
 
 ### adminProcessErrors
 
@@ -159,6 +155,34 @@ Canonical labels and descriptions for known dashboard and auth routes.
 #### adminProcessErrors.nav
 
 > `readonly` **nav**: `"Process errors"` = `'Process errors'`
+
+### adminRecipientDetail
+
+> `readonly` **adminRecipientDetail**: `object`
+
+#### adminRecipientDetail.description
+
+> `readonly` **description**: `"Recipient identity and linked document envelopes."` = `'Recipient identity and linked document envelopes.'`
+
+#### adminRecipientDetail.nav
+
+> `readonly` **nav**: `"Recipient detail"` = `'Recipient detail'`
+
+### adminRecipients
+
+> `readonly` **adminRecipients**: `object`
+
+#### adminRecipients.description
+
+> `readonly` **description**: `"Recipient identities with delivery contact and OTP channel preferences."` = `'Recipient identities with delivery contact and OTP channel preferences.'`
+
+#### adminRecipients.href
+
+> `readonly` **href**: `"/admin/recipients"` = `'/admin/recipients'`
+
+#### adminRecipients.nav
+
+> `readonly` **nav**: `"Recipients"` = `'Recipients'`
 
 ### adminUsers
 

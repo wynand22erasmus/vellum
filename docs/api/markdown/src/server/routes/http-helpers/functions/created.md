@@ -2,7 +2,7 @@
 
 > **created**\<`T`\>(`req`, `res`, `data`, `detail?`): `void`
 
-Defined in: [src/server/routes/http-helpers.ts:34](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/server/routes/http-helpers.ts#L34)
+Defined in: [src/server/routes/http-helpers.ts:34](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/server/routes/http-helpers.ts#L34)
 
 Sends a 201 Created result envelope.
 

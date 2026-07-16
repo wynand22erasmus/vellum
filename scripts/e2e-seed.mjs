@@ -45,11 +45,12 @@ const fileContent = fs.readFileSync(uploadFixturePath);
 const linkTtlSeconds = 86_400;
 const fileTtlSeconds = 604_800;
 
-function writeArtifacts(documentId, downloadToken) {
+function writeArtifacts(documentId, communicationId, downloadToken) {
   const state = {
     baseUrl,
     apiKey,
     documentId,
+    communicationId,
     downloadToken,
     recipientEmail,
     password,
@@ -78,6 +79,7 @@ function writeArtifacts(documentId, downloadToken) {
   devEmail: ${recipientEmail}
   filePassword: ${password}
   documentId: ${documentId}
+  communicationId: ${communicationId}
   downloadToken: ${downloadToken}
   fileName: ${fileName}
 }
@@ -85,20 +87,24 @@ function writeArtifacts(documentId, downloadToken) {
   );
 
   console.log('[e2e-seed] OK');
-  console.log(`  documentId:    ${documentId}`);
+  console.log(`  documentId:      ${documentId}`);
+  console.log(`  communicationId: ${communicationId}`);
   console.log(`  downloadToken: ${downloadToken.slice(0, 8)}…`);
   console.log(`  state:         ${statePath}`);
 }
 
-async function fetchDownloadToken(documentId) {
+async function fetchCommunicationIds(documentId) {
   const client = new pg.Client({ connectionString: databaseUrl });
   await client.connect();
   const { rows } = await client.query(
-    'SELECT "downloadToken" FROM "document_user_links" WHERE id = $1',
+    `SELECT "communicationId", "downloadToken" FROM "Communication"
+     WHERE "documentId" = $1
+     ORDER BY "createdAt" DESC
+     LIMIT 1`,
     [documentId],
   );
   await client.end();
-  return rows[0]?.downloadToken;
+  return rows[0] ?? null;
 }
 
 async function seedViaUpload() {
@@ -118,10 +124,12 @@ async function seedViaUpload() {
       body: form,
     });
     const uploadBody = await uploadRes.json().catch(() => ({}));
+    const data = uploadBody.data && typeof uploadBody.data === 'object' ? uploadBody.data : uploadBody;
     const uploadedId =
-      (uploadBody.data && typeof uploadBody.data === 'object' && 'id' in uploadBody.data
-        ? uploadBody.data.id
-        : undefined) ?? uploadBody.id;
+      (typeof data.documentId === 'string' && data.documentId.length > 0
+        ? data.documentId
+        : undefined) ??
+      (typeof data.id === 'string' && data.id.length > 0 ? data.id : undefined);
     if (uploadRes.ok && typeof uploadedId === 'string' && uploadedId.length > 0) {
       return uploadedId;
     }
@@ -153,8 +161,10 @@ async function ensureMinioBucket(s3) {
 async function seedDirect() {
   console.warn('[e2e-seed] Using direct DB + MinIO fallback (upload API unavailable).');
 
-  const linkId = randomUUID();
+  const communicationId = randomUUID();
+  const documentId = randomUUID();
   const fileId = randomUUID();
+  const recipientId = randomUUID();
   const downloadToken = randomBytes(32).toString('hex');
   const s3Key = `documents/${randomBytes(16).toString('hex')}/${fileName}`;
   const passwordHash = await argon2.hash(password);
@@ -185,38 +195,52 @@ async function seedDirect() {
   const client = new pg.Client({ connectionString: databaseUrl });
   await client.connect();
   await client.query(
-    `INSERT INTO "document_files" (
-      id, sha256, "s3Key", "fileName", "fileExpiresAt", "recordExpiresAt", "createdAt", "byteSize"
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+    `INSERT INTO "File" (
+      "fileId", sha256, "s3Key", "fileName", "fileExpiresAt", "recordExpiresAt", "createdAt", "updatedAt", "byteSize"
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $7, $8)`,
     [fileId, sha256, s3Key, fileName, fileExpiresAt, recordExpiresAt, now, fileContent.length],
   );
   await client.query(
-    `INSERT INTO "document_user_links" (
-      id, "documentFileId", "recipientEmail", "passwordHash", "downloadToken",
-      "linkExpiresAt", "isUsed", "createdAt"
-    ) VALUES ($1, $2, $3, $4, $5, $6, false, $7)`,
-    [linkId, fileId, recipientEmail, passwordHash, downloadToken, linkExpiresAt, now],
+    `INSERT INTO "Recipient" (
+      "recipientId", "sourceSystemKey", email, "createdAt", "updatedAt"
+    ) VALUES ($1, $2, $3, $4, $4)`,
+    [recipientId, recipientEmail, recipientEmail, now],
+  );
+  await client.query(
+    `INSERT INTO "Document" (
+      "documentId", "fileId", "recipientId", "passwordHash", "createdAt", "updatedAt"
+    ) VALUES ($1, $2, $3, $4, $5, $5)`,
+    [documentId, fileId, recipientId, passwordHash, now],
+  );
+  await client.query(
+    `INSERT INTO "Communication" (
+      "communicationId", "documentId", "downloadToken", "linkExpiresAt", "createdAt", "updatedAt"
+    ) VALUES ($1, $2, $3, $4, $5, $5)`,
+    [communicationId, documentId, downloadToken, linkExpiresAt, now],
   );
   await client.end();
 
-  return { documentId: linkId, downloadToken };
+  return { documentId, communicationId, downloadToken };
 }
 
 console.log(`[e2e-seed] Seeding for ${recipientEmail}…`);
 
 let documentId;
+let communicationId;
 let downloadToken;
 
 try {
   console.log(`[e2e-seed] Trying upload via ${baseUrl}/api/upload…`);
   documentId = await seedViaUpload();
-  downloadToken = await fetchDownloadToken(documentId);
-  if (!downloadToken) {
-    throw new Error(`No downloadToken for document ${documentId}`);
+  const comm = await fetchCommunicationIds(documentId);
+  if (!comm?.downloadToken) {
+    throw new Error(`No communication for document ${documentId}`);
   }
+  communicationId = comm.communicationId;
+  downloadToken = comm.downloadToken;
 } catch (uploadErr) {
   console.warn(`[e2e-seed] ${uploadErr instanceof Error ? uploadErr.message : uploadErr}`);
-  ({ documentId, downloadToken } = await seedDirect());
+  ({ documentId, communicationId, downloadToken } = await seedDirect());
 }
 
-writeArtifacts(documentId, downloadToken);
+writeArtifacts(documentId, communicationId, downloadToken);

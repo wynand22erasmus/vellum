@@ -8,7 +8,6 @@
 export type VerifyConsumptionDocument = {
   maxDownloads: number;
   downloadCount: number;
-  isUsed: boolean;
   verifySuccessCount: number;
   lastVerifiedAt: Date | null;
 };
@@ -18,7 +17,6 @@ export type VerifyConsumptionUpdate = {
   verifySuccessCount: number;
   lastVerifiedAt: Date;
   downloadCount: number;
-  isUsed: boolean;
   reverifyAttempt: number;
   isFinalConsumption: boolean;
 };
@@ -44,12 +42,8 @@ export function getVerifyRejection(
     return 'download_limit_reached';
   }
 
-  if (!doc.isUsed) {
+  if (doc.lastVerifiedAt === null || doc.verifySuccessCount === 0) {
     return null;
-  }
-
-  if (doc.lastVerifiedAt === null) {
-    return 'link_consumed';
   }
 
   const inWindow = now.getTime() - doc.lastVerifiedAt.getTime() < config.reverifyWindowMs;
@@ -75,12 +69,11 @@ export function computeVerifyConsumptionUpdate(
   const nextAttempt = inWindow ? doc.verifySuccessCount + 1 : 1;
   const isFinalConsumption = nextAttempt >= config.maxReverifyAttempts;
   const nextDownloadCount = isFinalConsumption ? doc.downloadCount + 1 : doc.downloadCount;
-  const fullyConsumed = nextDownloadCount >= doc.maxDownloads;
 
   let verifySuccessCount = nextAttempt;
   const lastVerifiedAt = now;
 
-  if (isFinalConsumption && !fullyConsumed) {
+  if (isFinalConsumption && nextDownloadCount < doc.maxDownloads) {
     verifySuccessCount = 0;
   }
 
@@ -88,7 +81,6 @@ export function computeVerifyConsumptionUpdate(
     verifySuccessCount,
     lastVerifiedAt,
     downloadCount: nextDownloadCount,
-    isUsed: fullyConsumed,
     reverifyAttempt: nextAttempt,
     isFinalConsumption,
   };

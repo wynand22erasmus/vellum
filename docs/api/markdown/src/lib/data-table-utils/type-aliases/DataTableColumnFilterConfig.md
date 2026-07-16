@@ -2,7 +2,7 @@
 
 > **DataTableColumnFilterConfig**\<`T`\> = `object`
 
-Defined in: [src/lib/data-table-utils.ts:207](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-utils.ts#L207)
+Defined in: [src/lib/data-table-utils.ts:207](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-utils.ts#L207)
 
 Per-column filter wiring passed to [filterDataTableRows](../functions/filterDataTableRows.md).
 
@@ -18,7 +18,7 @@ Per-column filter wiring passed to [filterDataTableRows](../functions/filterData
 
 > `optional` **filterFn?**: (`cellValue`, `filterValue`) => `boolean`
 
-Defined in: [src/lib/data-table-utils.ts:210](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-utils.ts#L210)
+Defined in: [src/lib/data-table-utils.ts:210](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-utils.ts#L210)
 
 #### Parameters
 
@@ -40,7 +40,7 @@ Defined in: [src/lib/data-table-utils.ts:210](https://github.com/wynand22erasmus
 
 > **getFilterValue**: (`row`) => `unknown`
 
-Defined in: [src/lib/data-table-utils.ts:209](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-utils.ts#L209)
+Defined in: [src/lib/data-table-utils.ts:209](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-utils.ts#L209)
 
 #### Parameters
 
@@ -58,4 +58,4 @@ Defined in: [src/lib/data-table-utils.ts:209](https://github.com/wynand22erasmus
 
 > **id**: `string`
 
-Defined in: [src/lib/data-table-utils.ts:208](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/data-table-utils.ts#L208)
+Defined in: [src/lib/data-table-utils.ts:208](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/data-table-utils.ts#L208)

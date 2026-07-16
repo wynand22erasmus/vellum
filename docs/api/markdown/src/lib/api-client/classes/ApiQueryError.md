@@ -1,6 +1,6 @@
 # Class: ApiQueryError
 
-Defined in: [src/lib/api-client.ts:10](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/api-client.ts#L10)
+Defined in: [src/lib/api-client.ts:10](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/api-client.ts#L10)
 
 Thrown when an API request returns a Problem Details envelope.
 
@@ -14,7 +14,7 @@ Thrown when an API request returns a Problem Details envelope.
 
 > **new ApiQueryError**(`problem`): `ApiQueryError`
 
-Defined in: [src/lib/api-client.ts:13](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/api-client.ts#L13)
+Defined in: [src/lib/api-client.ts:13](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/api-client.ts#L13)
 
 #### Parameters
 
@@ -72,7 +72,7 @@ Defined in: node\_modules/typescript/lib/lib.es5.d.ts:1074
 
 > `readonly` **problem**: [`ProblemDetails`](../../http/problem-details/interfaces/ProblemDetails.md)
 
-Defined in: [src/lib/api-client.ts:11](https://github.com/wynand22erasmus/vellum/blob/02442fedaf00245060c21695c36ee0c2b9e841c3/src/lib/api-client.ts#L11)
+Defined in: [src/lib/api-client.ts:11](https://github.com/wynand22erasmus/vellum/blob/df8dd981b8ffb4c4991a6666cd26c449bfb192b3/src/lib/api-client.ts#L11)
 
 ***
 
