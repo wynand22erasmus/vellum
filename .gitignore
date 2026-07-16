@@ -44,3 +44,6 @@ bruno/collections/vellum-api/environments/Seeded.bru
 
 # Docker
 .docker/
+
+# Docs
+docs/api/*.md
